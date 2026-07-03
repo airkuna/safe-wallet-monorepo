@@ -22,6 +22,14 @@ google-services.json
 google-services-dev.json
 GoogleService-Info.plist
 GoogleService-Info-Dev.plist
+# Per-brand Firebase files (one set per white-label build)
+google-services-*.json
+GoogleService-Info-*.plist
+
+# Per-brand manifests come from the SaaS/DB at build time; keep only the tracked templates
+/brand/manifests/*.json
+!/brand/manifests/safe.json
+!/brand/manifests/example.community.json
 
 
 # @generated expo-cli sync-8d4afeec25ea8a192358fae2f8e2fc766bdce4ec

@@ -1,8 +1,13 @@
 import { ExpoConfig } from 'expo/config'
+import { resolveBrand } from './brand/resolveBrand'
 
 const IS_DEV = process.env.APP_VARIANT === 'development'
 
-const appleDevTeamId = '86487MHG6V'
+// White-label identity, resolved from the active brand manifest (defaults to `safe`).
+// See brand/README.md.
+const brand = resolveBrand({ isDev: IS_DEV })
+
+const appleDevTeamId = brand.ios.appleTeamId
 
 // SPKI (public key) pins, matched against any cert in the validated chain. Per AWS guidance for
 // ACM-managed certs, pin all Amazon Trust Services roots — leaf and intermediate certs rotate
@@ -25,22 +30,22 @@ const sslPinningDomains = {
   'safe-client.safe.global': amazonRootCAs,
 }
 
-const name = IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}'
+const name = brand.appName
 
 const config: ExpoConfig = {
   name: name,
-  slug: 'safe-mobileapp',
-  owner: 'safeglobal',
+  slug: brand.slug,
+  owner: brand.owner,
   version: '1.0.14',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
-      projectId: '27e9e907-8675-474d-99ee-6c94e7b83a5c',
+      projectId: brand.easProjectId,
     },
   },
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: ['wc'],
+  scheme: brand.scheme,
   userInterfaceStyle: 'automatic',
   ios: {
     config: {
@@ -52,7 +57,7 @@ const config: ExpoConfig = {
       NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
       // Read by react-native-mmkv v4 to place the MMKV store in the App Group container.
       // Renaming this key to anything else (e.g. v3's `AppGroup`) strands data in the old location on upgrade.
-      AppGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
+      AppGroupIdentifier: brand.ios.appGroupIdentifier,
       // https://github.com/expo/expo/issues/39739
       UIDesignRequiresCompatibility: true,
       // https://github.com/react-native-share/react-native-share/issues/1669
@@ -78,17 +83,15 @@ const config: ExpoConfig = {
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
-    bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.ios.dev' : 'global.safe.mobileapp.ios',
+    bundleIdentifier: brand.ios.bundleIdentifier,
     entitlements: {
-      'aps-environment': IS_DEV ? 'development' : 'production',
-      'com.apple.security.application-groups': [
-        IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
-      ],
+      'aps-environment': brand.ios.apsEnvMode,
+      'com.apple.security.application-groups': [brand.ios.appGroupIdentifier],
     },
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
   },
   android: {
-    package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
+    package: brand.android.package,
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
     adaptiveIcon: {
       foregroundImage: './assets/images/android-adaptive-icon-foreground.png',
@@ -195,9 +198,9 @@ const config: ExpoConfig = {
       '@safe-global/notification-service-ios',
       {
         iosDeploymentTarget: '15.1',
-        apsEnvMode: IS_DEV ? 'development' : 'production',
+        apsEnvMode: brand.ios.apsEnvMode,
         appleDevTeamId: appleDevTeamId,
-        appGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
+        appGroupIdentifier: brand.ios.appGroupIdentifier,
       },
     ],
     [

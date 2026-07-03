@@ -1,0 +1,19 @@
+{
+  "id": "example.community",
+  "name": "Example Wallet",
+  "devNamePrefix": "Dev-",
+  "slug": "example-wallet",
+  "owner": "your-eas-account",
+  "easProjectId": "00000000-0000-0000-0000-000000000000",
+  "scheme": ["examplewallet", "wc"],
+  "ios": {
+    "bundleIdentifier": "com.example.wallet.ios",
+    "appleTeamId": "XXXXXXXXXX"
+  },
+  "android": {
+    "package": "com.example.wallet"
+  },
+  "backend": {
+    "cgwBaseUrl": "https://safe-client.safe.global"
+  }
+}

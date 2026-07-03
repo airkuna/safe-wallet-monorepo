@@ -1,0 +1,42 @@
+const { z } = require('zod')
+
+/**
+ * A brand manifest is the single source of truth for one white-label build.
+ * In local dev it is a JSON file under `brand/manifests/`; in the SaaS build
+ * pipeline the same JSON is injected via the `BRAND_CONFIG_JSON` env var,
+ * validated against this schema on both the dashboard and the app side.
+ *
+ * This module is CommonJS `.js` (not `.ts`) on purpose: Expo's config loader
+ * transpiles only `app.config.ts` itself and then `require`s siblings through
+ * plain Node resolution, which does not resolve `.ts`. Types live in
+ * `schema.d.ts`.
+ */
+const brandManifestSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  devNamePrefix: z.string().min(1).optional(),
+  slug: z.string().min(1),
+  owner: z.string().min(1),
+  easProjectId: z.string().uuid(),
+  scheme: z.union([z.string().min(1), z.array(z.string().min(1)).nonempty()]),
+  ios: z.object({
+    bundleIdentifier: z.string().min(1),
+    appleTeamId: z.string().min(1),
+  }),
+  android: z.object({
+    package: z.string().min(1),
+  }),
+  backend: z
+    .object({
+      cgwBaseUrl: z.string().url().optional(),
+    })
+    .optional(),
+  theme: z
+    .object({
+      light: z.record(z.string()).optional(),
+      dark: z.record(z.string()).optional(),
+    })
+    .optional(),
+})
+
+module.exports = { brandManifestSchema }
