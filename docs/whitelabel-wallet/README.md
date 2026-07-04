@@ -13,6 +13,7 @@ Ova knowledge baza dokumentira **zašto** i **kako** gradimo whitelabel wallet p
 | [02 — Brand config sustav](02-brand-config-sustav.md)            | Manifest-driven brand config koji smo izgradili (faza 1, commit `f7cb87d44`); native vs runtime slojevi; SaaS pipeline |
 | [03 — Feature audit (Revolut-like)](03-feature-audit-revolut.md) | Koliko je "Revolut-like" wallet već gotov (~80%), matrica sposobnosti, ključni gap = identitet primatelja              |
 | [04 — Prior art landscape](04-prior-art-landscape.md)            | Tko još forka Safe, neobank self-custody wallete, P2P-send obrasci, reusable OSS                                       |
+| [handoffs/](handoffs/README.md)                                  | **Izvršni plan MVP-a u 5 faza** — samodostatni handoff promptovi za praznu Claude Code sesiju, po jedan po fazi        |
 
 ## Kontekst u jednoj slici
 
@@ -54,3 +55,4 @@ flowchart TB
 2. **Jedini pravi gap = ljudski-čitljiv primatelj** (username/ENS/link umjesto 0x). Prior art jednoglasno kaže da je to najvažnija stvar. Vidi [04](04-prior-art-landscape.md).
 3. **Nitko product-grade ne forka Safe frontend** — svi grade na Safe{Core} SDK-u. `domovina/wallet` je već na tom putu. Vidi [01](01-vizija-i-strategija.md).
 4. **Brand config faza 1 je isporučena** — manifest-driven _identitet_ na mobileu. Vizual (boje/typography) i backend su faza 2. Vidi [02](02-brand-config-sustav.md).
+5. **MVP se gradi u 5 faza, ne u jednoj** — runtime branding → onboarding (novi Safe) → receive/payment linkovi → identity layer → release pipeline. Handoff prompt po fazi u [handoffs/](handoffs/README.md).
