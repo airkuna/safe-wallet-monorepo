@@ -4,9 +4,19 @@
  */
 
 import { flattenPalette } from '../utils/flatten'
+import { applyPaletteOverride, type PaletteOverride } from '../utils/applyPaletteOverride'
 import lightPalette from '../palettes/light'
 import darkPalette from '../palettes/dark'
 import { spacingMobile, radius, fontSizes } from '../tokens'
+
+/**
+ * Optional per-mode palette overrides (dot-path keys, see PaletteOverride).
+ * Used by white-label brands to recolor the app without forking the palettes.
+ */
+export interface ThemeOverride {
+  light?: PaletteOverride
+  dark?: PaletteOverride
+}
 
 /**
  * Type for Tamagui token values - compatible with createTokens input.
@@ -26,11 +36,12 @@ export interface TamaguiTokensInput {
 /**
  * Generate Tamagui color tokens from light and dark palettes.
  * Returns flattened color objects with Light and Dark suffixes.
+ * Without an override the output is identical to the stock palettes.
  */
-export function generateTamaguiColorTokens() {
+export function generateTamaguiColorTokens(override?: ThemeOverride) {
   return {
-    ...flattenPalette(lightPalette, { suffix: 'Light' }),
-    ...flattenPalette(darkPalette, { suffix: 'Dark' }),
+    ...flattenPalette(applyPaletteOverride(lightPalette, override?.light), { suffix: 'Light' }),
+    ...flattenPalette(applyPaletteOverride(darkPalette, override?.dark), { suffix: 'Dark' }),
   }
 }
 
@@ -64,9 +75,9 @@ export function generateTamaguiTokens(): TamaguiTokensInput {
  * Generate Tamagui theme objects for light and dark modes.
  * Returns theme configurations ready for use in Tamagui's createTamagui.
  */
-export function generateTamaguiThemes() {
-  const lightColors = flattenPalette(lightPalette, { suffix: 'Light' })
-  const darkColors = flattenPalette(darkPalette, { suffix: 'Dark' })
+export function generateTamaguiThemes(override?: ThemeOverride) {
+  const lightColors = flattenPalette(applyPaletteOverride(lightPalette, override?.light), { suffix: 'Light' })
+  const darkColors = flattenPalette(applyPaletteOverride(darkPalette, override?.dark), { suffix: 'Dark' })
 
   return {
     light: lightColors,

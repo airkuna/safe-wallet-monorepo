@@ -76,6 +76,38 @@ describe('generateTamaguiThemes', () => {
   })
 })
 
+describe('palette overrides', () => {
+  it('is byte-identical without an override (backcompat)', () => {
+    expect(generateTamaguiColorTokens(undefined)).toEqual(generateTamaguiColorTokens())
+    expect(generateTamaguiColorTokens({})).toEqual(generateTamaguiColorTokens())
+    expect(generateTamaguiThemes({})).toEqual(generateTamaguiThemes())
+  })
+
+  it('applies per-mode overrides to color tokens', () => {
+    const tokens = generateTamaguiColorTokens({
+      light: { 'primary.main': '#0A84FF' },
+      dark: { 'primary.main': '#FF9F0A' },
+    })
+
+    expect(tokens.primaryMainLight).toBe('#0A84FF')
+    expect(tokens.primaryMainDark).toBe('#FF9F0A')
+    // untouched tokens keep stock values
+    expect(tokens.textPrimaryLight).toBe('#121312')
+    expect(tokens.textPrimaryDark).toBe('#FFFFFF')
+  })
+
+  it('applies per-mode overrides to themes', () => {
+    const themes = generateTamaguiThemes({ dark: { 'text.primary': '#EEEEEE' } })
+
+    expect(themes.dark.textPrimaryDark).toBe('#EEEEEE')
+    expect(themes.light.textPrimaryLight).toBe('#121312')
+  })
+
+  it('ignores unknown override keys', () => {
+    expect(generateTamaguiColorTokens({ light: { 'not.a.key': '#FF0000' } })).toEqual(generateTamaguiColorTokens())
+  })
+})
+
 describe('generateTamaguiFontSizes', () => {
   it('should return font size scale', () => {
     const fontSizes = generateTamaguiFontSizes()
