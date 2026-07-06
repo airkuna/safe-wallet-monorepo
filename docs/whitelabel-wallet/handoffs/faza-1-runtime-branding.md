@@ -56,4 +56,33 @@ Na kraju: označi fazu 1 ✅ u `handoffs/README.md`, ispuni "Zapisnik izvršenja
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+> Izvršeno: 2026-07-06 (Claude Code sesija). `git merge upstream/dev` = already up to date.
+
+### Što je isporučeno
+
+- **`packages/theme`**: novi čisti util `applyPaletteOverride` (dot-path ključevi, ignore-unknown, no-mutation) + opcionalni `override` parametar na `generateTamaguiColorTokens`/`generateTamaguiThemes` (`ThemeOverride` tip). Bez overridea rezultat je byte-identičan — pokriveno testom. Web generatori (`mui.ts`, `css-vars.ts`) nisu dirani; `vars.css` nepromijenjen; web type-check prolazi.
+- **`brand/`**: schema + `.d.ts` dobili `assets` polje (icon/splash/adaptiveIcon/favicon); `resolveBrand` mapira `theme`/`backend` passthrough + `assets` s defaultom na stock Safe assete (pathovi iz manifesta se razrješavaju kao `./brand/<path>`). 10 testova.
+- **`app.config.ts`** (thin seam): icon/splash/adaptive-icon/favicon iz `brand.assets`; novi `extra.brand` payload (`id`/`name`/`theme`/`backend`) za runtime.
+- **Novi overlay `src/custom/brand/`**: `getBrand()`/`useBrand()` tipizirani accessori nad `expo-constants` s fallbackom na stock Safe (testovi/Storybook rade bez payloada). 3 testa.
+- **Runtime seamovi**: `src/theme/tokens.ts` → `generateTamaguiColorTokens(getBrand().theme)` (1 linija); `src/config/constants.ts` → `GATEWAY_URL` respektira `backend.cgwBaseUrl` (2 linije).
+- **Hex čišćenje (boxano)**: `Loader` default `#12FF80` → novi theme key `$colorBrand` (= `static.textBrand`, identičan u obje palete → nula vizualne promjene); `EmptyToken`/`EmptyNFT` SVG fillovi `#121312`/`#A1A3A7` → `static.main`/`static.textSecondary` tokeni (isto mode-invarijantni). + smoke testovi.
+- **Docs**: `brand/README.md` (nova polja + primjeri), `02-brand-config-sustav.md` (faza 2 isporučeno + dijagram), `example.community.json` (theme primjer), `.gitignore` (`/brand/assets/`).
+
+### Odstupanja od plana
+
+1. **Točka theme injectiona je generiranje tokena, ne theme provider.** Tamagui `config`/`tokens` grade se statički pri module-eval i nisu reaktivni — override u `SafeThemeProvider` ne bi imao učinka. Seam je zato u `src/theme/tokens.ts` (1 linija), što pokriva i teme u `tamagui.config.ts` (sve referenciraju `tokens.color.*`). Posljedica: brand je fiksan po binaryju; OTA rebrand bi tražio restart-gated apply.
+2. **`example.community.json` nema `assets` polje** — asset pathovi pokazuju na gitignorani `brand/assets/`, pa bi manifest s njima srušio `BRAND_ID=example.community` boot na svježem checkoutu. Assets su dokumentirani u `brand/README.md`; schema/resolve/config plumbing pokriven testovima.
+3. **Dodatni thin seamovi izvan dogovorenih**: `tamagui.config.ts` (+2 linije, aditivni `colorBrand` theme key), `eslint.config.mjs` (+5 linija — popravlja _pre-postojeći_ no-undef lint fail na CommonJS `brand/*.js`, vidljiv tek kad verify eksplicitno lintaa te fileove).
+
+### Verifikacija
+
+- `expo config` (default): asset pathovi byte-identični starim hardkodiranim; `extra.brand = {id:'safe', name}` bez theme/backend. `BRAND_ID=example.community`: puni theme/backend payload u `extra.brand`.
+- `node scripts/verify.mjs --changed --workspace=mobile`: type-check/lint/prettier/testovi ✅ (282 suites / 2266 testova). `packages/theme`: type-check/lint/prettier/45 testova ✅. `yarn turbo run type-check --filter=@safe-global/web --force` ✅; `css-vars` ne mijenja `vars.css` ✅.
+- Napomena: root `yarn verify:changed` bez `--workspace` krivo detektira web (default) i diffa vs zastarjeli lokalni `dev` → koristiti `--workspace=mobile`.
+
+### Preostali dug
+
+- **Vizualna potvrda na uređaju** (`BRAND_ID=example.community`) nije napravljena — traži per-brand Firebase fileove + native rebuild (identitet se mijenja s BRAND_ID). Plumbing je verificiran kroz `expo config` + unit testove.
+- **~90 hardkodiranih hex boja izvan MVP ekrana** (audit `03-mobile-white-label.md` #3) — nije dirano. U MVP flowu preskočeni: `ShareView` (#fff/#000 QR kontrast je namjeran), `SafeSkeleton` shimmer sive (nema odgovarajući token; dodavanje novog palette polja mijenja `vars.css` → zaseban zadatak).
+- **SSL pinning** pokriva samo `safe-client.*` domene — custom `cgwBaseUrl` na drugoj domeni nije pinnan (dokumentirano u README-u).
+- **Placeholder EAS guard** (audit #4) — izvan opsega faze.

@@ -1,6 +1,6 @@
-# 02 — Brand config sustav (faza 1: native identitet)
+# 02 — Brand config sustav (faza 1: native identitet · faza 2: runtime branding)
 
-> Izvor istine u kodu: [`apps/mobile/brand/`](../../apps/mobile/brand/README.md) · Isporučeno: commit `f7cb87d44` (`feat(mobile): manifest-driven white-label brand config`).
+> Izvor istine u kodu: [`apps/mobile/brand/`](../../apps/mobile/brand/README.md) · Isporučeno: faza 1 u commitu `f7cb87d44` (`feat(mobile): manifest-driven white-label brand config`), faza 2 (theme/backend/assets) u sklopu handoff [faze 1 — runtime branding](handoffs/faza-1-runtime-branding.md).
 
 ## Ideja
 
@@ -44,10 +44,11 @@ flowchart TD
 
 ## Native vs runtime slojevi
 
-| Sloj                 | Polja u manifestu                                                                    | Kad se primjenjuje      | Faza                                              |
-| -------------------- | ------------------------------------------------------------------------------------ | ----------------------- | ------------------------------------------------- |
-| **Native identitet** | `name`, `android.package`, `ios.bundleIdentifier`, `scheme`, `owner`, `easProjectId` | build-time, po binaryju | ✅ Faza 1 (gotovo)                                |
-| **Runtime branding** | `theme` (palette override), `backend.cgwBaseUrl`                                     | runtime (moguće OTA)    | 🔜 Faza 2 (polja u schemi, još se ne konzumiraju) |
+| Sloj                 | Polja u manifestu                                                                    | Kad se primjenjuje              | Faza               |
+| -------------------- | ------------------------------------------------------------------------------------ | ------------------------------- | ------------------ |
+| **Native identitet** | `name`, `android.package`, `ios.bundleIdentifier`, `scheme`, `owner`, `easProjectId` | build-time, po binaryju         | ✅ Faza 1 (gotovo) |
+| **Vizualni asseti**  | `assets.*` (icon, splash, adaptive iconi, favicon)                                   | build-time, po binaryju         | ✅ Faza 2 (gotovo) |
+| **Runtime branding** | `theme` (palette override), `backend.cgwBaseUrl`                                     | app startup (via `extra.brand`) | ✅ Faza 2 (gotovo) |
 
 Verificirano: `safe` default daje **bit-identičan** identitet starom (dev i prod), `BRAND_ID=example.community` prebacuje cijeli identitet, `BRAND_CONFIG_JSON` nadjačava sve.
 
@@ -65,9 +66,23 @@ flowchart LR
 
 Dashboard i app validiraju **istim** zod schemom. Sljedeći korak: promovirati `schema.js` u `packages/brand-config` (dijele web + mobile + dashboard).
 
-## Faza 2 — theme injection (plan)
+## Faza 2 — theme injection (isporučeno)
 
-`packages/theme` već generira MUI (web) i Tamagui (mobile) teme iz paleta. Brand `theme.light/dark` override tokena se primijeni **prije** `generateMuiTheme` / `generateTamaguiThemes`. To je runtime sloj — može se čak dohvaćati s backenda (OTA rebrand boja bez novog binarya).
+Implementirano ovako (vidi [handoffs/faza-1-runtime-branding.md](handoffs/faza-1-runtime-branding.md), "Zapisnik izvršenja"):
+
+```mermaid
+flowchart LR
+  M["brand manifest<br/>theme/backend/assets"] --> R["resolveBrand.js"]
+  R -->|"assets"| AC["app.config.ts<br/>icon/splash/adaptive/favicon"]
+  R -->|"extra.brand<br/>(id/name/theme/backend)"| EC["expo-constants"]
+  EC --> GB["src/custom/brand<br/>getBrand()/useBrand()"]
+  GB -->|"theme override"| TK["src/theme/tokens.ts →<br/>generateTamaguiColorTokens(override)"]
+  GB -->|"cgwBaseUrl"| GW["src/config/constants.ts<br/>GATEWAY_URL"]
+  TK --> TAM["tamagui.config.ts teme<br/>(sve izvedene iz tokena)"]
+```
+
+- Override se primjenjuje u **generiranju tokena** (`applyPaletteOverride` u `packages/theme`, dot-path ključevi), ne u provideru — Tamagui config se gradi statički pri učitavanju modula i nije reaktivan. Zbog toga je brand fiksan po binaryju; OTA rebrand (dohvat teme s backenda) ostaje moguća nadogradnja, zahtijevala bi restart-gated apply.
+- `generateTamaguiThemes`/`generateTamaguiColorTokens` bez overridea vraćaju **byte-identičan** rezultat (bakcompat test), pa je `safe` build nepromijenjen. Web (`generateMuiTheme`, `css-vars`) se ne dira.
 
 ## Usporedba: kako je domovina wallet riješio branding (ADR 0015)
 
