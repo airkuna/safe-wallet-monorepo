@@ -15,7 +15,7 @@
 | Kreiranje **novog** računa u appu        | ✅ lokalno, bez gasa                      | ✅ counterfactual, bez gasa (faza 2) | **gotovo (oba)**       |
 | Send na adresu / QR / recent             | ✅                                        | ✅ wizard + risk-validacija          | **gotovo**             |
 | **Send po username / ENS / directoryju** | ❌                                        | ❌                                   | **GAP**                |
-| Receive QR + payment link                | ✅ EIP-681 + share link                   | 🟡 gola adresa (bez iznosa)          | domovina               |
+| Receive QR + payment link                | ✅ EIP-681 + share link                   | ✅ EIP-681 QR + deep link (faza 3)   | **gotovo (oba)**       |
 | Gasless / sponzorirano                   | ✅ vlastiti relayer (5/dan)               | ✅ relay + **GTF Safe-pays**         | **gotovo (oba)**       |
 | Fiat on-ramp                             | ✅ SEPA/Monerium (IBAN→EURe)              | ❌ (mobile `onramp:false`)           | domovina               |
 | Fiat off-ramp (cash-out)                 | ❌                                        | ❌                                   | gap                    |
