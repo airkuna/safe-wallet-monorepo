@@ -1,0 +1,16 @@
+{
+  "id": "domovina",
+  "name": "Domovina",
+  "devNamePrefix": "Dev-",
+  "slug": "domovina-wallet",
+  "owner": "domovina",
+  "easProjectId": "c6767ce3-2b9c-4568-bb3d-d43d5f656d93",
+  "scheme": ["domovina", "wc"],
+  "ios": {
+    "bundleIdentifier": "ai.domovina.wallet",
+    "appleTeamId": "6SCK58757K"
+  },
+  "android": {
+    "package": "ai.domovina.wallet"
+  }
+}
