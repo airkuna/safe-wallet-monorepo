@@ -17,7 +17,7 @@ MVP se **ne može kvalitetno napraviti u jednoj fazi** iz četiri razloga:
 ```mermaid
 flowchart LR
   F0["Faza 0 ✅<br/>Native identitet<br/>(f7cb87d44)"] --> F1["Faza 1 ✅<br/>Runtime branding<br/>(theme + backend + assets)"]
-  F1 --> F2["Faza 2<br/>Onboarding:<br/>kreiranje novog Safea"]
+  F1 --> F2["Faza 2 ✅<br/>Onboarding:<br/>kreiranje novog Safea"]
   F1 --> F3["Faza 3<br/>Receive + payment linkovi"]
   F2 --> F4["Faza 4<br/>Identity layer<br/>(username → adresa)"]
   F3 --> F4
@@ -25,15 +25,15 @@ flowchart LR
 
   classDef done fill:#eafbea,stroke:#2f855a,color:#14331f
   classDef todo fill:#e8f0ff,stroke:#2e5791,color:#0b2447
-  class F0,F1 done
-  class F2,F3,F4,F5 todo
+  class F0,F1,F2 done
+  class F3,F4,F5 todo
 ```
 
 | Faza | Dokument                                                               | Cilj                                                                        | Status |
 | ---- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------ |
 | 0    | — (isporučeno, commit `f7cb87d44`)                                     | Manifest-driven native identitet (ime, packageId, Firebase, EAS)            | ✅     |
 | 1    | [faza-1-runtime-branding.md](faza-1-runtime-branding.md)               | Manifest `theme`/`backend` polja se konzumiraju; brand assets; hex čišćenje | ✅     |
-| 2    | [faza-2-onboarding-novi-safe.md](faza-2-onboarding-novi-safe.md)       | Kreiranje **novog** Safea u appu (danas: samo import)                       | ⬜     |
+| 2    | [faza-2-onboarding-novi-safe.md](faza-2-onboarding-novi-safe.md)       | Kreiranje **novog** Safea u appu (danas: samo import)                       | ✅     |
 | 3    | [faza-3-receive-payment-linkovi.md](faza-3-receive-payment-linkovi.md) | EIP-681 QR s iznosom + share link + deep-link u Send                        | ⬜     |
 | 4    | [faza-4-identity-layer.md](faza-4-identity-layer.md)                   | Send po usernameu (ENS offchain subnames), hex adrese skrivene              | ⬜     |
 | 5    | [faza-5-release-pipeline.md](faza-5-release-pipeline.md)               | EAS build per brand manifest + smoke test + store priprema                  | ⬜     |

@@ -8,23 +8,23 @@
 
 ## Matrica sposobnosti
 
-| Feature                                  | `domovina/wallet`                         | `safe-wallet` mobile                | Status                 |
-| ---------------------------------------- | ----------------------------------------- | ----------------------------------- | ---------------------- |
-| N računa + switcher                      | ✅ ADR 0013, instant mint bez gasa        | ✅ (samo import postojećih Safeova) | **gotovo**             |
-| Passkey seedless onboarding              | ✅ Face ID, bez seeda                     | ❌ samo seed/PK/Ledger              | domovina               |
-| Kreiranje **novog** računa u appu        | ✅ lokalno, bez gasa                      | 🟡 samo import                      | domovina               |
-| Send na adresu / QR / recent             | ✅                                        | ✅ wizard + risk-validacija         | **gotovo**             |
-| **Send po username / ENS / directoryju** | ❌                                        | ❌                                  | **GAP**                |
-| Receive QR + payment link                | ✅ EIP-681 + share link                   | 🟡 gola adresa (bez iznosa)         | domovina               |
-| Gasless / sponzorirano                   | ✅ vlastiti relayer (5/dan)               | ✅ relay + **GTF Safe-pays**        | **gotovo (oba)**       |
-| Fiat on-ramp                             | ✅ SEPA/Monerium (IBAN→EURe)              | ❌ (mobile `onramp:false`)          | domovina               |
-| Fiat off-ramp (cash-out)                 | ❌                                        | ❌                                  | gap                    |
-| Kartica (VISA, Revolut-like)             | 🔬 kodirano, **flagged OFF** (Gnosis Pay) | ❌                                  | skoro                  |
-| Multi-asset / portfelj                   | ❌ samo EURe                              | ✅ tokeni/NFT/DeFi                  | safe-wallet            |
-| Multi-chain                              | ❌ samo Gnosis                            | ✅ switching + auto-discovery       | safe-wallet            |
-| Runtime N-brand branding                 | ✅ ADR 0015 (4 tenanta)                   | 🟡 faza 1 (samo native identitet)   | domovina               |
-| Activity feed / povijest                 | ✅ on-chain Transfer feed                 | ✅                                  | **gotovo**             |
-| Address book / kontakti                  | 🟡 lokalni recent (max 20)                | ✅ per-chain CRUD, u Send wizardu   | djelomično/safe-wallet |
+| Feature                                  | `domovina/wallet`                         | `safe-wallet` mobile                 | Status                 |
+| ---------------------------------------- | ----------------------------------------- | ------------------------------------ | ---------------------- |
+| N računa + switcher                      | ✅ ADR 0013, instant mint bez gasa        | ✅ (samo import postojećih Safeova)  | **gotovo**             |
+| Passkey seedless onboarding              | ✅ Face ID, bez seeda                     | ❌ samo seed/PK/Ledger               | domovina               |
+| Kreiranje **novog** računa u appu        | ✅ lokalno, bez gasa                      | ✅ counterfactual, bez gasa (faza 2) | **gotovo (oba)**       |
+| Send na adresu / QR / recent             | ✅                                        | ✅ wizard + risk-validacija          | **gotovo**             |
+| **Send po username / ENS / directoryju** | ❌                                        | ❌                                   | **GAP**                |
+| Receive QR + payment link                | ✅ EIP-681 + share link                   | 🟡 gola adresa (bez iznosa)          | domovina               |
+| Gasless / sponzorirano                   | ✅ vlastiti relayer (5/dan)               | ✅ relay + **GTF Safe-pays**         | **gotovo (oba)**       |
+| Fiat on-ramp                             | ✅ SEPA/Monerium (IBAN→EURe)              | ❌ (mobile `onramp:false`)           | domovina               |
+| Fiat off-ramp (cash-out)                 | ❌                                        | ❌                                   | gap                    |
+| Kartica (VISA, Revolut-like)             | 🔬 kodirano, **flagged OFF** (Gnosis Pay) | ❌                                   | skoro                  |
+| Multi-asset / portfelj                   | ❌ samo EURe                              | ✅ tokeni/NFT/DeFi                   | safe-wallet            |
+| Multi-chain                              | ❌ samo Gnosis                            | ✅ switching + auto-discovery        | safe-wallet            |
+| Runtime N-brand branding                 | ✅ ADR 0015 (4 tenanta)                   | 🟡 faza 1 (samo native identitet)    | domovina               |
+| Activity feed / povijest                 | ✅ on-chain Transfer feed                 | ✅                                   | **gotovo**             |
+| Address book / kontakti                  | 🟡 lokalni recent (max 20)                | ✅ per-chain CRUD, u Send wizardu    | djelomično/safe-wallet |
 
 Legenda: ✅ gotovo · 🟡 djelomično · ❌ nema · 🔬 kodirano ali isključeno.
 
