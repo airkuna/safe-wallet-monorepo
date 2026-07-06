@@ -96,6 +96,13 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
       package: withVariant(manifest.android.package, isDev),
     },
     assets: resolveAssets(manifest.assets),
+    // OTA (EAS Update) is opt-in per brand; absent → expo-updates stays disabled.
+    updates: manifest.updates
+      ? {
+          codeSigningCertificatePath: brandAssetPath(manifest.updates.codeSigningCertificatePath),
+          url: manifest.updates.url,
+        }
+      : undefined,
     // Runtime branding, forwarded to the app via `expoConfig.extra.brand`.
     theme: manifest.theme,
     backend: manifest.backend,

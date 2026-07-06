@@ -36,6 +36,12 @@ export interface ResolvedBrand {
     }
     favicon: string
   }
+  /** OTA opt-in; certificate path resolved to app-root-relative. */
+  updates?: {
+    codeSigningCertificatePath: string
+    /** Update-server manifest URL; absent → EAS default. */
+    url?: string
+  }
   /** Palette overrides (dot-path keys), forwarded to the runtime via `extra.brand`. */
   theme?: BrandManifest['theme']
   /** Per-brand backend, forwarded to the runtime via `extra.brand`. */

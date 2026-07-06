@@ -2,9 +2,13 @@
   "id": "domovina",
   "name": "Domovina",
   "devNamePrefix": "Dev-",
-  "slug": "domovina-wallet",
-  "owner": "domovina",
+  "slug": "dom",
+  "owner": "domovinasync",
   "easProjectId": "c6767ce3-2b9c-4568-bb3d-d43d5f656d93",
+  "updates": {
+    "codeSigningCertificatePath": "certs/domovina/certificate.pem",
+    "url": "https://ota.domovina.ai/api/manifest"
+  },
   "scheme": ["domovina", "wc"],
   "ios": {
     "bundleIdentifier": "ai.domovina.wallet",

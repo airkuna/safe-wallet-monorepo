@@ -38,6 +38,12 @@ const brandManifestSchema = z.object({
       dark: z.record(z.string()).optional(),
     })
     .optional(),
+  updates: z
+    .object({
+      codeSigningCertificatePath: z.string().min(1),
+      url: z.string().url().optional(),
+    })
+    .optional(),
   assets: z
     .object({
       icon: z.string().min(1).optional(),

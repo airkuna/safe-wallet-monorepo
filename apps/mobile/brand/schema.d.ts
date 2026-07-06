@@ -43,6 +43,16 @@ export interface BrandManifest {
     dark?: Record<string, string>
   }
   /**
+   * Opting in enables OTA (EAS Update) for this brand. The certificate path is
+   * relative to `brand/` (e.g. `certs/acme/certificate.pem`); the matching
+   * private key stays outside the repo (see `keys/` in .gitignore).
+   */
+  updates?: {
+    codeSigningCertificatePath: string
+    /** Update-server manifest URL; defaults to EAS (`https://u.expo.dev/<easProjectId>`). */
+    url?: string
+  }
+  /**
    * Optional visual assets. Image paths are relative to `brand/`
    * (e.g. `assets/acme/icon.png`); `backgroundColor*` are hex colors.
    * Missing fields fall back to the stock Safe assets.

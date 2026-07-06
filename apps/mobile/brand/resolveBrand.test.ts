@@ -104,6 +104,39 @@ describe('resolveBrand', () => {
     expect(brand.backend).toBeUndefined()
   })
 
+  it('resolves the OTA code-signing certificate path relative to brand/', () => {
+    const brand = resolveBrand(
+      { isDev: false },
+      { ...safe, updates: { codeSigningCertificatePath: 'certs/acme/certificate.pem' } },
+    )
+
+    expect(brand.updates).toEqual({
+      codeSigningCertificatePath: './brand/certs/acme/certificate.pem',
+      url: undefined,
+    })
+  })
+
+  it('passes a custom update-server url through unchanged', () => {
+    const brand = resolveBrand(
+      { isDev: false },
+      {
+        ...safe,
+        updates: {
+          codeSigningCertificatePath: 'certs/acme/certificate.pem',
+          url: 'https://ota.example.com/api/manifest',
+        },
+      },
+    )
+
+    expect(brand.updates?.url).toBe('https://ota.example.com/api/manifest')
+  })
+
+  it('leaves updates undefined when the manifest does not opt in (OTA disabled)', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+
+    expect(brand.updates).toBeUndefined()
+  })
+
   it('prefers an inline BRAND_CONFIG_JSON over the file', () => {
     const original = process.env.BRAND_CONFIG_JSON
     process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, id: 'inline', name: 'Inline Wallet' })

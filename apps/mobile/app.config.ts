@@ -32,7 +32,29 @@ const sslPinningDomains = {
 
 const name = brand.appName
 
+// OTA (EAS Update) — only for brands that opt in via the manifest. `fingerprint` keeps
+// updates from reaching binaries whose native layer differs; code signing is mandatory
+// (wallet — the app must reject any update not signed with our private key).
+const otaConfig: Pick<ExpoConfig, 'runtimeVersion' | 'updates'> = brand.updates
+  ? {
+      runtimeVersion: { policy: 'fingerprint' },
+      updates: {
+        url: brand.updates.url ?? `https://u.expo.dev/${brand.easProjectId}`,
+        enabled: true,
+        checkAutomatically: 'ON_LOAD',
+        // Never block launch on the network; a downloaded update applies on next launch.
+        fallbackToCacheTimeout: 0,
+        // Channel for LOCAL (non-EAS) builds; EAS Build overwrites this with the
+        // profile's `channel` from eas.json at build time.
+        requestHeaders: { 'expo-channel-name': IS_DEV ? 'development' : 'production' },
+        codeSigningCertificate: brand.updates.codeSigningCertificatePath,
+        codeSigningMetadata: { keyid: 'main', alg: 'rsa-v1_5-sha256' },
+      },
+    }
+  : {}
+
 const config: ExpoConfig = {
+  ...otaConfig,
   name: name,
   slug: brand.slug,
   owner: brand.owner,

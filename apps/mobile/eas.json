@@ -16,6 +16,7 @@
     "development": {
       "extends": "base",
       "environment": "development",
+      "channel": "development",
       "autoIncrement": true,
       "env": {
         "APP_VARIANT": "development"
@@ -35,6 +36,7 @@
     "preview": {
       "extends": "base",
       "environment": "preview",
+      "channel": "preview",
       "distribution": "internal",
       "ios": {},
       "android": {
@@ -44,6 +46,7 @@
     "production": {
       "extends": "base",
       "environment": "production",
+      "channel": "production",
       "autoIncrement": true,
       "ios": {
         "env": {
