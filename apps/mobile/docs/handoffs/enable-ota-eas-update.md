@@ -1,5 +1,12 @@
 # Handoff — enable OTA (EAS Update) for the Domovina mobile app
 
+> **STATUS: EXECUTED 2026-07-06 — with one deviation.** The app side is fully wired (module,
+> per-brand config, fingerprint runtimeVersion, channels, code signing). Deviation: EAS gates
+> update code signing behind a paid plan, so hosted EAS Update was dropped in favour of a
+> **self-hosted server** at `ota.domovina.ai` (standalone repo `~/git/domovinatv/domovina-ota`,
+> see its `HANDOFF.md`). Current live state is documented in the OTA section of
+> `apps/mobile/docs/domovina-build-and-flavors.md` — read that, not this file.
+
 Self-contained task brief for a **fresh Claude Code session**. Everything needed is here or in
 the linked docs; do not assume prior chat context.
 

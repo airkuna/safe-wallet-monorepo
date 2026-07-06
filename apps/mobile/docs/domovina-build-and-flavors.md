@@ -284,9 +284,33 @@ separate axes; don't fold build mode into the bundle id.
 
 ## Over-the-air (OTA) updates — EAS Update
 
-> **Current state in this repo:** OTA is **not wired yet**. `expo-updates` is not installed
-> (`EXUpdatesEnabled = false`), and `eas.json` has build profiles but no update channels. The
-> section below explains the model and the exact steps to enable it.
+> **Current state in this repo:** OTA is **wired** (app side complete). `expo-updates`
+> (`~55.0.25`) is installed; `app.config.ts` enables updates **per-brand** (only when the brand
+> manifest has an `updates` section — the stock `safe` brand stays OTA-disabled). Live values
+> for domovina:
+>
+> - **update server:** **self-hosted** — `https://ota.domovina.ai/api/manifest` (set via
+>   `updates.url` in `brand/manifests/domovina.json`). Hosted EAS Update was dropped because
+>   EAS gates update **code signing** behind a paid plan (Production/Enterprise), and unsigned
+>   OTA is unacceptable for a wallet. The server lives in the standalone repo
+>   `~/git/domovinatv/domovina-ota` (see its `README.md`/`HANDOFF.md`); until it is deployed,
+>   the app simply finds no update and boots the embedded bundle (launch never blocks).
+> - **runtimeVersion policy:** `fingerprint` (per platform **and per flavor**)
+> - **channels:** `development` (dev flavor) / `production` (prod flavor), sent via the
+>   `expo-channel-name` request header baked into local builds; EAS builds override it with the
+>   same-named `channel` in `eas.json` profiles
+> - **code signing:** enabled (`rsa-v1_5-sha256`, keyid `main`). Public certificate:
+>   `brand/certs/domovina/certificate.pem` (committed, embedded in the binary). **Private
+>   key:** `keys/domovina/private-key.pem` — gitignored (`/keys/`), exists only on the dev
+>   machine; back it up to a password manager / secure vault. The app rejects any update not
+>   signed with this key — updates are signed locally at publish time, so the update server
+>   holds no secrets.
+> - timing: `checkAutomatically: ON_LOAD`, `fallbackToCacheTimeout: 0` (launch never blocks;
+>   a downloaded update applies on the next launch)
+>
+> Binaries built before this change do not contain `expo-updates` — only fresh builds are
+> OTA-capable. The on-device signed round-trip (fetch + apply + tamper rejection) is verified
+> as the final step of the `domovina-ota` server handoff.
 
 ### Why it exists (and why it's a killer feature vs Flutter)
 
@@ -358,33 +382,46 @@ Default timing: check **on launch**, download in the background, apply on the **
 (`ON_LOAD` / `ON_ERROR_RECOVERY` / `NEVER`) and `fallbackToCacheTimeout` (how long launch blocks
 to fetch before falling back to the embedded/cached bundle).
 
-### Enabling OTA (steps, when we're ready)
+### How it's wired (per-brand opt-in)
+
+OTA is gated on the brand manifest: a brand opts in by adding an `updates` section, and
+`app.config.ts` only emits `runtimeVersion` + `updates` for opted-in brands, so the stock
+`safe` brand stays byte-identical (OTA disabled).
+
+```jsonc
+// brand/manifests/domovina.json (gitignored, local)
+"updates": {
+  "codeSigningCertificatePath": "certs/domovina/certificate.pem" // relative to brand/
+}
+```
+
+`resolveBrand.js` resolves the path app-root-relative; `app.config.ts` then sets
+`runtimeVersion: { policy: 'fingerprint' }`, `updates.url` (the manifest's `url`, falling back
+to EAS `https://u.expo.dev/<easProjectId>`), and the code-signing fields. Each `eas.json` build
+profile carries a matching `channel` (`development` / `preview` / `production`).
+
+Publish an update (from the `domovina-ota` repo; signs locally with the private key):
 
 ```bash
-cd apps/mobile
-npx expo install expo-updates          # adds the native module (requires a new native build)
-eas update:configure                   # sets updates.url + runtimeVersion, wires channels
+cd ~/git/domovinatv/domovina-ota
+node scripts/publish.mjs --channel development --message "what changed"   # dev builds
+node scripts/publish.mjs --channel production  --message "what changed"   # store builds
+node scripts/rollback.mjs --channel production                            # instant revert
 ```
 
-Then in `app.config.ts` add (per-flavor via `IS_DEV` if desired):
-
-```ts
-runtimeVersion: { policy: 'fingerprint' },
-updates: { url: 'https://u.expo.dev/<eas-project-id>' },
-```
-
-and give each `eas.json` build profile a `channel` (e.g. `"channel": "production"`). Publish with
-`eas update --branch production`. **The binary that first ships to the stores must already contain
-`expo-updates`** — you cannot retro-add OTA to an already-shipped build without a new release.
+**The binary that first ships to the stores must already contain `expo-updates`** — you cannot
+retro-add OTA to an already-shipped build without a new release. Any native change bumps the
+fingerprint runtimeVersion, so old binaries simply stop matching new updates (no crashes).
 
 ### Wallet-specific security (do not skip)
 
 OTA ships **arbitrary JS into an app that handles private keys and signs transactions** — treat
 the update pipeline as a security-critical supply chain:
 
-- **Enable expo-updates code signing.** The app then only accepts updates signed with _your_
-  private key, so a compromised update server/CDN cannot push malicious JS. For a wallet this is
-  effectively mandatory.
+- **expo-updates code signing is enabled** (see "Current state" above). The app only accepts
+  updates signed with _our_ private key (`keys/domovina/private-key.pem`, never committed), so a
+  compromised update server/CDN cannot push malicious JS. For a wallet this is effectively
+  mandatory — never disable it, and guard the private key like a signing key.
 - Keep security-sensitive logic **native** where practical (SSL pinning via TrustKit, Keychain /
   key storage, RASP) — being native, it's not OTA-mutable, which is a feature.
 - Respect store policy: OTA is for fixes/UI/content, **not** for shipping a materially different
