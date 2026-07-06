@@ -91,7 +91,7 @@ function ConfirmTxContainer() {
         >
           {isLoading ? (
             <View flex={1} justifyContent="center" alignItems="center">
-              <Loader size={64} color="#12FF80" />
+              <Loader size={64} color="$colorBrand" />
             </View>
           ) : isError && !txDetails ? (
             <View justifyContent="center" padding="$4">

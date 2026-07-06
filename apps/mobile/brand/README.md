@@ -32,10 +32,74 @@ BRAND_ID=acme APP_VARIANT=development GOOGLE_SERVICES_JSON_DEV=./google-services
 
 ## What is baked at build time vs. runtime
 
-| Layer                     | Fields                                                                                             | Mutable at runtime? |
-| ------------------------- | -------------------------------------------------------------------------------------------------- | ------------------- |
-| **Native identity**       | `name`, `android.package`, `ios.bundleIdentifier`, `scheme`, EAS `owner`/`projectId`, Firebase app | No — per binary     |
-| **Runtime branding** (P2) | `theme` palette overrides, `backend.cgwBaseUrl`, in-app copy/logos                                 | Yes                 |
+| Layer                | Fields                                                                                             | Mutable at runtime? |
+| -------------------- | -------------------------------------------------------------------------------------------------- | ------------------- |
+| **Native identity**  | `name`, `android.package`, `ios.bundleIdentifier`, `scheme`, EAS `owner`/`projectId`, Firebase app | No — per binary     |
+| **Visual assets**    | `assets.*` (icon, splash, adaptive icons, favicon)                                                 | No — per binary     |
+| **Runtime branding** | `theme` palette overrides, `backend.cgwBaseUrl`                                                    | No — per binary¹    |
+
+¹ Baked into the binary via `expoConfig.extra.brand` and read once at startup; an OTA/backend-driven rebrand is a possible later step.
+
+## Runtime branding fields
+
+### `theme` — palette overrides
+
+Dot-path keys into the shared palette (`packages/theme/src/palettes/`), one map
+per mode:
+
+```json
+"theme": {
+  "light": { "primary.main": "#0B5FFF", "static.textBrand": "#0B5FFF" },
+  "dark": { "primary.main": "#4D8DFF" }
+}
+```
+
+They are applied in `apps/mobile/src/theme/tokens.ts` via
+`generateTamaguiColorTokens(getBrand().theme)`, so every Tamagui token and
+theme derives from the overridden palette. Unknown keys are ignored (validate
+manifests against the schema). Without `theme` the output is byte-identical to
+stock Safe.
+
+### `backend.cgwBaseUrl`
+
+Overrides the CGW base URL for both variants (`GATEWAY_URL` in
+`src/config/constants.ts`). Note: SSL pinning in `app.config.ts` only covers
+the stock `safe-client.*` domains — a custom CGW domain is not pinned.
+
+### `assets` — icon/splash/adaptive icons/favicon
+
+Image paths are **relative to `brand/`** (they live in the gitignored
+`brand/assets/`, delivered together with the manifest); `backgroundColor*` are
+hex colors. Every field is optional and falls back to the stock Safe asset.
+
+```json
+"assets": {
+  "icon": "assets/acme/icon.png",
+  "splash": {
+    "image": "assets/acme/splash-dark.png",
+    "backgroundColor": "#f4f4f4",
+    "imageDark": "assets/acme/splash-light.png",
+    "backgroundColorDark": "#121312"
+  },
+  "androidAdaptiveIcon": {
+    "foregroundImage": "assets/acme/adaptive-fg.png",
+    "backgroundImage": "assets/acme/adaptive-bg.png",
+    "monochromeImage": "assets/acme/adaptive-mono.png"
+  },
+  "favicon": "assets/acme/favicon.png"
+}
+```
+
+### Reading the brand in app code
+
+Use the typed accessor from the overlay module — never `expo-constants`
+directly:
+
+```ts
+import { useBrand, getBrand } from '@/src/custom/brand'
+
+const { name, theme, backend } = useBrand() // or getBrand() outside React
+```
 
 ## SaaS pipeline (target)
 

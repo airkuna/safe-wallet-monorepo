@@ -20,6 +20,26 @@ export interface ResolvedBrand {
   android: {
     package: string
   }
+  /** App-root-relative asset paths, defaulted to the stock Safe assets. */
+  assets: {
+    icon: string
+    splash: {
+      image: string
+      backgroundColor: string
+      imageDark: string
+      backgroundColorDark: string
+    }
+    androidAdaptiveIcon: {
+      foregroundImage: string
+      backgroundImage: string
+      monochromeImage: string
+    }
+    favicon: string
+  }
+  /** Palette overrides (dot-path keys), forwarded to the runtime via `extra.brand`. */
+  theme?: BrandManifest['theme']
+  /** Per-brand backend, forwarded to the runtime via `extra.brand`. */
+  backend?: BrandManifest['backend']
 }
 
 export declare function loadBrandManifest(): BrandManifest

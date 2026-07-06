@@ -3,9 +3,11 @@ import { zIndex } from '@tamagui/themes'
 import { generateTamaguiColorTokens, generateTamaguiFontSizes } from '@safe-global/theme/generators/tamagui'
 import { radius } from '@safe-global/theme/tokens/radius'
 import { spacingMobile } from '@safe-global/theme/tokens/spacing'
+import { getBrand } from '@/src/custom/brand'
 
-// Generate color tokens from unified palettes
-const colors = generateTamaguiColorTokens()
+// Generate color tokens from unified palettes, recolored by the active brand
+// (no-op for the default `safe` brand)
+const colors = generateTamaguiColorTokens(getBrand().theme)
 
 // Re-export radius for use in other files
 export { radius }

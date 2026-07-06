@@ -7,7 +7,7 @@ type LoaderProps = CircleSnailPropTypes & {
   color?: string
 }
 
-export function Loader({ size = 64, color = '#12FF80', ...rest }: LoaderProps) {
+export function Loader({ size = 64, color = '$colorBrand', ...rest }: LoaderProps) {
   const theme = useTheme()
   const resolved = color?.startsWith('$') ? theme[color]?.get() || getVariable(color, 'color') : color
 

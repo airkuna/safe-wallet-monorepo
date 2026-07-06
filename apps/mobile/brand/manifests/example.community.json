@@ -15,5 +15,18 @@
   },
   "backend": {
     "cgwBaseUrl": "https://safe-client.safe.global"
+  },
+  "theme": {
+    "light": {
+      "primary.main": "#0B5FFF",
+      "secondary.main": "#0B5FFF",
+      "secondary.dark": "#0847BF",
+      "static.textBrand": "#0B5FFF"
+    },
+    "dark": {
+      "primary.main": "#4D8DFF",
+      "secondary.light": "#B3CDFF",
+      "static.textBrand": "#4D8DFF"
+    }
   }
 }

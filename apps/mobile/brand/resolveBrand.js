@@ -14,7 +14,51 @@ const { brandManifestSchema } = require('./schema')
 const DEV_SUFFIX = '.dev'
 const DEFAULT_DEV_NAME_PREFIX = 'Dev-'
 
+// Stock Safe assets — the fallback whenever a manifest omits an asset, so the
+// default `safe` brand stays byte-identical to the pre-brand config.
+const SAFE_DEFAULT_ASSETS = {
+  icon: './assets/images/icon.png',
+  splash: {
+    image: './assets/images/icon-dark.png',
+    backgroundColor: '#f4f4f4',
+    imageDark: './assets/images/icon-light.png',
+    backgroundColorDark: '#121312',
+  },
+  androidAdaptiveIcon: {
+    foregroundImage: './assets/images/android-adaptive-icon-foreground.png',
+    backgroundImage: './assets/images/android-adaptive-icon-background.png',
+    monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
+  },
+  favicon: './assets/images/favicon.png',
+}
+
 const withVariant = (base, isDev) => (isDev ? `${base}${DEV_SUFFIX}` : base)
+
+// Manifest asset paths are relative to `brand/`; the Expo config expects
+// app-root-relative paths.
+const brandAssetPath = (path) => (path === undefined ? undefined : `./brand/${path}`)
+
+const resolveAssets = (assets = {}) => ({
+  icon: brandAssetPath(assets.icon) ?? SAFE_DEFAULT_ASSETS.icon,
+  splash: {
+    image: brandAssetPath(assets.splash?.image) ?? SAFE_DEFAULT_ASSETS.splash.image,
+    backgroundColor: assets.splash?.backgroundColor ?? SAFE_DEFAULT_ASSETS.splash.backgroundColor,
+    imageDark: brandAssetPath(assets.splash?.imageDark) ?? SAFE_DEFAULT_ASSETS.splash.imageDark,
+    backgroundColorDark: assets.splash?.backgroundColorDark ?? SAFE_DEFAULT_ASSETS.splash.backgroundColorDark,
+  },
+  androidAdaptiveIcon: {
+    foregroundImage:
+      brandAssetPath(assets.androidAdaptiveIcon?.foregroundImage) ??
+      SAFE_DEFAULT_ASSETS.androidAdaptiveIcon.foregroundImage,
+    backgroundImage:
+      brandAssetPath(assets.androidAdaptiveIcon?.backgroundImage) ??
+      SAFE_DEFAULT_ASSETS.androidAdaptiveIcon.backgroundImage,
+    monochromeImage:
+      brandAssetPath(assets.androidAdaptiveIcon?.monochromeImage) ??
+      SAFE_DEFAULT_ASSETS.androidAdaptiveIcon.monochromeImage,
+  },
+  favicon: brandAssetPath(assets.favicon) ?? SAFE_DEFAULT_ASSETS.favicon,
+})
 
 const manifestPath = (id) => resolve(process.cwd(), 'brand/manifests', `${id}.json`)
 
@@ -51,6 +95,10 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
     android: {
       package: withVariant(manifest.android.package, isDev),
     },
+    assets: resolveAssets(manifest.assets),
+    // Runtime branding, forwarded to the app via `expoConfig.extra.brand`.
+    theme: manifest.theme,
+    backend: manifest.backend,
   }
 }
 

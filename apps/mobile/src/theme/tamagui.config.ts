@@ -63,6 +63,7 @@ export const config = createTamagui({
       errorLight: tokens.color.errorLightLight,
       errorBackground: tokens.color.errorBackgroundLight,
       contrast: tokens.color.textContrastLight,
+      colorBrand: tokens.color.staticTextBrandLight,
     },
     light_label: {
       color: tokens.color.textSecondaryLight,
@@ -134,6 +135,7 @@ export const config = createTamagui({
       info: tokens.color.infoMainDark,
       infoBackground: tokens.color.infoBackgroundDark,
       contrast: tokens.color.textContrastDark,
+      colorBrand: tokens.color.staticTextBrandDark,
     },
   },
   tokens,

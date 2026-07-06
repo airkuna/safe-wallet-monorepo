@@ -42,6 +42,68 @@ describe('resolveBrand', () => {
     expect(brand.slug).toBe('safe-mobileapp')
   })
 
+  it('defaults assets to the stock Safe assets when the manifest has none', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+
+    expect(brand.assets).toEqual({
+      icon: './assets/images/icon.png',
+      splash: {
+        image: './assets/images/icon-dark.png',
+        backgroundColor: '#f4f4f4',
+        imageDark: './assets/images/icon-light.png',
+        backgroundColorDark: '#121312',
+      },
+      androidAdaptiveIcon: {
+        foregroundImage: './assets/images/android-adaptive-icon-foreground.png',
+        backgroundImage: './assets/images/android-adaptive-icon-background.png',
+        monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
+      },
+      favicon: './assets/images/favicon.png',
+    })
+  })
+
+  it('resolves manifest asset paths relative to brand/ and keeps colors as-is', () => {
+    const brand = resolveBrand(
+      { isDev: false },
+      {
+        ...safe,
+        assets: {
+          icon: 'assets/acme/icon.png',
+          splash: { image: 'assets/acme/splash.png', backgroundColor: '#123456' },
+          androidAdaptiveIcon: { foregroundImage: 'assets/acme/adaptive-fg.png' },
+        },
+      },
+    )
+
+    expect(brand.assets.icon).toBe('./brand/assets/acme/icon.png')
+    expect(brand.assets.splash.image).toBe('./brand/assets/acme/splash.png')
+    expect(brand.assets.splash.backgroundColor).toBe('#123456')
+    // omitted fields fall back to the stock Safe assets
+    expect(brand.assets.splash.imageDark).toBe('./assets/images/icon-light.png')
+    expect(brand.assets.androidAdaptiveIcon.foregroundImage).toBe('./brand/assets/acme/adaptive-fg.png')
+    expect(brand.assets.androidAdaptiveIcon.backgroundImage).toBe(
+      './assets/images/android-adaptive-icon-background.png',
+    )
+    expect(brand.assets.favicon).toBe('./assets/images/favicon.png')
+  })
+
+  it('passes theme and backend through for the runtime layer', () => {
+    const theme = { light: { 'primary.main': '#0A84FF' }, dark: { 'primary.main': '#FF9F0A' } }
+    const backend = { cgwBaseUrl: 'https://cgw.example.com' }
+
+    const brand = resolveBrand({ isDev: false }, { ...safe, theme, backend })
+
+    expect(brand.theme).toEqual(theme)
+    expect(brand.backend).toEqual(backend)
+  })
+
+  it('leaves theme and backend undefined when the manifest has none', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+
+    expect(brand.theme).toBeUndefined()
+    expect(brand.backend).toBeUndefined()
+  })
+
   it('prefers an inline BRAND_CONFIG_JSON over the file', () => {
     const original = process.env.BRAND_CONFIG_JSON
     process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, id: 'inline', name: 'Inline Wallet' })

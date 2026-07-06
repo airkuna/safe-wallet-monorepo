@@ -1,5 +1,6 @@
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
+import { getBrand } from '@/src/custom/brand'
 
 // export const isProduction = process.env.NODE_ENV === 'production'
 // TODO: put it to get from process.env.NODE_ENV once we remove the mocks for the user account.
@@ -17,7 +18,9 @@ export const COMING_SOON_TITLE = 'Coming soon'
 export const GATEWAY_URL_PRODUCTION =
   process.env.EXPO_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
-export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+// A brand manifest's `backend.cgwBaseUrl` overrides both variants (absent for the default `safe` brand).
+export const GATEWAY_URL =
+  getBrand().backend?.cgwBaseUrl ?? (isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING)
 export const CONFIG_SERVICE_KEY = process.env.EXPO_PUBLIC_CONFIG_SERVICE_KEY || 'MOBILE'
 
 export const SECURITY_CERTIFICATE_HASH_BASE64 = process.env.EXPO_PUBLIC_SECURITY_SERTIFICATE_HASH_BASE64

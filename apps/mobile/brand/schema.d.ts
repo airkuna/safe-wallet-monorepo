@@ -28,14 +28,37 @@ export interface BrandManifest {
     /** Production base application id; the dev variant appends `.dev`. */
     package: string
   }
-  /** Optional per-brand backend (phase 2). */
+  /** Optional per-brand backend. */
   backend?: {
     cgwBaseUrl?: string
   }
-  /** Optional palette overrides applied on top of the shared theme (phase 2). */
+  /**
+   * Optional palette overrides applied on top of the shared theme.
+   * Keys are dot-paths into the palette (e.g. `"primary.main"`).
+   */
   theme?: {
     light?: Record<string, string>
     dark?: Record<string, string>
+  }
+  /**
+   * Optional visual assets. Image paths are relative to `brand/`
+   * (e.g. `assets/acme/icon.png`); `backgroundColor*` are hex colors.
+   * Missing fields fall back to the stock Safe assets.
+   */
+  assets?: {
+    icon?: string
+    splash?: {
+      image?: string
+      backgroundColor?: string
+      imageDark?: string
+      backgroundColorDark?: string
+    }
+    androidAdaptiveIcon?: {
+      foregroundImage?: string
+      backgroundImage?: string
+      monochromeImage?: string
+    }
+    favicon?: string
   }
 }
 

@@ -42,9 +42,16 @@ const config: ExpoConfig = {
     eas: {
       projectId: brand.easProjectId,
     },
+    // Runtime branding payload, read via `src/custom/brand`.
+    brand: {
+      id: brand.id,
+      name: name,
+      theme: brand.theme,
+      backend: brand.backend,
+    },
   },
   orientation: 'portrait',
-  icon: './assets/images/icon.png',
+  icon: brand.assets.icon,
   scheme: brand.scheme,
   userInterfaceStyle: 'automatic',
   ios: {
@@ -94,9 +101,9 @@ const config: ExpoConfig = {
     package: brand.android.package,
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
     adaptiveIcon: {
-      foregroundImage: './assets/images/android-adaptive-icon-foreground.png',
-      backgroundImage: './assets/images/android-adaptive-icon-background.png',
-      monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
+      foregroundImage: brand.assets.androidAdaptiveIcon.foregroundImage,
+      backgroundImage: brand.assets.androidAdaptiveIcon.backgroundImage,
+      monochromeImage: brand.assets.androidAdaptiveIcon.monochromeImage,
     },
     permissions: [
       'android.permission.CAMERA',
@@ -110,7 +117,7 @@ const config: ExpoConfig = {
   web: {
     bundler: 'metro',
     output: 'static',
-    favicon: './assets/images/favicon.png',
+    favicon: brand.assets.favicon,
   },
   plugins: [
     [
@@ -149,11 +156,11 @@ const config: ExpoConfig = {
     [
       'expo-splash-screen',
       {
-        image: './assets/images/icon-dark.png',
-        backgroundColor: '#f4f4f4',
+        image: brand.assets.splash.image,
+        backgroundColor: brand.assets.splash.backgroundColor,
         dark: {
-          image: './assets/images/icon-light.png',
-          backgroundColor: '#121312',
+          image: brand.assets.splash.imageDark,
+          backgroundColor: brand.assets.splash.backgroundColorDark,
         },
       },
     ],

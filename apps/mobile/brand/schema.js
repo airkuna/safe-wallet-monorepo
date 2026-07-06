@@ -37,6 +37,27 @@ const brandManifestSchema = z.object({
       dark: z.record(z.string()).optional(),
     })
     .optional(),
+  assets: z
+    .object({
+      icon: z.string().min(1).optional(),
+      splash: z
+        .object({
+          image: z.string().min(1).optional(),
+          backgroundColor: z.string().min(1).optional(),
+          imageDark: z.string().min(1).optional(),
+          backgroundColorDark: z.string().min(1).optional(),
+        })
+        .optional(),
+      androidAdaptiveIcon: z
+        .object({
+          foregroundImage: z.string().min(1).optional(),
+          backgroundImage: z.string().min(1).optional(),
+          monochromeImage: z.string().min(1).optional(),
+        })
+        .optional(),
+      favicon: z.string().min(1).optional(),
+    })
+    .optional(),
 })
 
 module.exports = { brandManifestSchema }
