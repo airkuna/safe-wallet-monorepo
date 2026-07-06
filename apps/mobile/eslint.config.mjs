@@ -5,6 +5,11 @@ import pluginReact from 'eslint-plugin-react'
 export default [
   { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
   { languageOptions: { globals: globals.browser } },
+  {
+    // Build-time CommonJS scripts evaluated by the Expo config loader
+    files: ['brand/**/*.js', 'expo-plugins/**/*.js', 'queries.js'],
+    languageOptions: { globals: globals.node, sourceType: 'commonjs' },
+  },
   pluginJs.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
