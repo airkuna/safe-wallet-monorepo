@@ -36,7 +36,7 @@ BRAND_ID=acme APP_VARIANT=development GOOGLE_SERVICES_JSON_DEV=./google-services
 | -------------------- | -------------------------------------------------------------------------------------------------- | ------------------- |
 | **Native identity**  | `name`, `android.package`, `ios.bundleIdentifier`, `scheme`, EAS `owner`/`projectId`, Firebase app | No — per binary     |
 | **Visual assets**    | `assets.*` (icon, splash, adaptive icons, favicon)                                                 | No — per binary     |
-| **Runtime branding** | `theme` palette overrides, `backend.cgwBaseUrl`                                                    | No — per binary¹    |
+| **Runtime branding** | `theme` palette overrides, `backend.cgwBaseUrl`, `backend.defaultChainId`                          | No — per binary¹    |
 
 ¹ Baked into the binary via `expoConfig.extra.brand` and read once at startup; an OTA/backend-driven rebrand is a possible later step.
 
@@ -65,6 +65,12 @@ stock Safe.
 Overrides the CGW base URL for both variants (`GATEWAY_URL` in
 `src/config/constants.ts`). Note: SSL pinning in `app.config.ts` only covers
 the stock `safe-client.*` domains — a custom CGW domain is not pinned.
+
+### `backend.defaultChainId`
+
+Chain preselected in the "Create account" flow (`CreateSafe` feature). Must be
+one of the chains served by the brand's gateway; unknown ids fall back to the
+active account's chain, then the first gateway chain.
 
 ### `assets` — icon/splash/adaptive icons/favicon
 

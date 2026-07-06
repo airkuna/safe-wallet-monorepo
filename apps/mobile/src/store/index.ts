@@ -53,6 +53,7 @@ import executingState from './executingStateSlice'
 import draftTx from './draftTxSlice'
 import toast from './toastSlice'
 import walletKit, { walletKitSliceName } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
+import undeployedSafes from '@/src/features/CreateSafe/store/undeployedSafesSlice'
 import { withE2EReset } from './resetE2EState'
 
 setBaseUrl(GATEWAY_URL)
@@ -149,6 +150,7 @@ const persistedWalletKit = persistReducer(walletKitPersistConfig, walletKit)
 const combinedReducer = combineReducers({
   txHistory,
   safes,
+  undeployedSafes,
   activeSigner,
   activeSafe,
   notifications,

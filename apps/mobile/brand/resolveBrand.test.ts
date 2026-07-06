@@ -89,7 +89,7 @@ describe('resolveBrand', () => {
 
   it('passes theme and backend through for the runtime layer', () => {
     const theme = { light: { 'primary.main': '#0A84FF' }, dark: { 'primary.main': '#FF9F0A' } }
-    const backend = { cgwBaseUrl: 'https://cgw.example.com' }
+    const backend = { cgwBaseUrl: 'https://cgw.example.com', defaultChainId: '100' }
 
     const brand = resolveBrand({ isDev: false }, { ...safe, theme, backend })
 

@@ -29,6 +29,7 @@ const brandManifestSchema = z.object({
   backend: z
     .object({
       cgwBaseUrl: z.string().url().optional(),
+      defaultChainId: z.string().min(1).optional(),
     })
     .optional(),
   theme: z

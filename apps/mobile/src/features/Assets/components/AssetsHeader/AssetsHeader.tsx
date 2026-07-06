@@ -5,6 +5,7 @@ import { PendingTransactions } from '@/src/components/StatusBanners/PendingTrans
 import { View, Text, XStack } from 'tamagui'
 import { StyledAssetsHeader } from './styles'
 import { ReadOnlyContainer } from '../ReadOnly/ReadOnly.container'
+import { CounterfactualBannerContainer } from '@/src/features/CreateSafe'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 interface AssetsHeaderProps {
@@ -29,6 +30,7 @@ export function AssetsHeader({
   return (
     <StyledAssetsHeader>
       <ReadOnlyContainer marginTop={-8} marginBottom="$2" />
+      <CounterfactualBannerContainer />
 
       <BalanceContainer />
 

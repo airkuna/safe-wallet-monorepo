@@ -31,6 +31,8 @@ export interface BrandManifest {
   /** Optional per-brand backend. */
   backend?: {
     cgwBaseUrl?: string
+    /** Chain preselected when creating a new account (must exist on the gateway). */
+    defaultChainId?: string
   }
   /**
    * Optional palette overrides applied on top of the shared theme.

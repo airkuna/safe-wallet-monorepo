@@ -26,6 +26,15 @@ export function MyAccountsFooter() {
       marginBottom={-bottom}
       paddingBottom={bottom + getTokenValue('$4')}
     >
+      <Link href={'/create-safe'} asChild>
+        <MyAccountsButton testID="create-new-account" marginBottom={'$4'}>
+          <Badge themeName="badge_skeleton" circleSize="$10" content={<SafeFontIcon size={24} name="plus-filled" />} />
+
+          <Text fontSize="$4" fontWeight={400}>
+            Create new account
+          </Text>
+        </MyAccountsButton>
+      </Link>
       <Link href={'/(import-accounts)'} asChild>
         <MyAccountsButton testID="add-existing-account">
           <Badge themeName="badge_skeleton" circleSize="$10" content={<SafeFontIcon size={24} name="plus" />} />

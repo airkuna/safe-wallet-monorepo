@@ -30,6 +30,11 @@ export const GetStarted = () => {
     DdSdkReactNative.setTrackingConsent(TrackingConsent.GRANTED)
   }
 
+  const onPressCreateAccount = useCallback(async () => {
+    await enableDataCollection()
+    router.navigate('/create-safe')
+  }, [])
+
   const onPressAddAccount = useCallback(async () => {
     await enableDataCollection()
     router.navigate('/(import-accounts)')
@@ -84,6 +89,13 @@ export const GetStarted = () => {
           How would you like to continue?
         </Text>
 
+        <SafeButton
+          icon={<SafeFontIcon name={'plus'} />}
+          testID={'create-account-button'}
+          onPress={onPressCreateAccount}
+        >
+          Create account
+        </SafeButton>
         <SafeButton
           outlined
           icon={<SafeFontIcon name={'plus-outlined'} />}

@@ -97,6 +97,7 @@ function NavigationStack() {
       <Stack.Screen name="get-started" options={transparentModalOptions} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="(import-accounts)" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="create-safe" options={{ headerShown: true, title: '', presentation: 'modal' }} />
       <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
       <Stack.Screen name="execute-transaction" options={{ headerShown: false }} />
       <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />

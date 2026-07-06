@@ -11,5 +11,7 @@ export interface RuntimeBrand {
   theme?: ThemeOverride
   backend?: {
     cgwBaseUrl?: string
+    /** Chain preselected when creating a new account (must exist on the gateway). */
+    defaultChainId?: string
   }
 }
