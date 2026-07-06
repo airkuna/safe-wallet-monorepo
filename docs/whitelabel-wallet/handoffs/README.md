@@ -53,7 +53,10 @@ i izvrši tu fazu točno po uputama iz dokumenta. Na kraju ažuriraj status tabl
 
 - **Overlay, ne fork-edit**: nova funkcionalnost ide u NOVE datoteke/dirove; upstream datoteke se diraju samo kroz "thin seams" (~1 linija) — route wrappere, `app/_layout.tsx`, `app.config.ts`.
 - Prije početka: `git fetch upstream && git merge upstream/dev` (na grani `custom`).
-- Prije committa: `yarn verify:changed` mora proći; conventional commits (`feat(mobile):`, `docs(whitelabel):`…).
+- Prije committa: verify mora proći; conventional commits (`feat(mobile):`, `docs(whitelabel):`…).
+  - **Gotcha (faze 1–3):** root `yarn verify:changed` krivo detektira workspace kad diff dira i `packages/` — koristi **`node scripts/verify.mjs --changed --workspace=mobile`**. Ako diff dira `packages/utils`, dodatno pokreni `yarn workspace @safe-global/utils type-check && yarn workspace @safe-global/utils test` i `yarn workspace @safe-global/web type-check` (shared paket smije razbiti web).
+  - **Gotcha (faza 3):** puni mobile test run zna imati flaky suite pod opterećenjem (`PendingTx.container`, `DelegateCleanupService`) — prije debugiranja pokreni pali suite izolirano; ako izolirano prolazi i nije u diffu, nije tvoje.
+  - **Gotcha (faza 3):** mobile ESLint **nema** konfiguriran `react-hooks/exhaustive-deps` — `eslint-disable` komentar za to pravilo je lint ERROR ("Definition for rule ... was not found"); jednostavno izostavi komentar.
 - Novi kod = novi kolocirani testovi (`*.test.ts(x)`).
 - Nakon faze: označi fazu ✅ u tablici gore i zapiši odstupanja od plana u sam handoff dokument (sekcija "Zapisnik izvršenja" na dnu).
 
