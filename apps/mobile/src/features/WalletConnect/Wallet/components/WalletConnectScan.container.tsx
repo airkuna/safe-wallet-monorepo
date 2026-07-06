@@ -68,7 +68,7 @@ function CenterOverlay({
 }
 
 export function WalletConnectScanContainer({ isActive = true }: { isActive?: boolean } = {}) {
-  const { warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
+  const { sendScannedToRecipient } = useScannedAddressToSend()
 
   // A scanned Ethereum address leaves the scanner modal and lands on the Send recipient screen,
   // matching the home-screen Send button (replace so back returns to the tabs, not the scanner).
@@ -78,11 +78,10 @@ export function WalletConnectScanContainer({ isActive = true }: { isActive?: boo
       if (!resolved) {
         return false
       }
-      warnChainMismatch(resolved.prefix)
-      navigateToRecipient(resolved.address, 'replace')
+      sendScannedToRecipient(resolved, 'replace')
       return true
     },
-    [warnChainMismatch, navigateToRecipient],
+    [sendScannedToRecipient],
   )
 
   const {

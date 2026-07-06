@@ -7,13 +7,11 @@ import type { ScanStatus } from '../../hooks/useWalletConnectScan'
 const mockPush = jest.fn()
 jest.mock('expo-router', () => ({ router: { push: (p: string) => mockPush(p) } }))
 
-const mockWarnChainMismatch = jest.fn()
-const mockNavigateToRecipient = jest.fn()
+const mockSendScannedToRecipient = jest.fn()
 const mockResolveScannedAddress = jest.fn()
 jest.mock('@/src/features/Send/hooks/useScannedAddressToSend', () => ({
   useScannedAddressToSend: () => ({
-    warnChainMismatch: mockWarnChainMismatch,
-    navigateToRecipient: mockNavigateToRecipient,
+    sendScannedToRecipient: mockSendScannedToRecipient,
   }),
 }))
 
@@ -124,8 +122,7 @@ describe('WalletConnectScanContainer', () => {
 
     const onAddressScanned = lastOnAddressScanned()
     expect(onAddressScanned?.('gno:0xabc')).toBe(true)
-    expect(mockWarnChainMismatch).toHaveBeenCalledWith('gno')
-    expect(mockNavigateToRecipient).toHaveBeenCalledWith('0xabc', 'replace')
+    expect(mockSendScannedToRecipient).toHaveBeenCalledWith({ address: '0xabc', prefix: 'gno' }, 'replace')
   })
 
   it('reports a non-address code as not handled and does not navigate', () => {
@@ -134,6 +131,6 @@ describe('WalletConnectScanContainer', () => {
 
     const onAddressScanned = lastOnAddressScanned()
     expect(onAddressScanned?.('https://example.com')).toBe(false)
-    expect(mockNavigateToRecipient).not.toHaveBeenCalled()
+    expect(mockSendScannedToRecipient).not.toHaveBeenCalled()
   })
 })

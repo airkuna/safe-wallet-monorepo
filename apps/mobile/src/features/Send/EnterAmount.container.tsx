@@ -16,6 +16,7 @@ import { FooterAction } from './components/FooterAction'
 import { NonceBottomSheet } from './components/NonceBottomSheet'
 import { CustomNonceModal } from './components/CustomNonceModal'
 import { useAmountInput, useTokenAmountValidation } from './hooks/useAmountInput'
+import { usePrefillAmount } from './hooks/usePrefillAmount'
 import { useFiatConversion } from './hooks/useFiatConversion'
 import { useMaxAmount } from './hooks/useMaxAmount'
 import { useNonceSelection } from './hooks/useNonceSelection'
@@ -50,10 +51,12 @@ export function EnterAmountContainer() {
     recipientAddress: string
     recipientName?: string
     tokenAddress: string
+    prefillValueRaw?: string
   }>()
   const recipientAddress = params.recipientAddress ?? ''
   const recipientName = params.recipientName
   const tokenAddress = params.tokenAddress ?? ''
+  const prefillValueRaw = params.prefillValueRaw
   const activeSafe = useDefinedActiveSafe()
   const currency = useAppSelector(selectCurrency)
 
@@ -68,6 +71,8 @@ export function EnterAmountContainer() {
   })
 
   const { rawInput, setRawInput, setMax } = useAmountInput()
+
+  usePrefillAmount({ prefillValueRaw, decimals, isTokenDataReady, setAmount: setRawInput })
 
   const tokenSymbol = token?.tokenInfo.symbol ?? ''
   const fiatConversion = useFiatConversion({

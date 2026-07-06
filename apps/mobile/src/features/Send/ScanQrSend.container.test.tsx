@@ -61,10 +61,9 @@ jest.mock('@/src/components/Camera', () => {
 })
 
 const mockResolve = jest.fn()
-const mockWarn = jest.fn()
-const mockNavigate = jest.fn()
+const mockSendScanned = jest.fn()
 jest.mock('./hooks/useScannedAddressToSend', () => ({
-  useScannedAddressToSend: () => ({ warnChainMismatch: mockWarn, navigateToRecipient: mockNavigate }),
+  useScannedAddressToSend: () => ({ sendScannedToRecipient: mockSendScanned }),
 }))
 
 describe('ScanQrSendContainer', () => {
@@ -82,7 +81,7 @@ describe('ScanQrSendContainer', () => {
 
     expect(getByTestId('center-overlay')).toBeTruthy()
     expect(getByText('Not a valid address')).toBeTruthy()
-    expect(mockNavigate).not.toHaveBeenCalled()
+    expect(mockSendScanned).not.toHaveBeenCalled()
   })
 
   it('hides the scanning heading while the error overlay is shown', () => {
@@ -120,13 +119,22 @@ describe('ScanQrSendContainer', () => {
     expect(qrProps?.centerOverlay).toBeTruthy()
   })
 
-  it('warns on chain mismatch and navigates to the recipient for a valid address', () => {
+  it('hands a resolved scan to the shared Send navigation', () => {
     mockResolve.mockReturnValue({ address: '0xabc', prefix: 'gno' })
     render(<ScanQrSendContainer />)
 
     act(() => qrProps?.onScan([{ value: 'gno:0xabc' }]))
 
-    expect(mockWarn).toHaveBeenCalledWith('gno')
-    expect(mockNavigate).toHaveBeenCalledWith('0xabc')
+    expect(mockSendScanned).toHaveBeenCalledWith({ address: '0xabc', prefix: 'gno' })
+  })
+
+  it('hands an EIP-681 payment request to the shared Send navigation', () => {
+    const paymentRequest = { recipient: '0xabc', chainId: '1', value: '1000' }
+    mockResolve.mockReturnValue({ address: '0xabc', paymentRequest })
+    render(<ScanQrSendContainer />)
+
+    act(() => qrProps?.onScan([{ value: 'ethereum:0xabc@1?value=1000' }]))
+
+    expect(mockSendScanned).toHaveBeenCalledWith({ address: '0xabc', paymentRequest })
   })
 })

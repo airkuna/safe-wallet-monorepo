@@ -42,7 +42,7 @@ export function ScanQrSendContainer() {
   const hasScanned = useRef(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const { warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
+  const { sendScannedToRecipient } = useScannedAddressToSend()
 
   // Read the latest error inside the focus effect without listing it in deps (which would re-run the
   // effect and fight the live state).
@@ -81,12 +81,11 @@ export function ScanQrSendContainer() {
         return
       }
 
-      warnChainMismatch(resolved.prefix)
       hasScanned.current = true
       setIsCameraActive(false)
-      navigateToRecipient(resolved.address)
+      sendScannedToRecipient(resolved)
     },
-    [isCameraActive, warnChainMismatch, navigateToRecipient],
+    [isCameraActive, sendScannedToRecipient],
   )
 
   const handleActivateCamera = useCallback(() => {

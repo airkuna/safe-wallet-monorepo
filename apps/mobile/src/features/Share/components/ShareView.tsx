@@ -111,6 +111,16 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
               Copy
             </SafeButton>
           </XStack>
+          <XStack marginTop={'$3'}>
+            <SafeButton
+              size={'$sm'}
+              onPress={() => router.push('/request-amount')}
+              icon={<SafeFontIcon name={'qr-code-1'} size={16} />}
+              testID="request-amount-button"
+            >
+              Request amount
+            </SafeButton>
+          </XStack>
         </YStack>
       </YStack>
       {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}

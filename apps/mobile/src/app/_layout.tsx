@@ -133,6 +133,11 @@ function NavigationStack() {
       <Stack.Screen name="review-and-execute" options={{ title: 'Review and execute' }} />
       <Stack.Screen name="currency" options={{ headerShown: true, title: 'Currency' }} />
       <Stack.Screen name="share" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen
+        name="request-amount"
+        options={{ headerShown: true, title: 'Request amount', presentation: 'modal' }}
+      />
+      <Stack.Screen name="pay" options={{ headerShown: false }} />
       <Stack.Screen name="manage-tokens-sheet" options={transparentModalOptions} />
       <Stack.Screen name="protocol-detail-sheet" options={transparentModalOptions} />
       <Stack.Screen name="signing-error" options={{ headerShown: false, presentation: 'modal' }} />

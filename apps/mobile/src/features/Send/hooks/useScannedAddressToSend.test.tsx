@@ -72,4 +72,111 @@ describe('useScannedAddressToSend', () => {
 
     expect(mockShow).not.toHaveBeenCalled()
   })
+
+  describe('sendPaymentRequestToRecipient', () => {
+    const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+    const TOKEN = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+
+    it('prefills token and amount when the request matches the active chain', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() =>
+        result.current.sendPaymentRequestToRecipient({
+          recipient: VALID_ADDRESS,
+          chainId: '1',
+          tokenAddress: TOKEN,
+          value: '5000000',
+        }),
+      )
+
+      expect(mockDismissTo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/(send)/recipient',
+          params: expect.objectContaining({
+            scannedAddress: VALID_ADDRESS,
+            prefillTokenAddress: TOKEN,
+            prefillValueRaw: '5000000',
+          }),
+        }),
+      )
+      expect(mockShow).not.toHaveBeenCalled()
+    })
+
+    it('uses the zero-address native sentinel for native requests', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() => result.current.sendPaymentRequestToRecipient({ recipient: VALID_ADDRESS, chainId: '1', value: '1000' }))
+
+      expect(mockDismissTo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ prefillTokenAddress: ZERO_ADDRESS, prefillValueRaw: '1000' }),
+        }),
+      )
+    })
+
+    it('warns and drops token/amount prefill on a chain mismatch, keeping the address', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() =>
+        result.current.sendPaymentRequestToRecipient({
+          recipient: VALID_ADDRESS,
+          chainId: '100',
+          tokenAddress: TOKEN,
+          value: '5000000',
+        }),
+      )
+
+      expect(mockShow).toHaveBeenCalledWith(expect.stringContaining('100'), expect.anything())
+      const target = mockDismissTo.mock.calls[0][0]
+      expect(target.params.scannedAddress).toBe(VALID_ADDRESS)
+      expect(target.params.prefillTokenAddress).toBeUndefined()
+      expect(target.params.prefillValueRaw).toBeUndefined()
+    })
+
+    it('prefills when the request carries no chain id', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() => result.current.sendPaymentRequestToRecipient({ recipient: VALID_ADDRESS, value: '7' }, 'replace'))
+
+      expect(mockReplace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ prefillTokenAddress: ZERO_ADDRESS, prefillValueRaw: '7' }),
+        }),
+      )
+    })
+  })
+
+  describe('sendScannedToRecipient', () => {
+    it('routes a payment request through the prefill path', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() =>
+        result.current.sendScannedToRecipient({
+          address: VALID_ADDRESS,
+          paymentRequest: { recipient: VALID_ADDRESS, chainId: '1', value: '9' },
+        }),
+      )
+
+      expect(mockDismissTo).toHaveBeenCalledWith(
+        expect.objectContaining({ params: expect.objectContaining({ prefillValueRaw: '9' }) }),
+      )
+    })
+
+    it('keeps the plain-address behaviour for non-payment scans', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() => result.current.sendScannedToRecipient({ address: VALID_ADDRESS, prefix: 'gno' }))
+
+      expect(mockShow).toHaveBeenCalledWith(expect.stringContaining('gno'), expect.anything())
+      const target = mockDismissTo.mock.calls[0][0]
+      expect(target.params.prefillTokenAddress).toBeUndefined()
+      expect(target.params.prefillValueRaw).toBeUndefined()
+    })
+  })
 })

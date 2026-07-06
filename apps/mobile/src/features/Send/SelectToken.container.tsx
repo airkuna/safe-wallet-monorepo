@@ -9,6 +9,8 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useTokenBalances } from '@/src/features/Assets/components/Tokens/useTokenBalances'
 import { TokenListItem } from './components/TokenListItem'
 import { RecipientDisplay } from './components/RecipientDisplay'
+import { useAutoSelectPrefillToken } from './hooks/useAutoSelectPrefillToken'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 function ItemSeparator() {
@@ -132,8 +134,10 @@ export function SelectTokenContainer() {
   const params = useLocalSearchParams<{
     recipientAddress: string
     recipientName?: string
+    prefillTokenAddress?: string
+    prefillValueRaw?: string
   }>()
-  const { recipientAddress, recipientName } = params
+  const { recipientAddress, recipientName, prefillTokenAddress, prefillValueRaw } = params
   const { visibleItems, currency, isLoading, error, refetch } = useTokenBalances()
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -141,17 +145,29 @@ export function SelectTokenContainer() {
 
   const handleTokenPress = useCallback(
     (tokenAddress: string) => {
+      // The requested amount is in the requested token's base units, so it only makes sense for
+      // that token — picking a different one starts with an empty amount.
+      const carryAmount = !!prefillValueRaw && sameAddress(tokenAddress, prefillTokenAddress)
+
       router.push({
         pathname: '/(send)/amount',
         params: {
           recipientAddress,
           ...(recipientName ? { recipientName } : {}),
           tokenAddress,
+          ...(carryAmount ? { prefillValueRaw } : {}),
         },
       })
     },
-    [recipientAddress, recipientName, router],
+    [recipientAddress, recipientName, prefillTokenAddress, prefillValueRaw, router],
   )
+
+  useAutoSelectPrefillToken({
+    prefillTokenAddress,
+    items: visibleItems,
+    isLoading,
+    onSelect: handleTokenPress,
+  })
 
   const handleManageTokens = useCallback(() => {
     router.push('/manage-tokens-sheet')

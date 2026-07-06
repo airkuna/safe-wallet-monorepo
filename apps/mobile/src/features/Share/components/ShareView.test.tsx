@@ -83,6 +83,14 @@ describe('ShareView', () => {
     expect(mockPush).toHaveBeenCalledWith('/supported-networks')
   })
 
+  it('opens the request amount screen when the request button is pressed', () => {
+    const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
+    const availableChains = [{ chainName: 'Ethereum' }] as Chain[]
+    const { getByTestId } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
+    fireEvent.press(getByTestId('request-amount-button'))
+    expect(mockPush).toHaveBeenCalledWith('/request-amount')
+  })
+
   it('closes the screen when the close button is pressed', () => {
     const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
     const availableChains = [{ chainName: 'Ethereum' }] as Chain[]

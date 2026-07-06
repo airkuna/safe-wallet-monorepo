@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView } from 'react-native'
 import { Text, View, getTokenValue } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -52,7 +52,12 @@ function IconRow({
 export function SelectRecipientContainer() {
   const router = useRouter()
   const { bottom } = useSafeAreaInsets()
-  const { scannedAddress, scanNonce } = useLocalSearchParams<{ scannedAddress?: string; scanNonce?: string }>()
+  const { scannedAddress, scanNonce, prefillTokenAddress, prefillValueRaw } = useLocalSearchParams<{
+    scannedAddress?: string
+    scanNonce?: string
+    prefillTokenAddress?: string
+    prefillValueRaw?: string
+  }>()
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
   const chainName = chain?.chainName ?? 'this network'
@@ -70,6 +75,17 @@ export function SelectRecipientContainer() {
   const validation = useRecipientValidation(address)
   const searchResults = useRecipientSearch(address)
 
+  // Payment-request prefill (deep link / EIP-681 QR) travels with the navigation params so the token
+  // and amount steps can pick it up. Forwarded on every continue path — the user can still edit the
+  // recipient here; token/amount stay editable downstream.
+  const prefillParams = useMemo(
+    () => ({
+      ...(prefillTokenAddress ? { prefillTokenAddress } : {}),
+      ...(prefillValueRaw ? { prefillValueRaw } : {}),
+    }),
+    [prefillTokenAddress, prefillValueRaw],
+  )
+
   const handleAddressChange = useCallback((text: string) => {
     setAddress(text)
     setRecipientName(undefined)
@@ -82,10 +98,11 @@ export function SelectRecipientContainer() {
         params: {
           recipientAddress: selectedAddress.trim(),
           ...(name ? { recipientName: name } : {}),
+          ...prefillParams,
         },
       })
     },
-    [router],
+    [router, prefillParams],
   )
 
   const handleClear = useCallback(() => {
@@ -109,9 +126,10 @@ export function SelectRecipientContainer() {
       params: {
         recipientAddress: address.trim(),
         ...(displayName ? { recipientName: displayName } : {}),
+        ...prefillParams,
       },
     })
-  }, [address, displayName, validation.canContinue, router])
+  }, [address, displayName, validation.canContinue, router, prefillParams])
 
   const handleSuspiciousSelect = useCallback(
     (selectedAddress: string, name?: string) => {
@@ -120,10 +138,11 @@ export function SelectRecipientContainer() {
         params: {
           recipientAddress: selectedAddress.trim(),
           ...(name ? { recipientName: name } : {}),
+          ...prefillParams,
         },
       })
     },
-    [router],
+    [router, prefillParams],
   )
 
   const handleContactSaved = useCallback(() => {
