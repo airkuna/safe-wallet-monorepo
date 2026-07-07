@@ -293,8 +293,10 @@ separate axes; don't fold build mode into the bundle id.
 >   `updates.url` in `brand/manifests/domovina.json`). Hosted EAS Update was dropped because
 >   EAS gates update **code signing** behind a paid plan (Production/Enterprise), and unsigned
 >   OTA is unacceptable for a wallet. The server lives in the standalone repo
->   `~/git/domovinatv/domovina-ota` (see its `README.md`/`HANDOFF.md`); until it is deployed,
->   the app simply finds no update and boots the embedded bundle (launch never blocks).
+>   `~/git/domovinatv/domovina-ota` (see its `README.md` for the runbook and the E2E
+>   verification record). **Live and verified 2026-07-07**: a signed update published from the
+>   dev machine was fetched and applied by the dev-flavor Release build on a physical iPhone;
+>   a tampered manifest was rejected by the client; rollback restored the channel.
 > - **runtimeVersion policy:** `fingerprint` (per platform **and per flavor**)
 > - **channels:** `development` (dev flavor) / `production` (prod flavor), sent via the
 >   `expo-channel-name` request header baked into local builds; EAS builds override it with the
