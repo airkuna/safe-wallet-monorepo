@@ -47,6 +47,8 @@ export interface BrandManifest {
     light?: Record<string, string>
     dark?: Record<string, string>
   }
+  /** Brand-gated feature packs (e.g. `ff`); absent flags are off. */
+  features?: Record<string, boolean>
   /**
    * Opting in enables OTA (EAS Update) for this brand. The certificate path is
    * relative to `brand/` (e.g. `certs/acme/certificate.pem`); the matching

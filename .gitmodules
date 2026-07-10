@@ -1,0 +1,3 @@
+[submodule "apps/mobile/src/custom/ff"]
+	path = apps/mobile/src/custom/ff
+	url = /Users/ms/git/ss/ff-wallet

@@ -8,6 +8,7 @@ import { useTheme, View } from 'tamagui'
 import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
 import { isAndroid } from '@/src/config/constants'
+import { isFfBrand } from '@/src/custom/ff'
 
 function TabBarBackground() {
   const { isDark } = useCurrentTheme()
@@ -56,6 +57,25 @@ export default function TabLayout() {
             )
           },
           tabBarIcon: ({ color }) => <TabBarIcon name={'home'} color={color} />,
+        }}
+      />
+
+      {/* FF feature-pack tab — mounted only for brands with `features.ff` (see src/custom/ff). */}
+      <Tabs.Screen
+        name="klub"
+        options={{
+          href: isFfBrand() ? undefined : null,
+          title: 'Klub',
+          headerShown: false,
+          tabBarButtonTestID: 'klub-tab',
+          tabBarButton: ({ children, ref, ...rest }) => {
+            return (
+              <Pressable {...rest} style={styles.tabButton}>
+                {children}
+              </Pressable>
+            )
+          },
+          tabBarIcon: ({ color }) => <TabBarIcon name={'shield'} color={color} />,
         }}
       />
 

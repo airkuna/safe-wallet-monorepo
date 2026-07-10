@@ -41,6 +41,9 @@ const brandManifestSchema = z.object({
       dark: z.record(z.string()).optional(),
     })
     .optional(),
+  // Brand-gated feature packs (e.g. `ff` for the FootballFans club layer);
+  // absent flags are off, so stock brands never mount custom surfaces.
+  features: z.record(z.boolean()).optional(),
   updates: z
     .object({
       codeSigningCertificatePath: z.string().min(1),

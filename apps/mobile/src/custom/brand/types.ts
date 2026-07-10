@@ -9,6 +9,8 @@ export interface RuntimeBrand {
   name: string
   /** Palette overrides (dot-path keys) applied on top of the shared theme. */
   theme?: ThemeOverride
+  /** Brand-gated feature packs (e.g. `ff`); absent → off. */
+  features?: Record<string, boolean>
   backend?: {
     /** Gateway for production builds only; dev builds stay on staging. */
     cgwBaseUrl?: string

@@ -88,6 +88,7 @@ const config: ExpoConfig = {
       name: name,
       theme: brand.theme,
       backend: brand.backend,
+      features: brand.features,
     },
   },
   orientation: 'portrait',

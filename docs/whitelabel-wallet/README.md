@@ -59,3 +59,4 @@ flowchart TB
 3. **Nitko product-grade ne forka Safe frontend** — svi grade na Safe{Core} SDK-u. `domovina/wallet` je već na tom putu. Vidi [01](01-vizija-i-strategija.md).
 4. **Brand config faza 1 je isporučena** — manifest-driven _identitet_ na mobileu. Vizual (boje/typography) i backend su faza 2. Vidi [02](02-brand-config-sustav.md).
 5. **MVP se gradi u 5 faza, ne u jednoj** — runtime branding → onboarding (novi Safe) → receive/payment linkovi → identity layer → release pipeline. Handoff prompt po fazi u [handoffs/](handoffs/README.md).
+6. **Prvi feature-pack konzument brand sustava: FF Wallet** (nogometni klubovi, jedan binary + N klubova kao runtime tenanti) — git submodule na `apps/mobile/src/custom/ff`, plan i handoffi u tom repou (`docs/PLAN.md`). Pali se manifestom `features.ff`; stock brandovi ostaju netaknuti.

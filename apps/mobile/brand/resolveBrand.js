@@ -108,6 +108,7 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
     // Runtime branding, forwarded to the app via `expoConfig.extra.brand`.
     theme: manifest.theme,
     backend: manifest.backend,
+    features: manifest.features,
   }
 }
 

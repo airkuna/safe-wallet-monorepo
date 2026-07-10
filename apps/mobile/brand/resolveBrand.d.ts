@@ -46,6 +46,8 @@ export interface ResolvedBrand {
   theme?: BrandManifest['theme']
   /** Per-brand backend, forwarded to the runtime via `extra.brand`. */
   backend?: BrandManifest['backend']
+  /** Brand-gated feature packs, forwarded to the runtime via `extra.brand`. */
+  features?: BrandManifest['features']
 }
 
 export declare function loadBrandManifest(): BrandManifest
