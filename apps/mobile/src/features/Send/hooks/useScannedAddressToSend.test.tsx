@@ -136,6 +136,32 @@ describe('useScannedAddressToSend', () => {
       expect(target.params.prefillValueRaw).toBeUndefined()
     })
 
+    it('treats a bare address URI (no token, no amount) as a plain address scan', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() => result.current.sendPaymentRequestToRecipient({ recipient: VALID_ADDRESS, chainId: '1' }))
+
+      expect(mockShow).not.toHaveBeenCalled()
+      const target = mockDismissTo.mock.calls[0][0]
+      expect(target.params.scannedAddress).toBe(VALID_ADDRESS)
+      expect(target.params.prefillTokenAddress).toBeUndefined()
+      expect(target.params.prefillValueRaw).toBeUndefined()
+    })
+
+    it('still prefills the token when the request has a token but no amount', () => {
+      mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+      const { result } = renderHook(() => useScannedAddressToSend())
+
+      act(() =>
+        result.current.sendPaymentRequestToRecipient({ recipient: VALID_ADDRESS, chainId: '1', tokenAddress: TOKEN }),
+      )
+
+      const target = mockDismissTo.mock.calls[0][0]
+      expect(target.params.prefillTokenAddress).toBe(TOKEN)
+      expect(target.params.prefillValueRaw).toBeUndefined()
+    })
+
     it('prefills when the request carries no chain id', () => {
       mockActiveChain.mockReturnValue({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
       const { result } = renderHook(() => useScannedAddressToSend())

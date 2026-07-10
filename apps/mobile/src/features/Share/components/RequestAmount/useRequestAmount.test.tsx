@@ -84,6 +84,30 @@ describe('useRequestAmount', () => {
     expect(result.current.eip681Uri).toBe(`ethereum:${USDC}@1/transfer?address=${SAFE_ADDRESS}`)
   })
 
+  it('truncates the typed amount when switching to a token with fewer decimals', () => {
+    const { result } = renderHook(() => useRequestAmount())
+
+    act(() => result.current.handleAmountChange('1.1234567'))
+    expect(result.current.eip681Uri).toBe(`ethereum:${SAFE_ADDRESS}@1?value=1123456700000000000`)
+
+    act(() => result.current.selectToken(USDC))
+
+    // The input and the encoded URI stay in sync: both carry the truncated amount.
+    expect(result.current.amount).toBe('1.123456')
+    expect(result.current.eip681Uri).toBe(`ethereum:${USDC}@1/transfer?address=${SAFE_ADDRESS}&uint256=1123456`)
+  })
+
+  it('keeps the typed amount when switching to a token with enough decimals', () => {
+    const { result } = renderHook(() => useRequestAmount())
+
+    act(() => result.current.selectToken(USDC))
+    act(() => result.current.handleAmountChange('1.25'))
+    act(() => result.current.selectToken('native'))
+
+    expect(result.current.amount).toBe('1.25')
+    expect(result.current.eip681Uri).toBe(`ethereum:${SAFE_ADDRESS}@1?value=1250000000000000000`)
+  })
+
   it('offers only the native token when balances are unavailable (counterfactual account)', () => {
     mockBalances.mockReturnValue({ visibleItems: undefined })
     const { result } = renderHook(() => useRequestAmount())

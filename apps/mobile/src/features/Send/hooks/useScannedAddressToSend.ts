@@ -82,9 +82,15 @@ export const useScannedAddressToSend = () => {
         )
       }
 
-      const prefill = chainMismatch
-        ? undefined
-        : { tokenAddress: request.tokenAddress ?? ZeroAddress, valueRaw: request.value }
+      // A bare `ethereum:0x…` URI (no token, no amount) is just an address QR —
+      // MetaMask and others render receive QRs this way. Prefilling the native
+      // coin here would skip the token-selection step for a token payment.
+      const isBareAddress = request.tokenAddress === undefined && request.value === undefined
+
+      const prefill =
+        chainMismatch || isBareAddress
+          ? undefined
+          : { tokenAddress: request.tokenAddress ?? ZeroAddress, valueRaw: request.value }
 
       navigateToRecipient(request.recipient, mode, prefill)
     },

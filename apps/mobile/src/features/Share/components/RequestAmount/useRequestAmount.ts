@@ -56,6 +56,26 @@ export const useRequestAmount = () => {
     [setRawInput, selectedToken.decimals],
   )
 
+  // Switching to a token with fewer decimals truncates the typed amount to what
+  // the token supports; otherwise the displayed amount and the encoded URI
+  // would silently disagree (safeParseUnits rejects excess decimals).
+  const selectToken = useCallback(
+    (key: string) => {
+      setSelectedKey(key)
+      const next = tokenOptions.find((option) => option.key === key)
+      if (!next || !amount) {
+        return
+      }
+      const dotIndex = amount.indexOf('.')
+      if (dotIndex === -1 || amount.length - dotIndex - 1 <= next.decimals) {
+        return
+      }
+      const truncated = next.decimals === 0 ? amount.slice(0, dotIndex) : amount.slice(0, dotIndex + 1 + next.decimals)
+      setRawInput(truncated, next.decimals)
+    },
+    [tokenOptions, amount, setRawInput],
+  )
+
   const valueRaw = useMemo(() => {
     if (!amount) {
       return undefined
@@ -80,7 +100,7 @@ export const useRequestAmount = () => {
   return {
     tokenOptions,
     selectedToken,
-    selectToken: setSelectedKey,
+    selectToken,
     amount,
     handleAmountChange,
     eip681Uri,

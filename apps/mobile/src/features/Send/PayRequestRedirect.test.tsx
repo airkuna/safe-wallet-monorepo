@@ -1,6 +1,6 @@
 import React from 'react'
 import { render } from '@/src/tests/test-utils'
-import { PayRequestRedirect, INVALID_PAYMENT_LINK_MESSAGE } from './PayRequestRedirect'
+import { PayRequestRedirect, INVALID_PAYMENT_LINK_MESSAGE, NO_ACCOUNT_PAYMENT_LINK_MESSAGE } from './PayRequestRedirect'
 import type { SafeInfo } from '@/src/types/address'
 
 const RECIPIENT = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
@@ -65,11 +65,12 @@ describe('PayRequestRedirect', () => {
     expect(mockReplace).toHaveBeenCalledWith('/')
   })
 
-  it('goes home when there is no active safe to send from', () => {
+  it('explains and goes home when there is no active safe to send from', () => {
     mockParams.mockReturnValue({ uri: `ethereum:${RECIPIENT}@1?value=1000` })
 
     renderWithSafe(null)
 
+    expect(mockShow).toHaveBeenCalledWith(NO_ACCOUNT_PAYMENT_LINK_MESSAGE, expect.anything())
     expect(mockReplace).toHaveBeenCalledWith('/')
     expect(mockDismissTo).not.toHaveBeenCalled()
   })

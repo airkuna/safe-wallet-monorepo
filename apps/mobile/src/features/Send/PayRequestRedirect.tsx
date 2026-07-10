@@ -8,6 +8,8 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useScannedAddressToSend } from './hooks/useScannedAddressToSend'
 
 export const INVALID_PAYMENT_LINK_MESSAGE = 'Invalid payment link'
+export const NO_ACCOUNT_PAYMENT_LINK_MESSAGE =
+  'Set up an account first, then open the payment link again to pay from it.'
 
 // Target of the `<scheme>://pay?uri=<EIP-681>` deep link. Pure redirect screen: it parses the
 // payment request and hands it to the Send flow via the same path a scanned EIP-681 QR takes, so
@@ -30,6 +32,9 @@ export const PayRequestRedirect = () => {
     }
 
     if (!activeSafe) {
+      // The link itself is valid — tell the user why nothing opened instead of
+      // silently dropping the request on the home/onboarding screen.
+      toast.show(NO_ACCOUNT_PAYMENT_LINK_MESSAGE, { native: false, duration: 5000 })
       router.replace('/')
       return
     }

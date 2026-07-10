@@ -112,6 +112,12 @@ describe('parseEip681Uri', () => {
     expect(parseEip681Uri(`ethereum:${TOKEN}/transfer?address=${RECIPIENT}&uint256=5e6`)?.value).toBe('5000000')
   })
 
+  it('rejects exponents beyond uint256 instead of expanding them', () => {
+    expect(parseEip681Uri(`ethereum:${RECIPIENT}?value=1e999999999`)).toBeNull()
+    expect(parseEip681Uri(`ethereum:${RECIPIENT}?value=1e79`)).toBeNull()
+    expect(parseEip681Uri(`ethereum:${RECIPIENT}?value=1e78`)?.value).toBe(`1${'0'.repeat(78)}`)
+  })
+
   it('checksums lowercase addresses', () => {
     expect(parseEip681Uri(`ethereum:${RECIPIENT.toLowerCase()}`)?.recipient).toBe(RECIPIENT)
     const parsed = parseEip681Uri(`ethereum:${TOKEN.toLowerCase()}/transfer?address=${RECIPIENT.toLowerCase()}`)

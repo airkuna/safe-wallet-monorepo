@@ -18,6 +18,11 @@ export type Eip681Transfer = {
 
 export const isEip681Uri = (raw: string): boolean => /^ethereum:/i.test(raw.trim())
 
+// uint256 has at most 78 decimal digits, so any larger exponent cannot be a
+// valid amount — and an unbounded one would make `'0'.repeat` allocate
+// gigabytes from a hostile QR code.
+const MAX_EXPONENT = 78
+
 // EIP-681 NUMBER allows scientific notation (e.g. 2.014e18). Expands it to a
 // plain integer string; returns null when the result would not be an integer.
 const expandToInteger = (value: string): string | null => {
@@ -27,6 +32,9 @@ const expandToInteger = (value: string): string | null => {
   }
   const [, intPart, fracPart = '', expPart] = match
   const exponent = expPart ? parseInt(expPart, 10) : 0
+  if (exponent > MAX_EXPONENT) {
+    return null
+  }
   if (fracPart.length > exponent) {
     return null
   }
