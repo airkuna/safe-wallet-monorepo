@@ -25,9 +25,27 @@ const amazonRootCAs = [
   'eY/hCVfoxaCHQgHK8J1e9LLiQSxHv5kZSVZstULTrz8=', // 🌳 Amazon ECDSA 384 Root EU M1 (valid until: Nov 14 2042, pending trust-store inclusion)
 ]
 
-const sslPinningDomains = {
+const sslPinningDomains: Record<string, string[]> = {
   'safe-client.staging.5afe.dev': amazonRootCAs,
   'safe-client.safe.global': amazonRootCAs,
+  // Brand gateways get their pins from the manifest; without an entry here the
+  // native layer serves the host unpinned.
+  ...brand.backend?.pinnedCertificates,
+}
+
+// A brand gateway outside the pin list is a silent transport-security
+// downgrade — surface it at config-eval time, on every build.
+for (const gatewayUrl of [brand.backend?.cgwBaseUrl, brand.backend?.cgwStagingBaseUrl]) {
+  if (!gatewayUrl) {
+    continue
+  }
+  const host = new URL(gatewayUrl).hostname
+  if (!(host in sslPinningDomains)) {
+    console.warn(
+      `[brand] WARNING: gateway host ${host} is not certificate-pinned — ` +
+        `add backend.pinnedCertificates["${host}"] (SPKI base64 pins) to the brand manifest.`,
+    )
+  }
 }
 
 const name = brand.appName

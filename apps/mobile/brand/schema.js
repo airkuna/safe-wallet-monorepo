@@ -29,7 +29,10 @@ const brandManifestSchema = z.object({
   backend: z
     .object({
       cgwBaseUrl: z.string().url().optional(),
+      cgwStagingBaseUrl: z.string().url().optional(),
       defaultChainId: z.string().min(1).optional(),
+      // host → SPKI base64 pins, merged into the app's SSL pinning config.
+      pinnedCertificates: z.record(z.array(z.string().min(1)).min(1)).optional(),
     })
     .optional(),
   theme: z

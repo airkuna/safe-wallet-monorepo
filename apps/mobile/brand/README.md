@@ -60,11 +60,23 @@ theme derives from the overridden palette. Unknown keys are ignored (validate
 manifests against the schema). Without `theme` the output is byte-identical to
 stock Safe.
 
-### `backend.cgwBaseUrl`
+### `backend.cgwBaseUrl` / `backend.cgwStagingBaseUrl`
 
-Overrides the CGW base URL for both variants (`GATEWAY_URL` in
-`src/config/constants.ts`). Note: SSL pinning in `app.config.ts` only covers
-the stock `safe-client.*` domains — a custom CGW domain is not pinned.
+`cgwBaseUrl` overrides the CGW base URL for **production builds only**
+(`GATEWAY_URL` in `src/config/constants.ts`). Development builds keep the Safe
+staging gateway unless the brand ships its own via `cgwStagingBaseUrl` — this
+preserves the dev/staging isolation (push registrations, test safes) that the
+stock build gets from `GATEWAY_URL_STAGING`. A custom CGW host must also be
+pinned via `backend.pinnedCertificates` (see below), otherwise the config
+evaluation warns and the host is served without certificate pinning.
+
+### `backend.pinnedCertificates`
+
+Map of `host → SPKI base64 pins`, merged into the app's SSL pinning config at
+config-eval time. Any brand gateway host without an entry triggers a build-time
+warning and is served **without** certificate pinning. Pin the CA roots your
+gateway's certificates chain to (see the Amazon Trust Services example in
+`app.config.ts`), not the leaf.
 
 ### `backend.defaultChainId`
 

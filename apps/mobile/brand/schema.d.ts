@@ -30,9 +30,14 @@ export interface BrandManifest {
   }
   /** Optional per-brand backend. */
   backend?: {
+    /** Gateway for production builds only; dev builds stay on staging. */
     cgwBaseUrl?: string
+    /** Gateway for development builds; defaults to the Safe staging gateway. */
+    cgwStagingBaseUrl?: string
     /** Chain preselected when creating a new account (must exist on the gateway). */
     defaultChainId?: string
+    /** host → SPKI base64 pins, merged into the app's SSL pinning config. */
+    pinnedCertificates?: Record<string, string[]>
   }
   /**
    * Optional palette overrides applied on top of the shared theme.

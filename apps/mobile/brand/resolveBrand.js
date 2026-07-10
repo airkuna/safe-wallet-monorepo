@@ -60,7 +60,9 @@ const resolveAssets = (assets = {}) => ({
   favicon: brandAssetPath(assets.favicon) ?? SAFE_DEFAULT_ASSETS.favicon,
 })
 
-const manifestPath = (id) => resolve(process.cwd(), 'brand/manifests', `${id}.json`)
+// Anchored to this file, not process.cwd(): the Expo config gets evaluated
+// from other working directories too (monorepo root, ios/android build phases).
+const manifestPath = (id) => resolve(__dirname, 'manifests', `${id}.json`)
 
 /**
  * Load the active manifest. Precedence:

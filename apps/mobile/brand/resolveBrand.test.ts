@@ -156,6 +156,17 @@ describe('resolveBrand', () => {
     expect(loadBrandManifest().id).toBe('safe')
   })
 
+  it('loads the manifest regardless of the working directory', () => {
+    const originalCwd = process.cwd()
+    process.chdir('/')
+
+    try {
+      expect(loadBrandManifest().id).toBe('safe')
+    } finally {
+      process.chdir(originalCwd)
+    }
+  })
+
   it('rejects a manifest with a malformed EAS project id', () => {
     process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, easProjectId: 'not-a-uuid' })
 
