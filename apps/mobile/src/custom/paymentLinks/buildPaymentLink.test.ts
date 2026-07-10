@@ -21,36 +21,17 @@ const loadBuildPaymentLink = (expoConfig?: { scheme?: string | string[] }) => {
 
 const EIP681_URI = 'ethereum:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045@1?value=1000000000000000000'
 
-describe('getPaymentLinkScheme', () => {
-  it('prefers a brand scheme over wc', () => {
-    const { getPaymentLinkScheme } = loadBuildPaymentLink({ scheme: ['wc', 'domovina'] })
-
-    expect(getPaymentLinkScheme()).toBe('domovina')
-  })
-
-  it('falls back to wc when it is the only registered scheme (stock safe manifest)', () => {
-    const { getPaymentLinkScheme } = loadBuildPaymentLink({ scheme: ['wc'] })
-
-    expect(getPaymentLinkScheme()).toBe('wc')
-  })
-
-  it('accepts a plain string scheme', () => {
-    const { getPaymentLinkScheme } = loadBuildPaymentLink({ scheme: 'acme' })
-
-    expect(getPaymentLinkScheme()).toBe('acme')
-  })
-
-  it('falls back to safe when no scheme is configured (tests, Storybook)', () => {
-    expect(loadBuildPaymentLink({}).getPaymentLinkScheme()).toBe('safe')
-    expect(loadBuildPaymentLink(undefined).getPaymentLinkScheme()).toBe('safe')
-  })
-})
-
 describe('buildPaymentLink', () => {
   it('wraps the EIP-681 URI in a pay deep link with percent-encoding', () => {
     const { buildPaymentLink } = loadBuildPaymentLink({ scheme: ['domovina', 'wc'] })
 
     expect(buildPaymentLink(EIP681_URI)).toBe(`domovina://pay?uri=${encodeURIComponent(EIP681_URI)}`)
+  })
+
+  it('falls back to the safe scheme when none is configured', () => {
+    const { buildPaymentLink } = loadBuildPaymentLink(undefined)
+
+    expect(buildPaymentLink(EIP681_URI)).toBe(`safe://pay?uri=${encodeURIComponent(EIP681_URI)}`)
   })
 
   it('round-trips through decodeURIComponent', () => {

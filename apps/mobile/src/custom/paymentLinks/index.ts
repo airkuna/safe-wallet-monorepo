@@ -1,1 +1,1 @@
-export { buildPaymentLink, getPaymentLinkScheme } from './buildPaymentLink'
+export { buildPaymentLink } from './buildPaymentLink'
