@@ -74,6 +74,7 @@ const config: ExpoConfig = {
   },
   orientation: 'portrait',
   icon: brand.assets.icon,
+  // Primary scheme must match the WalletConnect registry native link (and SAFE_WALLET_METADATA.redirect); `wc` keeps raw wc: links.
   scheme: brand.scheme,
   userInterfaceStyle: 'automatic',
   ios: {

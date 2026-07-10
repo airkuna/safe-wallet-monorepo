@@ -8,7 +8,7 @@ const safe: BrandManifest = {
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   easProjectId: '27e9e907-8675-474d-99ee-6c94e7b83a5c',
-  scheme: ['wc'],
+  scheme: ['safe', 'wc'],
   ios: { bundleIdentifier: 'global.safe.mobileapp.ios', appleTeamId: '86487MHG6V' },
   android: { package: 'global.safe.mobileapp' },
 }
