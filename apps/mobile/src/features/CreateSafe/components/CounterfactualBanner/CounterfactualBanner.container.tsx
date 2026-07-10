@@ -1,12 +1,14 @@
 import React from 'react'
 import { View } from 'tamagui'
 import { Alert } from '@/src/components/Alert'
+import { SafeButton } from '@/src/components/SafeButton'
 import { useAppSelector } from '@/src/store/hooks'
 import { RootState } from '@/src/store'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { selectIsUndeployedSafe } from '../../store/undeployedSafesSlice'
 import { useNativeBalance } from '../../hooks/useNativeBalance'
+import { useActivateSafe } from '../../hooks/useActivateSafe'
 
 /**
  * Shown on the home screen while the active account is counterfactual (not
@@ -22,18 +24,35 @@ export const CounterfactualBannerContainer = () => {
     activeSafe ? selectChainById(state, activeSafe.chainId) : undefined,
   )
   const balance = useNativeBalance(isUndeployed ? chain : undefined, isUndeployed ? activeSafe?.address : undefined)
+  const { activate, status, error } = useActivateSafe()
 
   if (!isUndeployed) {
     return null
   }
 
   const info = balance
-    ? `Balance: ${balance}. You can receive funds now — the account activates on-chain with your first transaction.`
-    : 'You can receive funds now — the account activates on-chain with your first transaction.'
+    ? `Balance: ${balance}. You can receive funds now — activate the account to start sending.`
+    : 'You can receive funds now — activate the account to start sending.'
 
   return (
     <View marginBottom="$3" testID="counterfactual-banner">
       <Alert type="info" displayIcon message="Account not activated yet" info={info} />
+      <View marginTop="$2">
+        <SafeButton
+          onPress={status === 'activating' ? undefined : activate}
+          disabled={status === 'activating'}
+          loading={status === 'activating'}
+          loadingText="Activating account…"
+          testID="counterfactual-activate"
+        >
+          Activate account
+        </SafeButton>
+      </View>
+      {status === 'error' && error && (
+        <View marginTop="$2">
+          <Alert type="warning" displayIcon message={error} testID="counterfactual-activate-error" />
+        </View>
+      )}
     </View>
   )
 }
