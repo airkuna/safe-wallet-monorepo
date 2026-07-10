@@ -107,6 +107,8 @@ Sva nova funkcionalnost je u novim datotekama; upstream je dirnut na točno 6 mj
 
 ## Što je svjesno odgođeno (i preporučeni put)
 
+> **Ažuriranje 2026-07-10:** "Activate account" korak iz dijagrama ispod je implementiran točno po ovom putu (relay + owner-EOA fallback) u hardening prolazu — vidi [07 — Hardening: aktivacija + brand sigurnost](07-hardening-aktivacija-i-brand-sigurnost.md). Deploy-uz-prvu-transakciju ostaje odgođen.
+
 ```mermaid
 flowchart LR
   A["Counterfactual račun<br/>(faza 2 ✅)"] --> B["'Activate account' korak<br/>Safe.init({predictedSafe})<br/>+ createSafeDeploymentTransaction()"]

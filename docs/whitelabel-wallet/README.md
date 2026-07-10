@@ -7,14 +7,16 @@ Ova knowledge baza dokumentira **zašto** i **kako** gradimo whitelabel wallet p
 
 ## Sadržaj
 
-| Dok                                                               | Tema                                                                                                                   |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| [01 — Vizija i strategija](01-vizija-i-strategija.md)             | Cilj (N community walleta), dva track-a (Safe fork vs domovina wallet), build-vs-fork odluka                           |
-| [02 — Brand config sustav](02-brand-config-sustav.md)             | Manifest-driven brand config koji smo izgradili (faza 1, commit `f7cb87d44`); native vs runtime slojevi; SaaS pipeline |
-| [03 — Feature audit (Revolut-like)](03-feature-audit-revolut.md)  | Koliko je "Revolut-like" wallet već gotov (~80%), matrica sposobnosti, ključni gap = identitet primatelja              |
-| [04 — Prior art landscape](04-prior-art-landscape.md)             | Tko još forka Safe, neobank self-custody wallete, P2P-send obrasci, reusable OSS                                       |
-| [05 — Counterfactual onboarding](05-counterfactual-onboarding.md) | Arhitektura "Create account" flowa (faza 2): CREATE2 predikcija, undeployedSafes lifecycle, naučene lekcije            |
-| [handoffs/](handoffs/README.md)                                   | **Izvršni plan MVP-a u 5 faza** — samodostatni handoff promptovi za praznu Claude Code sesiju, po jedan po fazi        |
+| Dok                                                                                          | Tema                                                                                                                      |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [01 — Vizija i strategija](01-vizija-i-strategija.md)                                        | Cilj (N community walleta), dva track-a (Safe fork vs domovina wallet), build-vs-fork odluka                              |
+| [02 — Brand config sustav](02-brand-config-sustav.md)                                        | Manifest-driven brand config koji smo izgradili (faza 1, commit `f7cb87d44`); native vs runtime slojevi; SaaS pipeline    |
+| [03 — Feature audit (Revolut-like)](03-feature-audit-revolut.md)                             | Koliko je "Revolut-like" wallet već gotov (~80%), matrica sposobnosti, ključni gap = identitet primatelja                 |
+| [04 — Prior art landscape](04-prior-art-landscape.md)                                        | Tko još forka Safe, neobank self-custody wallete, P2P-send obrasci, reusable OSS                                          |
+| [05 — Counterfactual onboarding](05-counterfactual-onboarding.md)                            | Arhitektura "Create account" flowa (faza 2): CREATE2 predikcija, undeployedSafes lifecycle, naučene lekcije               |
+| [06 — Receive + payment linkovi](06-receive-payment-linkovi.md)                              | Arhitektura EIP-681 receive/pay flowa (faza 3): QR + deep link, konzumacija kroz Send risk-validaciju                     |
+| [07 — Hardening: aktivacija + brand sigurnost](07-hardening-aktivacija-i-brand-sigurnost.md) | Hardening prolaz (10 review nalaza): aktivacija counterfactual Safea (relay/EOA), gateway split, SSL pinning, WC metadata |
+| [handoffs/](handoffs/README.md)                                                              | **Izvršni plan MVP-a u 5 faza** — samodostatni handoff promptovi za praznu Claude Code sesiju, po jedan po fazi           |
 
 ## Kontekst u jednoj slici
 
