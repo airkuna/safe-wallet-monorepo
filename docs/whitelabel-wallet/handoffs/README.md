@@ -51,6 +51,19 @@ KUNAPay je generički consumer brand (KEKS/Aircash UX) na istoj tračnici — st
 | K5  | Claim linkovi (slanje ne-korisniku)  | [kunapay-4-claim-links.md](kunapay-4-claim-links.md)                | K2 (UX), analiza rizika | ⬜     |
 | K6  | Store release za `kunapay`           | [faza-5-release-pipeline.md](faza-5-release-pipeline.md) (= faza 5) | K1, faza 5              | ⬜     |
 
+## Tržnica faze
+
+Tržnica je ugrađeni marketplace za hrvatske MSP-ove (pilot: Crošulja) — strategija, regulatorni
+okvir i arhitektura u [09 — Tržnica](../09-trznica-marketplace.md). M1 je isporučen kao host
+feature-pack `apps/mobile/src/custom/marketplace/` (gated `features.marketplace`).
+
+| #   | Faza                                                   | Dokument                                                             | Ovisi o                          | Status |
+| --- | ------------------------------------------------------ | -------------------------------------------------------------------- | -------------------------------- | ------ |
+| M1  | Feature-pack `marketplace` + pilot katalog Crošulja    | — (isporučeno; v. [09](../09-trznica-marketplace.md) §3)             | —                                | ✅     |
+| M2  | Backend order-book + notifikacija trgovcu              | [trznica-2-order-book.md](trznica-2-order-book.md)                   | M1; ručno: hosting               | ⬜     |
+| M3  | Račun + fiskalizacija kao servis                       | [trznica-3-fiskalizacija.md](trznica-3-fiskalizacija.md)             | M2; ručno: certifikati/mišljenja | ⬜     |
+| M4  | Merchant onboarding (katalog backend, DAC7 evidencija) | [trznica-4-merchant-onboarding.md](trznica-4-merchant-onboarding.md) | M2                               | ⬜     |
+
 ## Kako koristiti
 
 U praznoj Claude Code sesiji (u rootu ovog repoa, grana `custom`) zalijepi:
