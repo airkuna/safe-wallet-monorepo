@@ -38,6 +38,19 @@ flowchart LR
 | 4    | [faza-4-identity-layer.md](faza-4-identity-layer.md)                   | Send po usernameu (ENS offchain subnames), hex adrese skrivene              | ⬜     |
 | 5    | [faza-5-release-pipeline.md](faza-5-release-pipeline.md)               | EAS build per brand manifest + smoke test + store priprema                  | ⬜     |
 
+## KUNAPay faze
+
+KUNAPay je generički consumer brand (KEKS/Aircash UX) na istoj tračnici — strategija, redoslijed i obrazloženje u [08 — KUNAPay](../08-kunapay-consumer-brand.md) (§5). Tri od šest faza su host funkcionalnosti koje vrijede za sve brandove (`features` gating); K2 i K6 su **postojeće** faze 4 i 5 iz tablice iznad — referenciraju se, ne dupliciraju.
+
+| #   | Faza                                 | Dokument                                                            | Ovisi o                 | Status |
+| --- | ------------------------------------ | ------------------------------------------------------------------- | ----------------------- | ------ |
+| K1  | Brand manifest + identitet `kunapay` | [kunapay-1-brand.md](kunapay-1-brand.md)                            | —                       | ⬜     |
+| K2  | Identity layer (@username)           | [faza-4-identity-layer.md](faza-4-identity-layer.md) (= faza 4)     | ručni preduvjeti (ENS)  | ⬜     |
+| K3  | Fiat on-ramp (SEPA uplata → EURe)    | [kunapay-2-fiat-onramp.md](kunapay-2-fiat-onramp.md)                | K1                      | ⬜     |
+| K4  | Fiat off-ramp (EURe → SEPA isplata)  | [kunapay-3-offramp.md](kunapay-3-offramp.md)                        | K3                      | ⬜     |
+| K5  | Claim linkovi (slanje ne-korisniku)  | [kunapay-4-claim-links.md](kunapay-4-claim-links.md)                | K2 (UX), analiza rizika | ⬜     |
+| K6  | Store release za `kunapay`           | [faza-5-release-pipeline.md](faza-5-release-pipeline.md) (= faza 5) | K1, faza 5              | ⬜     |
+
 ## Kako koristiti
 
 U praznoj Claude Code sesiji (u rootu ovog repoa, grana `custom`) zalijepi:
