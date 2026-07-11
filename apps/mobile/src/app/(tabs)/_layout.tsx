@@ -9,6 +9,7 @@ import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
 import { isAndroid } from '@/src/config/constants'
 import { isFfBrand } from '@/src/custom/ff'
+import { isMarketplaceBrand } from '@/src/custom/marketplace'
 
 function TabBarBackground() {
   const { isDark } = useCurrentTheme()
@@ -76,6 +77,25 @@ export default function TabLayout() {
             )
           },
           tabBarIcon: ({ color }) => <TabBarIcon name={'shield'} color={color} />,
+        }}
+      />
+
+      {/* Tržnica feature-pack tab — mounted only for brands with `features.marketplace` (see src/custom/marketplace). */}
+      <Tabs.Screen
+        name="trznica"
+        options={{
+          href: isMarketplaceBrand() ? undefined : null,
+          title: 'Tržnica',
+          headerShown: false,
+          tabBarButtonTestID: 'trznica-tab',
+          tabBarButton: ({ children, ref, ...rest }) => {
+            return (
+              <Pressable {...rest} style={styles.tabButton}>
+                {children}
+              </Pressable>
+            )
+          },
+          tabBarIcon: ({ color }) => <TabBarIcon name={'tag'} color={color} />,
         }}
       />
 

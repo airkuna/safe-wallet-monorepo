@@ -10,6 +10,9 @@
     "url": "https://ota.domovina.ai/api/manifest"
   },
   "scheme": ["domovina", "wc"],
+  "features": {
+    "marketplace": true
+  },
   "ios": {
     "bundleIdentifier": "ai.domovina.wallet",
     "appleTeamId": "6SCK58757K"
