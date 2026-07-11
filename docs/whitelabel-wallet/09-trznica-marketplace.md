@@ -112,6 +112,9 @@ config), i pošalje narudžbu trgovcu; `safe`/`ff` buildovi ostaju netaknuti.
 
 ## 6. Ručni preduvjeti (vlasnik, ne agent)
 
+> Operativni runbook + upute za trgovca (in-app kreiranje Safe-a, multi-tenant tablica):
+> [10 — Onboarding trgovca](10-onboarding-trgovca.md).
+
 1. **Crošulja Safe**: dogovoriti s vlasnikom (prijatelj), kreirati Safe na Gnosisu (može kroz
    samu app — onboarding faza 2), upisati adresu u `catalog/registry.ts` (`safeAddress`).
 2. **Crošulja pristanak i podaci**: potvrda kataloga (cijene se na siteu mogu mijenjati), dogovor
