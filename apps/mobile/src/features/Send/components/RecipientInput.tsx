@@ -19,7 +19,7 @@ interface RecipientInputProps {
   chainName?: string
 }
 
-const borderColors: Record<RecipientValidationState, string> = {
+export const borderColors: Record<RecipientValidationState, string> = {
   empty: '$borderLight',
   typing: '$borderLight',
   known: '$success',
@@ -56,7 +56,7 @@ const labelConfig: Partial<
   },
 }
 
-function RecipientLabel({
+export function RecipientLabel({
   validationState,
   chainName,
 }: {

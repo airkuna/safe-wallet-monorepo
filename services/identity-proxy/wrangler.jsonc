@@ -1,0 +1,14 @@
+{
+  "$schema": "https://www.unpkg.com/wrangler@latest/config-schema.json",
+  "name": "identity-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+  // Secrets (nisu u ovoj datoteci — postavi prije deploya):
+  //   wrangler secret put NAMESTONE_API_KEY
+  "vars": {
+    // Parent ENS domena — MORA odgovarati `identity.parentDomain` iz brand manifesta.
+    "DOMAIN": "kuna.eth",
+    // Opcionalno: zarezom odvojena lista rezerviranih imena; prazno → default lista u kodu.
+    "RESERVED_NAMES": "",
+  },
+}

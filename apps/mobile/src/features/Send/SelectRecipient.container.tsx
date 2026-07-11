@@ -7,11 +7,14 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { RecipientInput } from './components/RecipientInput'
 import { RecipientSections } from './components/RecipientSections'
+import { ResolvedUsernameCard } from './components/ResolvedUsernameCard'
+import { UsernameResolutionHint } from './components/UsernameResolutionHint'
 import { AddToAddressBookModal } from './components/AddToAddressBookModal'
 import { SuspiciousAddressComparison } from './components/SuspiciousAddressComparison'
 import { KnownOtherChainWarning } from './components/KnownOtherChainWarning'
 import { useRecipientValidation } from './hooks/useRecipientValidation'
 import { useRecipientSearch } from './hooks/useRecipientSearch'
+import { useRecipientResolution } from '@/src/custom/identity'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectChainById } from '@/src/store/chains'
@@ -72,7 +75,13 @@ export function SelectRecipientContainer() {
     }
   }, [scannedAddress, scanNonce])
 
-  const validation = useRecipientValidation(address)
+  // Username inputs (`@ana` / `ana.brand.eth`) resolve via the identity module; for brands without
+  // an `identity` manifest field the hook stays `idle` and everything below is byte-identical.
+  const resolution = useRecipientResolution(address)
+  const resolvedRecipient = resolution.resolved
+  const effectiveAddress = resolution.status === 'idle' ? address : (resolvedRecipient?.address ?? '')
+
+  const validation = useRecipientValidation(effectiveAddress)
   const searchResults = useRecipientSearch(address)
 
   // Payment-request prefill (deep link / EIP-681 QR) travels with the navigation params so the token
@@ -115,6 +124,9 @@ export function SelectRecipientContainer() {
   }, [router])
 
   const displayName = recipientName ?? validation.contactName
+  // Resolved usernames forward `@username` as the recipient name (unless a contact name wins), so
+  // the token/amount/confirm screens show the name instead of hex — same param a contact uses.
+  const forwardName = displayName ?? (resolvedRecipient ? `@${resolvedRecipient.username}` : undefined)
 
   const handleContinue = useCallback(() => {
     if (!validation.canContinue) {
@@ -124,12 +136,12 @@ export function SelectRecipientContainer() {
     router.push({
       pathname: '/(send)/token',
       params: {
-        recipientAddress: address.trim(),
-        ...(displayName ? { recipientName: displayName } : {}),
+        recipientAddress: effectiveAddress.trim(),
+        ...(forwardName ? { recipientName: forwardName } : {}),
         ...prefillParams,
       },
     })
-  }, [address, displayName, validation.canContinue, router, prefillParams])
+  }, [effectiveAddress, forwardName, validation.canContinue, router, prefillParams])
 
   const handleSuspiciousSelect = useCallback(
     (selectedAddress: string, name?: string) => {
@@ -169,22 +181,33 @@ export function SelectRecipientContainer() {
         >
           {isSuspicious && validation.suspiciousMatch ? (
             <SuspiciousAddressComparison
-              suspiciousAddress={address}
+              suspiciousAddress={effectiveAddress}
               knownAddress={validation.suspiciousMatch.knownAddress}
               knownName={validation.suspiciousMatch.knownName}
               onSelect={handleSuspiciousSelect}
             />
           ) : (
             <View gap="$2">
-              <RecipientInput
-                value={address}
-                onChangeText={handleAddressChange}
-                onClear={handleClear}
-                validationState={validation.state}
-                contactName={validation.contactName}
-                selectedName={displayName}
-                chainName={chainName}
-              />
+              {resolvedRecipient ? (
+                <ResolvedUsernameCard
+                  resolved={resolvedRecipient}
+                  validationState={validation.state}
+                  chainName={chainName}
+                  onClear={handleClear}
+                />
+              ) : (
+                <RecipientInput
+                  value={address}
+                  onChangeText={handleAddressChange}
+                  onClear={handleClear}
+                  validationState={validation.state}
+                  contactName={validation.contactName}
+                  selectedName={displayName}
+                  chainName={chainName}
+                />
+              )}
+
+              <UsernameResolutionHint status={resolution.status} />
 
               {isKnownOtherChain && validation.contactAddress && (
                 <KnownOtherChainWarning
@@ -230,7 +253,8 @@ export function SelectRecipientContainer() {
 
       <AddToAddressBookModal
         visible={showAddContact}
-        address={address}
+        address={effectiveAddress}
+        suggestedName={resolvedRecipient ? `@${resolvedRecipient.username}` : undefined}
         onClose={() => setShowAddContact(false)}
         onSaved={handleContactSaved}
       />

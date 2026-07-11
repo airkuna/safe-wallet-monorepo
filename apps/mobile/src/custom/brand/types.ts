@@ -11,6 +11,13 @@ export interface RuntimeBrand {
   theme?: ThemeOverride
   /** Brand-gated feature packs (e.g. `ff`); absent → off. */
   features?: Record<string, boolean>
+  /** Username identity via ENS offchain subnames; absent → identity UI never mounts. */
+  identity?: {
+    parentDomain: string
+    registrationProxyUrl: string
+    resolverChainId?: string
+    reservedNames?: string[]
+  }
   backend?: {
     /** Gateway for production builds only; dev builds stay on staging. */
     cgwBaseUrl?: string

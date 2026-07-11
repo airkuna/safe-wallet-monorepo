@@ -109,6 +109,7 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
     theme: manifest.theme,
     backend: manifest.backend,
     features: manifest.features,
+    identity: manifest.identity,
   }
 }
 

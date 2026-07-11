@@ -49,6 +49,8 @@ flowchart TD
 | **Native identitet** | `name`, `android.package`, `ios.bundleIdentifier`, `scheme`, `owner`, `easProjectId` | build-time, po binaryju         | ✅ Faza 1 (gotovo) |
 | **Vizualni asseti**  | `assets.*` (icon, splash, adaptive iconi, favicon)                                   | build-time, po binaryju         | ✅ Faza 2 (gotovo) |
 | **Runtime branding** | `theme` (palette override), `backend.cgwBaseUrl`                                     | app startup (via `extra.brand`) | ✅ Faza 2 (gotovo) |
+| **Feature flagovi**  | `features` (record; npr. `ff` klupski feature-pack)                                  | app startup (via `extra.brand`) | ✅ (FF MVP)        |
+| **Identity**         | `identity` (ENS parent domena, registration proxy URL, resolver chain, reserved)     | app startup (via `extra.brand`) | ✅ Faza 4          |
 
 Verificirano: `safe` default daje **bit-identičan** identitet starom (dev i prod), `BRAND_ID=example.community` prebacuje cijeli identitet, `BRAND_CONFIG_JSON` nadjačava sve.
 

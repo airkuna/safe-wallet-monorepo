@@ -16,6 +16,12 @@
   "backend": {
     "cgwBaseUrl": "https://safe-client.safe.global"
   },
+  "identity": {
+    "parentDomain": "example.eth",
+    "registrationProxyUrl": "https://identity.example.org",
+    "resolverChainId": "1",
+    "reservedNames": ["admin", "support", "example"]
+  },
   "theme": {
     "light": {
       "primary.main": "#0B5FFF",

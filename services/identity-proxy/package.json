@@ -1,0 +1,10 @@
+{
+  "name": "identity-proxy",
+  "private": true,
+  "description": "Registration proxy for username identity (Namestone) — NOT a yarn workspace; deployed with wrangler.",
+  "scripts": {
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "type-check": "npx -p typescript@5 tsc --noEmit -p tsconfig.json"
+  }
+}

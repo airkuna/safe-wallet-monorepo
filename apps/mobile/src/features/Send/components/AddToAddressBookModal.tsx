@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
 import { Text, useTheme } from 'tamagui'
 import { Identicon } from '@/src/components/Identicon'
@@ -12,15 +12,29 @@ import { DialogModal } from './DialogModal'
 interface AddToAddressBookModalProps {
   visible: boolean
   address: string
+  /** Prefills the contact name when the modal opens (e.g. a resolved `@username`). */
+  suggestedName?: string
   onClose: () => void
   onSaved: () => void
 }
 
-export function AddToAddressBookModal({ visible, address, onClose, onSaved }: AddToAddressBookModalProps) {
+export function AddToAddressBookModal({
+  visible,
+  address,
+  suggestedName,
+  onClose,
+  onSaved,
+}: AddToAddressBookModalProps) {
   const theme = useTheme()
   const [name, setName] = useState('')
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
+
+  useEffect(() => {
+    if (visible) {
+      setName(suggestedName ?? '')
+    }
+  }, [visible, suggestedName])
 
   const handleSave = () => {
     if (!name.trim()) {

@@ -50,6 +50,21 @@ export interface BrandManifest {
   /** Brand-gated feature packs (e.g. `ff`); absent flags are off. */
   features?: Record<string, boolean>
   /**
+   * Username identity via ENS offchain subnames. Absent → identity UI never
+   * mounts. The Namestone API key lives behind `registrationProxyUrl`, never
+   * in the manifest or the binary.
+   */
+  identity?: {
+    /** ENS parent domain users get subnames under (e.g. `kuna.eth`). */
+    parentDomain: string
+    /** Proxy holding the registration API key (Cloudflare Worker or similar). */
+    registrationProxyUrl: string
+    /** Chain the ENS registry lives on; resolution happens here. Default `1`. */
+    resolverChainId?: string
+    /** Names users cannot claim (brand, admin, support, ...). */
+    reservedNames?: string[]
+  }
+  /**
    * Opting in enables OTA (EAS Update) for this brand. The certificate path is
    * relative to `brand/` (e.g. `certs/acme/certificate.pem`); the matching
    * private key stays outside the repo (see `keys/` in .gitignore).

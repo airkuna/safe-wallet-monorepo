@@ -54,4 +54,28 @@ Označi fazu 4 ✅ u `handoffs/README.md`, popuni Zapisnik, commitaj (`feat(mobi
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+**Izvršeno 2026-07-11 (Claude Fable 5, multi-agent session).** Verify: type-check + lint + prettier čisti, 291 test / 34 suitea zeleno (identity 61, Send 156, CreateSafe 60, brand 14).
+
+**Dizajn odluke:**
+
+- **Namestone managed API** (bez vlastitog backenda) — endpointi verificirani live s namestone.com/docs (`set-name`, `get-names`, `search-names`, Authorization header). Durin odbačen za MVP (L2 registry = više infrastrukture).
+- **Proxy** = minimalni Cloudflare Worker u `services/identity-proxy/` (REST: `GET /api/availability`, `POST /api/register`, `GET /api/names`), API key kao Worker secret. Rate-limiting svjesno odgođen (komentar u kodu).
+- **Manifest polje `identity`** (parentDomain, registrationProxyUrl, resolverChainId default `1`, reservedNames) — isti passthrough obrazac kao `features`; tracked primjer u `example.community.json`.
+- **Modul** `src/custom/identity/` (frozen public API kroz `index.ts`): resolve preko `createWeb3ReadOnly(chain)` + ethers `resolveName` (CCIP-Read transparentno); reverse lookup preko proxy directoryja (offchain subnames ne mogu mainnet reverse record) s in-memory TTL cacheom; **persistira se samo vlastiti username** (`identitySlice`, `ownUsernames` po `chainId:address`) — tuđa imena se uvijek re-resolvaju.
+- **Send**: `useRecipientResolution` (debounce 400ms) → `effectiveAddress` u NEPROMIJENJENI `useRecipientValidation`; resolved kartica pokazuje `@ime` + skraćenu adresu (hex na tap); `@username` putuje kao `recipientName` kroz postojeći push — **confirm ekran pokazuje ime besplatno** (RecipientDisplay već renderira ime + skraćenu adresu). Suspicious-address usporedba dobiva resolved hex (namjerno — poisoning se uspoređuje na stvarnim adresama).
+- **CreateSafe**: opcionalni "Choose your name" korak nakon kreiranja (reset na home + username ekran povrh — bez zarobljavanja); registracija veže username na **primarnu mrežu branda** (chainId kreiranog Safea).
+
+**Ručni preduvjeti — NISU izvršeni (blokiraju produkcijsko uključenje):**
+
+1. ⬜ Brand ENS domena registrirana + delegirana na Namestone offchain resolver (mainnet).
+2. ⬜ Namestone API key za domenu.
+3. ⬜ Deploy `services/identity-proxy` (wrangler secret + vars) i upis `registrationProxyUrl` u brand manifest.
+4. ⬜ E2E na testnetu (acceptance kriteriji 1–2 djelomično odgođeni do preduvjeta; dev put = Namestone sandbox/sepolia).
+
+**Dug / poznata odstupanja:**
+
+- TxHistory/Share "nikad hex" pass (reverse lookup wiring u feed) — modul i cache postoje, UI wiring odgođen (šav u shared komponente nije jeftin).
+- Reverse cache je in-memory TTL, ne store slice (svjesno — semantika "tuđa imena moraju biti svježa").
+- Attestation replay unutar expiry prozora (bez nonce-a) — naslijeđeno s onchain strane, v. airkuna contracts hardening.
+- `username.ts` regex dopušta uzastopne crtice (docstring kaže single) — klijent i worker dijele identičan regex pa su konzistentni.
+- Claim linkovi za ne-korisnike: post-MVP (v. `kunapay-4-claim-links.md` — MiCA analiza prije koda).

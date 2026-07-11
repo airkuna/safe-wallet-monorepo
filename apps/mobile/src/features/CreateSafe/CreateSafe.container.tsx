@@ -5,6 +5,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChains } from '@/src/store/chains'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useBrand } from '@/src/custom/brand'
+import { isIdentityEnabled } from '@/src/custom/identity'
 import { useCreateSafe } from './hooks/useCreateSafe'
 import { CreateSafeView } from './components/CreateSafeView'
 
@@ -43,11 +44,16 @@ export const CreateSafeContainer = () => {
     const address = await createSafe(name.trim() || DEFAULT_ACCOUNT_NAME, selectedChain)
 
     if (address) {
-      navigation.dispatch(
-        CommonActions.reset({
-          routes: [{ key: '(tabs)', name: '(tabs)' }],
-        }),
-      )
+      // Identity-enabled brands get an optional "Choose your name" step on
+      // top of home; everyone else exits straight to home as before.
+      const routes = isIdentityEnabled()
+        ? [
+            { key: '(tabs)', name: '(tabs)' },
+            { name: 'create-safe-username', params: { safeAddress: address, chainId: selectedChain.chainId } },
+          ]
+        : [{ key: '(tabs)', name: '(tabs)' }]
+
+      navigation.dispatch(CommonActions.reset({ routes }))
     }
   }
 

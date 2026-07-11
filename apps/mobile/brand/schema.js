@@ -44,6 +44,20 @@ const brandManifestSchema = z.object({
   // Brand-gated feature packs (e.g. `ff` for the FootballFans club layer);
   // absent flags are off, so stock brands never mount custom surfaces.
   features: z.record(z.boolean()).optional(),
+  // Username identity via ENS offchain subnames (faza 4). Absent → identity UI
+  // never mounts; the registration API key lives behind the proxy, never here.
+  identity: z
+    .object({
+      // ENS parent domain users get subnames under (e.g. `kuna.eth`).
+      parentDomain: z.string().min(1),
+      // Cloudflare Worker (or equivalent) holding the Namestone API key.
+      registrationProxyUrl: z.string().url(),
+      // Chain the ENS registry lives on; resolution happens here (default `1`).
+      resolverChainId: z.string().min(1).optional(),
+      // Names users cannot claim (brand, admin, support, ...).
+      reservedNames: z.array(z.string().min(1)).optional(),
+    })
+    .optional(),
   updates: z
     .object({
       codeSigningCertificatePath: z.string().min(1),

@@ -35,7 +35,7 @@ flowchart LR
 | 1    | [faza-1-runtime-branding.md](faza-1-runtime-branding.md)               | Manifest `theme`/`backend` polja se konzumiraju; brand assets; hex čišćenje | ✅     |
 | 2    | [faza-2-onboarding-novi-safe.md](faza-2-onboarding-novi-safe.md)       | Kreiranje **novog** Safea u appu (danas: samo import)                       | ✅     |
 | 3    | [faza-3-receive-payment-linkovi.md](faza-3-receive-payment-linkovi.md) | EIP-681 QR s iznosom + share link + deep-link u Send                        | ✅     |
-| 4    | [faza-4-identity-layer.md](faza-4-identity-layer.md)                   | Send po usernameu (ENS offchain subnames), hex adrese skrivene              | ⬜     |
+| 4    | [faza-4-identity-layer.md](faza-4-identity-layer.md)                   | Send po usernameu (ENS offchain subnames), hex adrese skrivene              | ✅     |
 | 5    | [faza-5-release-pipeline.md](faza-5-release-pipeline.md)               | EAS build per brand manifest + smoke test + store priprema                  | ⬜     |
 
 ## KUNAPay faze

@@ -48,6 +48,8 @@ export interface ResolvedBrand {
   backend?: BrandManifest['backend']
   /** Brand-gated feature packs, forwarded to the runtime via `extra.brand`. */
   features?: BrandManifest['features']
+  /** Username identity config, forwarded to the runtime via `extra.brand`. */
+  identity?: BrandManifest['identity']
 }
 
 export declare function loadBrandManifest(): BrandManifest

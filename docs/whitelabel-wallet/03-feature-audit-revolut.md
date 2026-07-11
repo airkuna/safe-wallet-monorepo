@@ -14,7 +14,7 @@
 | Passkey seedless onboarding              | ✅ Face ID, bez seeda                     | ❌ samo seed/PK/Ledger               | domovina               |
 | Kreiranje **novog** računa u appu        | ✅ lokalno, bez gasa                      | ✅ counterfactual, bez gasa (faza 2) | **gotovo (oba)**       |
 | Send na adresu / QR / recent             | ✅                                        | ✅ wizard + risk-validacija          | **gotovo**             |
-| **Send po username / ENS / directoryju** | ❌                                        | ❌                                   | **GAP**                |
+| **Send po username / ENS / directoryju** | ❌                                        | ✅ ENS offchain subnames (faza 4)    | **mobile ✅ (faza 4)** |
 | Receive QR + payment link                | ✅ EIP-681 + share link                   | ✅ EIP-681 QR + deep link (faza 3)   | **gotovo (oba)**       |
 | Gasless / sponzorirano                   | ✅ vlastiti relayer (5/dan)               | ✅ relay + **GTF Safe-pays**         | **gotovo (oba)**       |
 | Fiat on-ramp                             | ✅ SEPA/Monerium (IBAN→EURe)              | ❌ (mobile `onramp:false`)           | domovina               |

@@ -17,6 +17,7 @@ import {
   REGISTER,
 } from 'redux-persist'
 import { reduxStorage } from './storage'
+import identity from '@/src/custom/identity/store/identitySlice'
 import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import activeSigner from './activeSignerSlice'
@@ -148,6 +149,7 @@ export const walletKitPersistConfig = {
 const persistedWalletKit = persistReducer(walletKitPersistConfig, walletKit)
 
 const combinedReducer = combineReducers({
+  identity,
   txHistory,
   safes,
   undeployedSafes,
