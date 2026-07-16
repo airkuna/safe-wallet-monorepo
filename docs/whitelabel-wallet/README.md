@@ -20,6 +20,7 @@ Ova knowledge baza dokumentira **zašto** i **kako** gradimo whitelabel wallet p
 | [09 — Tržnica marketplace](09-trznica-marketplace.md)                                        | Ugrađeni marketplace za HR MSP-ove (pilot: Crošulja); regulatorni okvir (Fiskalizacija 2.0, DAC7, ne-CASP)                    |
 | [10 — Onboarding trgovca](10-onboarding-trgovca.md)                                          | Operativni runbook za trgovca (in-app Safe, multi-tenant tablica)                                                             |
 | [11 — Događaji: P2P ticketing](11-dogadjaji-p2p-ticketing.md)                                | Event-ticketing marketplace bez posrednika (Entrio/Luma paritet); pilot MoMo/BlockSplit; backend na `pinka_finance`           |
+| [12 — Onboarding organizatora](12-onboarding-organizatora.md)                                | Operativni runbook za organizatora eventa (self-service E4: Safe u appu, event + tieri, publish, skener, off-ramp opcije)     |
 | [handoffs/](handoffs/README.md)                                                              | **Izvršni planovi po fazama** — samodostatni handoff promptovi za praznu Claude Code sesiju (MVP, KUNAPay, Tržnica, Događaji) |
 
 ## Kontekst u jednoj slici
