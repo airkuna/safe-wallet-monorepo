@@ -4,7 +4,6 @@ import type { Code } from 'react-native-vision-camera'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 import { QrCamera, ScanErrorOverlay, useCameraPermissionFlow } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
-import { SafeInput } from '@/src/components/SafeInput/SafeInput'
 import { checkinTicket } from '../api/client'
 import { isEventsBackendConfigured } from '../api/config'
 import type { CheckinResponse } from '../api/types'
@@ -18,6 +17,7 @@ import {
 } from '../state/useEntryLog'
 import { setScannerToken, useScannerToken } from '../state/useScannerAuth'
 import { evStrings } from '../strings'
+import { TokenGate } from './TokenGate'
 
 /**
  * Skener ulaza (E3) — organizatorov mod, POTPUNO ODVOJEN od payment skenera:
@@ -57,39 +57,6 @@ const formatScanTime = (iso: string | null | undefined): string | undefined => {
   }
   const parsed = new Date(iso)
   return Number.isNaN(parsed.getTime()) ? undefined : parsed.toLocaleString('hr-HR')
-}
-
-const TokenGate = ({ onSave }: { onSave: (token: string) => void }) => {
-  const [draft, setDraft] = useState('')
-
-  return (
-    <ScrollView
-      flex={1}
-      backgroundColor="$backgroundPaper"
-      testID="ev-scanner-token-gate"
-      contentContainerStyle={{ padding: '$4' }}
-    >
-      <YStack gap="$3">
-        <Text fontSize="$6" fontWeight="700">
-          {scanStrings.tokenTitle}
-        </Text>
-        <Text fontSize="$3" color="$colorSecondary">
-          {scanStrings.tokenHint}
-        </Text>
-        <SafeInput
-          value={draft}
-          onChangeText={setDraft}
-          placeholder={scanStrings.tokenPlaceholder}
-          autoCapitalize="none"
-          autoCorrect={false}
-          testID="ev-scanner-token-input"
-        />
-        <SafeButton disabled={draft.trim().length === 0} onPress={() => onSave(draft)} testID="ev-scanner-token-save">
-          {scanStrings.tokenSave}
-        </SafeButton>
-      </YStack>
-    </ScrollView>
-  )
 }
 
 const ResultView = ({
@@ -309,7 +276,7 @@ export const SkenerUlaza = () => {
   }
 
   if (scannerToken === undefined || showTokenGate) {
-    return <TokenGate onSave={onSaveToken} />
+    return <TokenGate onSave={onSaveToken} testIDPrefix="ev-scanner" />
   }
 
   if (outcome !== null) {

@@ -5,10 +5,20 @@ import type {
   CheckinResponse,
   CheckinResult,
   ConfirmOrderResponse,
+  CreateOrganizerEventInput,
+  CreateOrganizerEventResponse,
+  EventsFeedParams,
   EventsFeedResponse,
   FeedRow,
+  OrganizerOverview,
+  OrganizerRecordInput,
+  OrganizerResult,
+  PublishOrganizerEventResponse,
+  PublishTargetState,
   SubmitOrderRequest,
   SubmitOrderResult,
+  UpdateOrganizerEventInput,
+  UpdateOrganizerEventResponse,
 } from './types'
 
 /**
@@ -37,9 +47,37 @@ const apiFetch = async (path: string, init?: RequestInit): Promise<Response | nu
   }
 }
 
-/** Javni katalog evenata; `null` = backend nedostupan (ostaje config katalog). */
-export const fetchEventsFeed = async (): Promise<FeedRow[] | null> => {
-  const response = await apiFetch('/events-feed')
+const feedQueryString = (params?: EventsFeedParams): string => {
+  if (params === undefined) {
+    return ''
+  }
+  const search = new URLSearchParams()
+  if (params.grad !== undefined && params.grad.trim().length > 0) {
+    search.set('grad', params.grad.trim())
+  }
+  if (params.from !== undefined) {
+    search.set('from', params.from)
+  }
+  if (params.to !== undefined) {
+    search.set('to', params.to)
+  }
+  if (params.limit !== undefined) {
+    search.set('limit', String(params.limit))
+  }
+  if (params.offset !== undefined) {
+    search.set('offset', String(params.offset))
+  }
+  const query = search.toString()
+  return query.length === 0 ? '' : `?${query}`
+}
+
+/**
+ * Javni katalog evenata; `null` = backend nedostupan (ostaje config katalog).
+ * Filtriranje (grad, datum) i paginacija su opcionalni (E4); bez parametara
+ * ponašanje je identično E2.
+ */
+export const fetchEventsFeed = async (params?: EventsFeedParams): Promise<FeedRow[] | null> => {
+  const response = await apiFetch(`/events-feed${feedQueryString(params)}`)
   if (response === null || !response.ok) {
     return null
   }
@@ -122,6 +160,73 @@ export const checkinTicket = async (qrToken: string, authToken: string): Promise
   }
   return { kind: 'ok', response: body as CheckinResponse }
 }
+
+/**
+ * Organizatorska akcija kroz events-organizer action router (E4). `authToken`
+ * je GoTrue JWT org admina — ISTI "pristupni token" obrazac kao skener (E3):
+ * transport kredencijala, NE autorizacija. Tko smije kreirati/uređivati/
+ * objaviti odlučuje isključivo backend (RLS org admin + KYC; publish dodatno
+ * allowlist + pravi Safe). 4xx sa strojnim kodom = autoritativno odbijanje;
+ * 5xx/mreža = `unreachable`.
+ */
+const organizerAction = async <T>(body: Record<string, unknown>, authToken: string): Promise<OrganizerResult<T>> => {
+  const response = await apiFetch('/events-organizer', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${authToken}` },
+    body: JSON.stringify(body),
+  })
+  if (response === null || response.status >= 500) {
+    return { kind: 'unreachable' }
+  }
+  let parsed: unknown
+  try {
+    parsed = await response.json()
+  } catch {
+    return { kind: 'unreachable' }
+  }
+  if (!response.ok) {
+    const code = (parsed as { error?: string }).error
+    return typeof code === 'string' && code.length > 0 ? { kind: 'rejected', code } : { kind: 'unreachable' }
+  }
+  return { kind: 'ok', data: parsed as T }
+}
+
+/** Moji org accounti (allowlist/DAC7 status) + moji eventi uklj. draftove. */
+export const fetchOrganizerOverview = (authToken: string): Promise<OrganizerResult<OrganizerOverview>> =>
+  organizerAction<OrganizerOverview>({ action: 'overview' }, authToken)
+
+export const createOrganizerEvent = (
+  input: CreateOrganizerEventInput,
+  authToken: string,
+): Promise<OrganizerResult<CreateOrganizerEventResponse>> =>
+  organizerAction<CreateOrganizerEventResponse>({ action: 'create', ...input }, authToken)
+
+export const updateOrganizerEvent = (
+  input: UpdateOrganizerEventInput,
+  authToken: string,
+): Promise<OrganizerResult<UpdateOrganizerEventResponse>> =>
+  organizerAction<UpdateOrganizerEventResponse>({ action: 'update', ...input }, authToken)
+
+/**
+ * State machine draft→active→closed. Publish gating je SERVER-SIDE (org
+ * admin + allowlist + pravi Safe) — UI disabled state je samo zrcalo.
+ */
+export const publishOrganizerEvent = (
+  campaignId: string,
+  targetState: PublishTargetState,
+  authToken: string,
+): Promise<OrganizerResult<PublishOrganizerEventResponse>> =>
+  organizerAction<PublishOrganizerEventResponse>(
+    { action: 'publish', campaign_id: campaignId, target_state: targetState },
+    authToken,
+  )
+
+/** DAC7 zapis organizatora (SENSITIVE — backend ga nikad ne vraća u feed). */
+export const upsertOrganizerRecord = (
+  input: OrganizerRecordInput,
+  authToken: string,
+): Promise<OrganizerResult<{ account_id: string; saved: boolean }>> =>
+  organizerAction<{ account_id: string; saved: boolean }>({ action: 'record_upsert', ...input }, authToken)
 
 /** Narudžbe + ulaznice (QR token stiže jednokratno). `null` = nedostupan. */
 export const fetchBackendOrders = async (orderIds: string[]): Promise<BackendOrder[] | null> => {

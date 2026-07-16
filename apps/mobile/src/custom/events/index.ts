@@ -35,6 +35,15 @@ export {
 export type { EntryScanRecord, EntryScanResult } from './state/useEntryLog'
 export { getScannerToken, setScannerToken, clearScannerToken, useScannerToken } from './state/useScannerAuth'
 export type { CheckinResponse, CheckinResult, CheckinStatus } from './api/types'
+export { buildEventLink } from './logic/eventLink'
+export type {
+  OrganizerAccount,
+  OrganizerEvent,
+  OrganizerOverview,
+  OrganizerResult,
+  OrganizerTier,
+  OrganizerTierInput,
+} from './api/types'
 export {
   ticketTotals,
   toBaseUnits,

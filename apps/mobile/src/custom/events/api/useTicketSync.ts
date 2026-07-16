@@ -26,7 +26,8 @@ export type SubmitOutcome =
       kind: 'skipped'
     }
 
-const randomUuid = (): string => {
+/** Client-generated v4 UUID (idempotency ključ narudžbe/eventa). */
+export const randomUuid = (): string => {
   const bytes = new Uint8Array(16)
   crypto.getRandomValues(bytes)
   bytes[6] = (bytes[6] & 0x0f) | 0x40

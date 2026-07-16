@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react'
-import { TouchableOpacity } from 'react-native'
+import React, { useCallback, useMemo } from 'react'
+import { Share, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { getEvent, isTierOnSale } from '../catalog/registry'
+import { buildEventLink } from '../logic/eventLink'
 import { formatEur, formatEventDate } from '../logic/ticketOrder'
 import { evStrings } from '../strings'
 
@@ -23,6 +24,11 @@ export const EventDetail = () => {
 
   const date = formatEventDate(event.startIso, event.endIso)
 
+  // Share link = deep link na ovaj event u appu (naziv + link u poruci).
+  const onShare = useCallback(() => {
+    void Share.share({ message: `${event.naziv}\n${buildEventLink(event.slug)}` })
+  }, [event.naziv, event.slug])
+
   return (
     <ScrollView
       flex={1}
@@ -32,9 +38,14 @@ export const EventDetail = () => {
     >
       <YStack gap="$4">
         <YStack gap="$1">
-          <Text fontSize="$7" fontWeight="700">
-            {event.naziv}
-          </Text>
+          <XStack alignItems="flex-start" justifyContent="space-between" gap="$3">
+            <Text flex={1} fontSize="$7" fontWeight="700">
+              {event.naziv}
+            </Text>
+            <TouchableOpacity onPress={onShare} accessibilityLabel={evStrings.event.share} testID="ev-detail-share">
+              <SafeFontIcon name="export" size={20} color="$colorSecondary" />
+            </TouchableOpacity>
+          </XStack>
           <Text fontSize="$3" color="$colorSecondary" testID="ev-detail-date">
             {date.length > 0 ? date : evStrings.event.dateTba} · {event.venue.naziv}, {event.venue.grad}
           </Text>

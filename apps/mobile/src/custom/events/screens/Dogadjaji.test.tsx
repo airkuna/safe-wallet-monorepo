@@ -8,7 +8,9 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: jest.fn(), dismissTo: jest.fn() }),
 }))
 
+const mockRefresh = jest.fn<Promise<boolean>, []>(() => Promise.resolve(true))
 jest.mock('../catalog/backendSource', () => ({
+  refreshEventCatalog: () => mockRefresh(),
   useEventCatalog: () => [
     // Inline da izbjegnemo hoisting problem jest.mock factoryja.
     {
@@ -53,12 +55,25 @@ describe('Dogadjaji', () => {
     expect(getByText(new RegExp(evStrings.hub.announced))).toBeTruthy()
   })
 
-  it('opens my tickets and shows the future-organizer slot', () => {
+  it('opens my tickets and the organizer self-service (tap) / scanner (long-press)', () => {
     const { getByTestId } = render(<Dogadjaji />)
 
     fireEvent.press(getByTestId('ev-hub-tickets'))
     expect(mockPush).toHaveBeenCalledWith('/events/tickets')
 
-    expect(getByTestId('ev-hub-your-event')).toBeTruthy()
+    fireEvent.press(getByTestId('ev-hub-your-event'))
+    expect(mockPush).toHaveBeenCalledWith('/events/organizer')
+
+    fireEvent(getByTestId('ev-hub-your-event'), 'longPress')
+    expect(mockPush).toHaveBeenCalledWith('/events/scanner')
+  })
+
+  it('refreshes the backend catalog via pull-to-refresh', async () => {
+    const { getByTestId } = render(<Dogadjaji />)
+
+    const refreshControl = getByTestId('ev-hub-screen').props.refreshControl
+    expect(refreshControl).toBeTruthy()
+    await refreshControl.props.onRefresh()
+    expect(mockRefresh).toHaveBeenCalled()
   })
 })

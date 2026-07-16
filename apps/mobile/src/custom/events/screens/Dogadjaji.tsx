@@ -1,10 +1,10 @@
-import React from 'react'
-import { TouchableOpacity } from 'react-native'
+import React, { useCallback, useState } from 'react'
+import { RefreshControl, TouchableOpacity } from 'react-native'
 import { ScrollView, Text, View, XStack, YStack } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { useEventCatalog } from '../catalog/backendSource'
+import { refreshEventCatalog, useEventCatalog } from '../catalog/backendSource'
 import { formatEventDate } from '../logic/ticketOrder'
 import { evStrings } from '../strings'
 
@@ -13,9 +13,21 @@ export const Dogadjaji = () => {
   const router = useRouter()
   const { top } = useSafeAreaInsets()
   const events = useEventCatalog()
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Pull-to-refresh: backend feed (no-op bez konfiguriranog backenda).
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    void refreshEventCatalog().finally(() => setRefreshing(false))
+  }, [])
 
   return (
-    <ScrollView flex={1} backgroundColor="$backgroundPaper" testID="ev-hub-screen">
+    <ScrollView
+      flex={1}
+      backgroundColor="$backgroundPaper"
+      testID="ev-hub-screen"
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
       <YStack paddingTop={top + 12} paddingHorizontal="$4" paddingBottom="$4" gap="$2">
         <Text fontSize="$8" fontWeight="700">
           {evStrings.hub.title}
@@ -68,11 +80,15 @@ export const Dogadjaji = () => {
           </XStack>
         </TouchableOpacity>
 
-        {/* Organizatorski ulaz: long-press otvara Skener ulaza. Namjerno
-            diskretno — tko SMIJE skenirati zna server (redeem_ticket RPC,
-            org admin role); klijentski se organizator ne može dokazati pa
-            "skrivanje" gumba ne bi bilo nikakva zaštita. */}
-        <TouchableOpacity onLongPress={() => router.push('/events/scanner')} testID="ev-hub-your-event">
+        {/* Organizatorski ulaz (E4): tap otvara Moje događaje (self-service),
+            long-press Skener ulaza (E3 prečac za osoblje na pultu). Tko SMIJE
+            išta od toga zna server (org admin role u RPC-ima) — klijentski se
+            organizator ne može dokazati, pa "skrivanje" ne bi bilo zaštita. */}
+        <TouchableOpacity
+          onPress={() => router.push('/events/organizer')}
+          onLongPress={() => router.push('/events/scanner')}
+          testID="ev-hub-your-event"
+        >
           <XStack backgroundColor="$backgroundSecondary" borderRadius="$4" padding="$4" alignItems="center" gap="$3">
             <SafeFontIcon name="plus" size={20} color="$colorSecondary" />
             <YStack flex={1} gap="$1">
@@ -83,6 +99,7 @@ export const Dogadjaji = () => {
                 {evStrings.hub.yourEventHereDesc}
               </Text>
             </YStack>
+            <SafeFontIcon name="chevron-right" size={16} color="$colorSecondary" />
           </XStack>
         </TouchableOpacity>
       </YStack>

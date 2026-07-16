@@ -1,6 +1,17 @@
 import { http, HttpResponse } from 'msw'
 import { server } from '@/src/tests/server'
-import { checkinTicket, confirmTicketOrder, fetchBackendOrders, fetchEventsFeed, submitTicketOrder } from './client'
+import {
+  checkinTicket,
+  confirmTicketOrder,
+  createOrganizerEvent,
+  fetchBackendOrders,
+  fetchEventsFeed,
+  fetchOrganizerOverview,
+  publishOrganizerEvent,
+  submitTicketOrder,
+  updateOrganizerEvent,
+  upsertOrganizerRecord,
+} from './client'
 import type { SubmitOrderRequest } from './types'
 
 const BASE = 'https://events.test/functions/v1'
@@ -56,6 +67,34 @@ describe('events api client', () => {
     it('returns null when the network is down', async () => {
       server.use(http.get(`${BASE}/events-feed`, () => HttpResponse.error()))
       expect(await fetchEventsFeed()).toBeNull()
+    })
+
+    it('passes filter and pagination params as a query string (E4)', async () => {
+      let receivedUrl = ''
+      server.use(
+        http.get(`${BASE}/events-feed`, ({ request }) => {
+          receivedUrl = request.url
+          return HttpResponse.json({ events: [] })
+        }),
+      )
+      await fetchEventsFeed({ grad: 'Split', from: '2027-01-01', limit: 10, offset: 20 })
+      const url = new URL(receivedUrl)
+      expect(url.searchParams.get('grad')).toBe('Split')
+      expect(url.searchParams.get('from')).toBe('2027-01-01')
+      expect(url.searchParams.get('limit')).toBe('10')
+      expect(url.searchParams.get('offset')).toBe('20')
+    })
+
+    it('sends no query string without params (E2 behaviour preserved)', async () => {
+      let receivedUrl = ''
+      server.use(
+        http.get(`${BASE}/events-feed`, ({ request }) => {
+          receivedUrl = request.url
+          return HttpResponse.json({ events: [] })
+        }),
+      )
+      await fetchEventsFeed()
+      expect(receivedUrl.endsWith('/events-feed')).toBe(true)
     })
   })
 
@@ -216,6 +255,128 @@ describe('events api client', () => {
     it('is unreachable when the backend is not configured', async () => {
       mockApiBaseUrl = undefined
       expect(await checkinTicket(TOKEN, 'jwt')).toEqual({ kind: 'unreachable' })
+    })
+  })
+
+  describe('organizer actions (E4)', () => {
+    it('sends the bearer token and the action to events-organizer', async () => {
+      let receivedAuth: string | null = null
+      let receivedBody: Record<string, unknown> = {}
+      server.use(
+        http.post(`${BASE}/events-organizer`, async ({ request }) => {
+          receivedAuth = request.headers.get('authorization')
+          receivedBody = (await request.json()) as Record<string, unknown>
+          return HttpResponse.json({ accounts: [], events: [] })
+        }),
+      )
+      const result = await fetchOrganizerOverview('jwt-org-admina')
+      expect(receivedAuth).toBe('Bearer jwt-org-admina')
+      expect(receivedBody.action).toBe('overview')
+      expect(result.kind).toBe('ok')
+      if (result.kind === 'ok') {
+        expect(result.data.accounts).toEqual([])
+      }
+    })
+
+    it('creates an event with idempotency id and tiers', async () => {
+      let receivedBody: Record<string, unknown> = {}
+      server.use(
+        http.post(`${BASE}/events-organizer`, async ({ request }) => {
+          receivedBody = (await request.json()) as Record<string, unknown>
+          return HttpResponse.json({ id: 'e1', slug: 'blocksplit-2027', existing: false, event_created: true })
+        }),
+      )
+      const result = await createOrganizerEvent(
+        {
+          event_id: '11111111-2222-4333-8444-555555555555',
+          account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          title: 'BlockSplit 2027',
+          venue_name: 'MEDILS',
+          venue_city: 'Split',
+          tiers: [{ title: 'Stay paket', price_cents: 39900, imenska: true }],
+        },
+        'jwt',
+      )
+      expect(receivedBody.action).toBe('create')
+      expect(receivedBody.event_id).toBe('11111111-2222-4333-8444-555555555555')
+      expect(result.kind).toBe('ok')
+    })
+
+    it('maps the allowlist publish rejection to an authoritative code (server-side gating)', async () => {
+      server.use(
+        http.post(`${BASE}/events-organizer`, () =>
+          HttpResponse.json({ error: 'organizer_not_allowlisted' }, { status: 400 }),
+        ),
+      )
+      expect(await publishOrganizerEvent('c1', 'active', 'jwt')).toEqual({
+        kind: 'rejected',
+        code: 'organizer_not_allowlisted',
+      })
+    })
+
+    it('maps the missing-Safe publish rejection (no address ⇒ no publish)', async () => {
+      server.use(
+        http.post(`${BASE}/events-organizer`, () =>
+          HttpResponse.json({ error: 'campaign_destination_missing' }, { status: 400 }),
+        ),
+      )
+      expect(await publishOrganizerEvent('c1', 'active', 'jwt')).toEqual({
+        kind: 'rejected',
+        code: 'campaign_destination_missing',
+      })
+    })
+
+    it('maps tier_locked update rejection after publish', async () => {
+      server.use(
+        http.post(`${BASE}/events-organizer`, () => HttpResponse.json({ error: 'tier_locked' }, { status: 400 })),
+      )
+      expect(await updateOrganizerEvent({ campaign_id: 'c1', tiers: [] }, 'jwt')).toEqual({
+        kind: 'rejected',
+        code: 'tier_locked',
+      })
+    })
+
+    it('upserts the DAC7 organizer record', async () => {
+      let receivedBody: Record<string, unknown> = {}
+      server.use(
+        http.post(`${BASE}/events-organizer`, async ({ request }) => {
+          receivedBody = (await request.json()) as Record<string, unknown>
+          return HttpResponse.json({ account_id: 'a1', saved: true })
+        }),
+      )
+      const result = await upsertOrganizerRecord(
+        {
+          account_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          legal_name: 'UBIK udruga',
+          oib: '12345678901',
+          address_line: 'Ulica 1',
+          city: 'Split',
+          postal_code: '21000',
+          financial_identifier_type: 'safe_address',
+          financial_identifier: '0x1111111111111111111111111111111111111111',
+        },
+        'jwt',
+      )
+      expect(receivedBody.action).toBe('record_upsert')
+      expect(result.kind).toBe('ok')
+    })
+
+    it('maps 401/403 and 5xx/network like the scanner client', async () => {
+      server.use(
+        http.post(`${BASE}/events-organizer`, () => HttpResponse.json({ error: 'not_authenticated' }, { status: 401 })),
+      )
+      expect(await fetchOrganizerOverview('istekli-jwt')).toEqual({ kind: 'rejected', code: 'not_authenticated' })
+
+      server.use(http.post(`${BASE}/events-organizer`, () => HttpResponse.json({ error: 'x' }, { status: 500 })))
+      expect(await fetchOrganizerOverview('jwt')).toEqual({ kind: 'unreachable' })
+
+      server.use(http.post(`${BASE}/events-organizer`, () => HttpResponse.error()))
+      expect(await fetchOrganizerOverview('jwt')).toEqual({ kind: 'unreachable' })
+    })
+
+    it('is unreachable when the backend is not configured', async () => {
+      mockApiBaseUrl = undefined
+      expect(await fetchOrganizerOverview('jwt')).toEqual({ kind: 'unreachable' })
     })
   })
 })
