@@ -40,12 +40,29 @@ export const evStrings = {
     noActiveAccount: 'Za plaćanje prvo otvori ili uveži račun u aplikaciji.',
     eventInactive: 'Ovaj događaj još ne prima plaćanja u aplikaciji.',
     directNote: 'Plaćaš izravno organizatoru na njegov račun — bez posrednika i bez dodatnih naknada.',
+    // Autoritativna odbijanja narudžbe s backenda (strojni kod → poruka).
+    orderRejected: {
+      tier_sold_out: 'Nažalost, ulaznice u ovoj kategoriji su rasprodane.',
+      sale_not_started: 'Prodaja ulaznica u ovoj kategoriji još nije počela.',
+      sale_ended: 'Prodaja ulaznica u ovoj kategoriji je završila.',
+      holders_incomplete: 'Upiši ime i prezime za svaku ulaznicu.',
+      order_rate_limited: 'Previše narudžbi u kratkom vremenu — pokušaj ponovno malo kasnije.',
+      amount_mismatch: 'Cijena se u međuvremenu promijenila — osvježi događaj i pokušaj ponovno.',
+    } as Record<string, string>,
+    orderRejectedFallback: 'Narudžba nije prihvaćena — pokušaj ponovno.',
   },
   tickets: {
     title: 'Moje ulaznice',
     empty: 'Još nemaš ulaznica.',
     reference: 'Referenca',
-    status: { pending: 'Plaćanje nije dovršeno', 'paid-unverified': 'Plaćeno — čeka potvrdu organizatora' },
+    status: {
+      pending: 'Plaćanje nije dovršeno',
+      'paid-unverified': 'Plaćeno — čeka potvrdu organizatora',
+      issued: 'Ulaznice izdane',
+    },
+    ticketState: { issued: 'Vrijedi', checked_in: 'Iskorištena', void: 'Poništena' },
+    issuedHeader: 'Ulaznice',
+    syncing: 'Provjeravam narudžbe…',
     share: 'Pošalji narudžbu organizatoru',
     shareHint:
       'Nakon plaćanja pošalji organizatoru podatke narudžbe s referencom — ulaznice s QR kodom stižu u aplikaciju s potvrdom uplate.',

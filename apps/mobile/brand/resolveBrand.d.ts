@@ -50,6 +50,8 @@ export interface ResolvedBrand {
   features?: BrandManifest['features']
   /** Username identity config, forwarded to the runtime via `extra.brand`. */
   identity?: BrandManifest['identity']
+  /** Events (Događaji) backend config, forwarded to the runtime via `extra.brand`. */
+  events?: BrandManifest['events']
 }
 
 export declare function loadBrandManifest(): BrandManifest

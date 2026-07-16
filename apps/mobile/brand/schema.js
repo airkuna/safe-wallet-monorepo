@@ -58,6 +58,14 @@ const brandManifestSchema = z.object({
       reservedNames: z.array(z.string().min(1)).optional(),
     })
     .optional(),
+  // Događaji (E2): backend za events pack — Supabase edge functions base
+  // (npr. `https://api.domovina.ai/functions/v1`). Absent → katalog ostaje
+  // config-only i narudžbe žive samo lokalno (E1 ponašanje).
+  events: z
+    .object({
+      apiBaseUrl: z.string().url(),
+    })
+    .optional(),
   updates: z
     .object({
       codeSigningCertificatePath: z.string().min(1),

@@ -4,14 +4,15 @@ import { ScrollView, Text, View, XStack, YStack } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { EVENTS } from '../catalog/registry'
+import { useEventCatalog } from '../catalog/backendSource'
 import { formatEventDate } from '../logic/ticketOrder'
 import { evStrings } from '../strings'
 
-/** Događaji hub: popis evenata + ulaz u vlastite ulaznice. */
+/** Događaji hub: popis evenata (backend katalog uz config fallback) + ulaznice. */
 export const Dogadjaji = () => {
   const router = useRouter()
   const { top } = useSafeAreaInsets()
+  const events = useEventCatalog()
 
   return (
     <ScrollView flex={1} backgroundColor="$backgroundPaper" testID="ev-hub-screen">
@@ -25,7 +26,7 @@ export const Dogadjaji = () => {
       </YStack>
 
       <YStack paddingHorizontal="$4" gap="$3" paddingBottom="$10">
-        {EVENTS.map((event) => {
+        {events.map((event) => {
           const date = formatEventDate(event.startIso, event.endIso)
           return (
             <TouchableOpacity

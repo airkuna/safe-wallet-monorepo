@@ -21,6 +21,7 @@ import {
   type TicketHolder,
 } from '../logic/ticketOrder'
 import { addTicketOrder } from '../state/useTickets'
+import { submitOrder } from '../api/useTicketSync'
 import { evStrings } from '../strings'
 
 /**
@@ -42,6 +43,8 @@ export const TicketCheckout = () => {
 
   const [qty, setQty] = useState(1)
   const [holders, setHolders] = useState<TicketHolder[]>([{ fullName: '', email: '' }])
+  const [submitting, setSubmitting] = useState(false)
+  const [orderRejected, setOrderRejected] = useState<string | null>(null)
 
   const setHolderField = (index: number, field: keyof TicketHolder) => (value: string) =>
     setHolders((current) => current.map((holder, i) => (i === index ? { ...holder, [field]: value } : holder)))
@@ -68,9 +71,10 @@ export const TicketCheckout = () => {
 
   const eventInactive = event.safeAddress === undefined
   const holdersOk = tier !== undefined && holdersComplete(tier, holders, qty)
-  const canPay = activeSafe !== null && !eventInactive && totals !== null && valueRaw !== null && holdersOk
+  const canPay =
+    activeSafe !== null && !eventInactive && totals !== null && valueRaw !== null && holdersOk && !submitting
 
-  const onPay = useCallback(() => {
+  const onPay = useCallback(async () => {
     if (
       activeSafe === null ||
       event.safeAddress === undefined ||
@@ -78,6 +82,26 @@ export const TicketCheckout = () => {
       totals === null ||
       valueRaw === null
     ) {
+      return
+    }
+
+    // Backend narudžba PRIJE plaćanja (rezervacija inventoryja); backend
+    // nedostupan → 'skipped' i narudžba je čisto lokalna (točno E1). Kad je
+    // backend dostupan i eksplicitno odbije (rasprodano…), plaćanje se ne
+    // pokreće — to je autoritativan odgovor, ne mrežni pad.
+    setSubmitting(true)
+    setOrderRejected(null)
+    const outcome = await submitOrder({
+      event,
+      tier,
+      quantity: qty,
+      holders,
+      totals,
+      payerSafeAddress: activeSafe.address,
+    })
+    setSubmitting(false)
+    if (outcome.kind === 'rejected') {
+      setOrderRejected(outcome.code)
       return
     }
 
@@ -95,6 +119,7 @@ export const TicketCheckout = () => {
       payerSafeAddress: activeSafe.address,
       status: 'pending',
       createdAtMs: nowMs,
+      backendOrderId: outcome.kind === 'ok' ? outcome.backendOrderId : undefined,
     })
 
     const transfer: Eip681Transfer = {
@@ -218,7 +243,16 @@ export const TicketCheckout = () => {
           <Alert type="info" message={evStrings.checkout.eventInactive} displayIcon testID="ev-checkout-inactive" />
         )}
 
-        <SafeButton disabled={!canPay} onPress={canPay ? onPay : undefined} testID="ev-checkout-pay">
+        {orderRejected !== null && (
+          <Alert
+            type="warning"
+            message={evStrings.checkout.orderRejected[orderRejected] ?? evStrings.checkout.orderRejectedFallback}
+            displayIcon
+            testID="ev-checkout-rejected"
+          />
+        )}
+
+        <SafeButton disabled={!canPay} onPress={canPay ? () => void onPay() : undefined} testID="ev-checkout-pay">
           {evStrings.checkout.pay} {formatEur(totals.totalEur)} {currency.symbol}
         </SafeButton>
 

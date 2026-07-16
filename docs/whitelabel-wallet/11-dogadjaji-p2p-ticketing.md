@@ -1,6 +1,6 @@
 # 11 — Događaji: P2P ticketing marketplace (Entrio/Luma paritet bez posrednika)
 
-> Datum: 2026-07-16 · Status: **plan** (nijedna faza još nije isporučena) · Jezik: HR + EN sažetak (§9)
+> Datum: 2026-07-16 · Status: **E1 ✅ + E2 ✅** (E2 produkcijski deploy = ručni korak) · Jezik: HR + EN sažetak (§9)
 > Kontekst: [09 — Tržnica](09-trznica-marketplace.md) (isti payment rail i overlay obrazac),
 > [08 — KUNAPay](08-kunapay-consumer-brand.md), [01 — Vizija](01-vizija-i-strategija.md).
 > Backend: self-hosted Supabase `domovina-api` (`/Users/ms/git/domovinatv/domovina-api`), shema `pinka_finance`.
@@ -226,17 +226,19 @@ flowchart LR
   E3 --> E5["E5<br/>Računi/fiskalizacija za organizatore<br/>(naslanja se na Tržnica M3)"]
   E4 --> E5
 
+  classDef done fill:#eafbea,stroke:#2f855a,color:#14331f
   classDef todo fill:#e8f0ff,stroke:#2e5791,color:#0b2447
-  class E1,E2,E3,E4,E5 todo
+  class E1,E2 done
+  class E3,E4,E5 todo
 ```
 
-| #   | Faza                                                            | Handoff                                                           | Ovisi o                             | Status |
-| --- | --------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------- | ------ |
-| E1  | Feature-pack `events` + pilot katalog (MoMo 2027, BlockSplit)   | [dogadjaji-1-event-pack.md](handoffs/dogadjaji-1-event-pack.md)   | —                                   | ✅     |
-| E2  | Backend: eventi, narudžbe, onchain confirm, izdavanje ulaznica  | [dogadjaji-2-backend.md](handoffs/dogadjaji-2-backend.md)         | E1 (tipovi); ručno: pristup serveru | ⬜     |
-| E3  | QR ulaznice + skener ulaza + check-in                           | [dogadjaji-3-qr-checkin.md](handoffs/dogadjaji-3-qr-checkin.md)   | E2                                  | ⬜     |
-| E4  | Organizator self-service + discovery + pilot runbook (L. Sučić) | [dogadjaji-4-organizator.md](handoffs/dogadjaji-4-organizator.md) | E2; ručno: pilot dogovor, Safe      | ⬜     |
-| E5  | Računi/fiskalizacija za organizatore                            | — (plan se piše nakon Tržnica M3; isti servis, druga vertikala)   | E3, E4, Tržnica M3                  | ⬜     |
+| #   | Faza                                                            | Handoff                                                           | Ovisi o                             | Status            |
+| --- | --------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------- | ----------------- |
+| E1  | Feature-pack `events` + pilot katalog (MoMo 2027, BlockSplit)   | [dogadjaji-1-event-pack.md](handoffs/dogadjaji-1-event-pack.md)   | —                                   | ✅                |
+| E2  | Backend: eventi, narudžbe, onchain confirm, izdavanje ulaznica  | [dogadjaji-2-backend.md](handoffs/dogadjaji-2-backend.md)         | E1 (tipovi); ručno: pristup serveru | ✅ (deploy ručno) |
+| E3  | QR ulaznice + skener ulaza + check-in                           | [dogadjaji-3-qr-checkin.md](handoffs/dogadjaji-3-qr-checkin.md)   | E2                                  | ⬜                |
+| E4  | Organizator self-service + discovery + pilot runbook (L. Sučić) | [dogadjaji-4-organizator.md](handoffs/dogadjaji-4-organizator.md) | E2; ručno: pilot dogovor, Safe      | ⬜                |
+| E5  | Računi/fiskalizacija za organizatore                            | — (plan se piše nakon Tržnica M3; isti servis, druga vertikala)   | E3, E4, Tržnica M3                  | ⬜                |
 
 **MVP definicija (E1–E3):** posjetitelj u brandiranom buildu otvori tab Događaji, vidi Money
 Motion 2027, kupi 2 imenske ulaznice (unese imena), plati točan EURe iznos izravno na

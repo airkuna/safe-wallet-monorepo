@@ -74,7 +74,7 @@ E2 se izvršava u repou `/Users/ms/git/domovinatv/domovina-api`.
 | #   | Faza                                                           | Dokument                                                 | Ovisi o                   | Status |
 | --- | -------------------------------------------------------------- | -------------------------------------------------------- | ------------------------- | ------ |
 | E1  | Feature-pack `events` + pilot katalog (MoMo 2027, BlockSplit)  | [dogadjaji-1-event-pack.md](dogadjaji-1-event-pack.md)   | —                         | ✅     |
-| E2  | Backend: eventi, narudžbe, onchain confirm, izdavanje ulaznica | [dogadjaji-2-backend.md](dogadjaji-2-backend.md)         | E1; ručno: server pristup | ⬜     |
+| E2  | Backend: eventi, narudžbe, onchain confirm, izdavanje ulaznica | [dogadjaji-2-backend.md](dogadjaji-2-backend.md)         | E1; ručno: server pristup | ✅     |
 | E3  | QR ulaznice + skener ulaza + check-in                          | [dogadjaji-3-qr-checkin.md](dogadjaji-3-qr-checkin.md)   | E2                        | ⬜     |
 | E4  | Organizator self-service + discovery + pilot runbook           | [dogadjaji-4-organizator.md](dogadjaji-4-organizator.md) | E2; ručno: pilot dogovor  | ⬜     |
 | E5  | Računi/fiskalizacija za organizatore                           | — (plan nakon Tržnica M3; isti servis, druga vertikala)  | E3, E4, Tržnica M3        | ⬜     |

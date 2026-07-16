@@ -1,6 +1,18 @@
 export { isEventsBrand } from './isEventsBrand'
-export { EVENTS, EVENT_SLUGS, getEvent, getTier, isTierOnSale } from './catalog/registry'
+export {
+  EVENTS,
+  EVENT_SLUGS,
+  getEvent,
+  getEventCatalog,
+  getTier,
+  isTierOnSale,
+  setBackendEvents,
+} from './catalog/registry'
+export { mapFeedRowToEvent, refreshEventCatalog, useEventCatalog } from './catalog/backendSource'
 export { DEFAULT_CURRENCY } from './catalog/currency'
+export { isEventsBackendConfigured } from './api/config'
+export { submitOrder, recordTicketPayment, syncTicketOrders, useTicketSync } from './api/useTicketSync'
+export type { SubmitOutcome } from './api/useTicketSync'
 export type {
   EventConfig,
   EventType,
@@ -10,8 +22,8 @@ export type {
   CurrencyConfig,
 } from './catalog/types'
 export { evStrings } from './strings'
-export { useTicketOrders, addTicketOrder, markTicketOrderPaid } from './state/useTickets'
-export type { TicketOrder, TicketOrderStatus } from './state/useTickets'
+export { useTicketOrders, addTicketOrder, markTicketOrderPaid, applyBackendSync } from './state/useTickets'
+export type { TicketOrder, TicketOrderStatus, IssuedTicket } from './state/useTickets'
 export {
   ticketTotals,
   toBaseUnits,

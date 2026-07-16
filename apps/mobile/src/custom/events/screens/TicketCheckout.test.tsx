@@ -1,5 +1,5 @@
 import React from 'react'
-import { fireEvent, render } from '@/src/tests/test-utils'
+import { fireEvent, render, waitFor } from '@/src/tests/test-utils'
 import { TicketCheckout } from './TicketCheckout'
 import { evStrings } from '../strings'
 import { testEvent, TEST_EVENT_SAFE } from './testEvent'
@@ -31,6 +31,11 @@ jest.mock('../state/useTickets', () => ({
   addTicketOrder: (order: unknown) => mockAddTicketOrder(order),
 }))
 
+const mockSubmitOrder = jest.fn<Promise<{ kind: string; code?: string; backendOrderId?: string }>, [unknown]>()
+jest.mock('../api/useTicketSync', () => ({
+  submitOrder: (params: unknown) => mockSubmitOrder(params),
+}))
+
 const activeSafe: SafeInfo = { address: SAFE_ADDRESS, chainId: '100' }
 
 const renderWithSafe = (safe: SafeInfo | null) => render(<TicketCheckout />, { initialStore: { activeSafe: safe } })
@@ -40,6 +45,7 @@ describe('TicketCheckout', () => {
     jest.clearAllMocks()
     mockEvent = testEvent()
     mockParams.mockReturnValue({ event: 'test-conf', tier: 'regular' })
+    mockSubmitOrder.mockResolvedValue({ kind: 'skipped' })
   })
 
   it('shows the unit price and multiplies the total with the stepper', () => {
@@ -96,13 +102,16 @@ describe('TicketCheckout', () => {
     expect(queryByTestId('ev-checkout-holder-name-0')).toBeNull()
   })
 
-  it('saves the order locally and hands the total to the Send flow as an EIP-681 prefill', () => {
+  it('saves the order locally and hands the total to the Send flow as an EIP-681 prefill', async () => {
     const { getByTestId } = renderWithSafe(activeSafe)
 
     fireEvent.press(getByTestId('ev-checkout-qty-plus'))
     fireEvent.changeText(getByTestId('ev-checkout-holder-name-0'), 'Ana Anić')
     fireEvent.changeText(getByTestId('ev-checkout-holder-name-1'), 'Ivo Ivić')
     fireEvent.press(getByTestId('ev-checkout-pay'))
+
+    // onPay je async (backend submit prije plaćanja; bez backenda = no-op)
+    await waitFor(() => expect(mockAddTicketOrder).toHaveBeenCalled())
 
     expect(mockAddTicketOrder).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -127,5 +136,42 @@ describe('TicketCheckout', () => {
         }),
       }),
     )
+  })
+
+  it('attaches the backend order id when the backend accepts the order', async () => {
+    mockSubmitOrder.mockResolvedValue({ kind: 'ok', backendOrderId: 'be-uuid-1' })
+
+    const { getByTestId } = renderWithSafe(activeSafe)
+    fireEvent.changeText(getByTestId('ev-checkout-holder-name-0'), 'Ana Anić')
+    fireEvent.press(getByTestId('ev-checkout-pay'))
+
+    await waitFor(() => expect(mockAddTicketOrder).toHaveBeenCalled())
+    expect(mockAddTicketOrder).toHaveBeenCalledWith(expect.objectContaining({ backendOrderId: 'be-uuid-1' }))
+    expect(mockReplace).toHaveBeenCalled()
+  })
+
+  it('blocks payment when the backend authoritatively rejects the order', async () => {
+    mockSubmitOrder.mockResolvedValue({ kind: 'rejected', code: 'tier_sold_out' })
+
+    const { getByTestId, findByTestId, getByText } = renderWithSafe(activeSafe)
+    fireEvent.changeText(getByTestId('ev-checkout-holder-name-0'), 'Ana Anić')
+    fireEvent.press(getByTestId('ev-checkout-pay'))
+
+    expect(await findByTestId('ev-checkout-rejected')).toBeTruthy()
+    expect(getByText(evStrings.checkout.orderRejected['tier_sold_out'])).toBeTruthy()
+    expect(mockAddTicketOrder).not.toHaveBeenCalled()
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the local-only E1 order when the backend is unreachable', async () => {
+    mockSubmitOrder.mockResolvedValue({ kind: 'skipped' })
+
+    const { getByTestId } = renderWithSafe(activeSafe)
+    fireEvent.changeText(getByTestId('ev-checkout-holder-name-0'), 'Ana Anić')
+    fireEvent.press(getByTestId('ev-checkout-pay'))
+
+    await waitFor(() => expect(mockAddTicketOrder).toHaveBeenCalled())
+    expect(mockAddTicketOrder).toHaveBeenCalledWith(expect.objectContaining({ backendOrderId: undefined }))
+    expect(mockReplace).toHaveBeenCalled()
   })
 })

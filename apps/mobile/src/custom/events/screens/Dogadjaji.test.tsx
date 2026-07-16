@@ -8,8 +8,8 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: jest.fn(), dismissTo: jest.fn() }),
 }))
 
-jest.mock('../catalog/registry', () => ({
-  EVENTS: [
+jest.mock('../catalog/backendSource', () => ({
+  useEventCatalog: () => [
     // Inline da izbjegnemo hoisting problem jest.mock factoryja.
     {
       slug: 'test-conf',

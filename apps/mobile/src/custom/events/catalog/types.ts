@@ -31,8 +31,13 @@ export type OrganizerConfig = {
 }
 
 export type TicketTierConfig = {
-  /** Stabilan identifikator unutar eventa (slug). */
+  /** Stabilan identifikator unutar eventa (slug ili backend UUID). */
   id: string
+  /**
+   * Backend UUID tiera (pinka_finance.campaign_tiers.id) kad event dolazi s
+   * backend kataloga (E2); config-only tieri ga nemaju → narudžba je lokalna.
+   */
+  backendTierId?: string
   naziv: string
   opisHr?: string
   /** Cijena u EUR kao decimalni string ("149.00") — bez floata. */
@@ -55,6 +60,11 @@ export type TicketTierConfig = {
 export type EventConfig = {
   /** Stabilan identifikator eventa (slug). */
   slug: string
+  /**
+   * Backend UUID kampanje (pinka_finance.campaigns.id) kad event dolazi s
+   * backend kataloga (E2); config-only eventi ga nemaju → narudžba je lokalna.
+   */
+  backendCampaignId?: string
   naziv: string
   opisHr: string
   opisEn?: string

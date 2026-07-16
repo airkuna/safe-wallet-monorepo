@@ -65,6 +65,14 @@ export interface BrandManifest {
     reservedNames?: string[]
   }
   /**
+   * Events (Događaji) backend for the `events` feature pack — the Supabase
+   * edge functions base URL (e.g. `https://api.domovina.ai/functions/v1`).
+   * Absent → the catalog stays config-only and orders live on-device only.
+   */
+  events?: {
+    apiBaseUrl: string
+  }
+  /**
    * Opting in enables OTA (EAS Update) for this brand. The certificate path is
    * relative to `brand/` (e.g. `certs/acme/certificate.pem`); the matching
    * private key stays outside the repo (see `keys/` in .gitignore).

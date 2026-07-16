@@ -20,6 +20,7 @@ jest.mock('react-native-mmkv', () => ({
 import { renderHook, act } from '@testing-library/react-native'
 import {
   addTicketOrder,
+  applyBackendSync,
   clearTicketOrdersForTesting,
   markTicketOrderPaid,
   useTicketOrders,
@@ -69,6 +70,49 @@ describe('useTickets', () => {
     expect(paid?.status).toBe('paid-unverified')
     expect(paid?.txHash).toBe('0xabc')
     expect(result.current.find((order) => order.id === 'b')?.status).toBe('pending')
+  })
+
+  it('applies backend sync: state, tickets and issued status', () => {
+    const { result } = renderHook(() => useTicketOrders())
+
+    act(() => {
+      addTicketOrder(makeOrder('a'))
+      applyBackendSync('a', {
+        backendState: 'paid',
+        confirmedTxHash: '0xabc',
+        tickets: [{ serial: 'MON-000001', holderName: 'Ana Anić', state: 'issued', qrToken: 'tok-1' }],
+      })
+    })
+
+    const order = result.current[0]
+    expect(order.status).toBe('issued')
+    expect(order.backendState).toBe('paid')
+    expect(order.confirmedTxHash).toBe('0xabc')
+    expect(order.tickets?.[0]).toEqual({
+      serial: 'MON-000001',
+      holderName: 'Ana Anić',
+      state: 'issued',
+      qrToken: 'tok-1',
+    })
+  })
+
+  it('never overwrites a delivered QR token with an empty refetch', () => {
+    const { result } = renderHook(() => useTicketOrders())
+
+    act(() => {
+      addTicketOrder(makeOrder('a'))
+      applyBackendSync('a', {
+        tickets: [{ serial: 'MON-000001', state: 'issued', qrToken: 'tok-1' }],
+      })
+      // refetch nakon jednokratne dostave: token više ne stiže s backenda
+      applyBackendSync('a', {
+        tickets: [{ serial: 'MON-000001', state: 'checked_in', qrToken: undefined }],
+      })
+    })
+
+    const order = result.current[0]
+    expect(order.tickets?.[0].qrToken).toBe('tok-1')
+    expect(order.tickets?.[0].state).toBe('checked_in')
   })
 
   it('keeps a referentially stable snapshot between renders', () => {

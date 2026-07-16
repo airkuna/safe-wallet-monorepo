@@ -110,6 +110,7 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
     backend: manifest.backend,
     features: manifest.features,
     identity: manifest.identity,
+    events: manifest.events,
   }
 }
 

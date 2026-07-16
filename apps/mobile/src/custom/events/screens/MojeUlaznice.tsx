@@ -2,17 +2,21 @@ import React, { useCallback } from 'react'
 import { Share } from 'react-native'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
+import { useTicketSync } from '../api/useTicketSync'
 import { getEvent, getTier } from '../catalog/registry'
 import { composeTicketOrderMessage, formatEur } from '../logic/ticketOrder'
 import { useTicketOrders, type TicketOrder } from '../state/useTickets'
 import { evStrings } from '../strings'
 
 /**
- * Lokalna knjiga narudžbi ulaznica + MVP kanal prema organizatoru: share
- * sheet s tekstom narudžbe (backend s pravim QR ulaznicama je faza E2/E3).
+ * Lokalna knjiga narudžbi + backend sync (E2): na mount se retroaktivno
+ * potvrde uplate (tx hash → events-confirm) i povuku izdane ulaznice sa
+ * serialom, holderom i jednokratno isporučenim QR tokenom. Bez backenda
+ * ekran radi točno kao u E1 (share sheet prema organizatoru).
  */
 export const MojeUlaznice = () => {
   const orders = useTicketOrders()
+  const { syncing } = useTicketSync()
 
   const onShare = useCallback(async (order: TicketOrder) => {
     const event = getEvent(order.eventSlug)
@@ -42,6 +46,12 @@ export const MojeUlaznice = () => {
       contentContainerStyle={{ padding: '$4', paddingBottom: '$10' }}
     >
       <YStack gap="$3">
+        {syncing && (
+          <Text fontSize="$2" color="$colorSecondary" testID="ev-tickets-syncing">
+            {evStrings.tickets.syncing}
+          </Text>
+        )}
+
         {orders.length === 0 && (
           <Text fontSize="$3" color="$colorSecondary" testID="ev-tickets-empty">
             {evStrings.tickets.empty}
@@ -85,9 +95,30 @@ export const MojeUlaznice = () => {
                 {evStrings.tickets.status[order.status]}
               </Text>
 
-              <SafeButton size="$sm" onPress={() => void onShare(order)} testID={`ev-ticket-share-${order.id}`}>
-                {evStrings.tickets.share}
-              </SafeButton>
+              {order.tickets !== undefined && order.tickets.length > 0 && (
+                <YStack gap="$1" testID={`ev-ticket-issued-${order.id}`}>
+                  <Text fontSize="$3" fontWeight="600">
+                    {evStrings.tickets.issuedHeader}
+                  </Text>
+                  {order.tickets.map((ticket) => (
+                    <XStack key={ticket.serial} justifyContent="space-between" gap="$2">
+                      <Text fontSize="$3" color="$colorSecondary">
+                        {ticket.serial}
+                        {ticket.holderName !== undefined ? ` · ${ticket.holderName}` : ''}
+                      </Text>
+                      <Text fontSize="$3" color="$colorSecondary">
+                        {evStrings.tickets.ticketState[ticket.state]}
+                      </Text>
+                    </XStack>
+                  ))}
+                </YStack>
+              )}
+
+              {order.status !== 'issued' && (
+                <SafeButton size="$sm" onPress={() => void onShare(order)} testID={`ev-ticket-share-${order.id}`}>
+                  {evStrings.tickets.share}
+                </SafeButton>
+              )}
             </YStack>
           )
         })}

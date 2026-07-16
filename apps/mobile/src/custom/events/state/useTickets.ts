@@ -10,7 +10,16 @@ import type { TicketHolder, TicketTotals } from '../logic/ticketOrder'
  * uređaju; prava verifikacija uplate i izdane ulaznice = faza E2.
  */
 
-export type TicketOrderStatus = 'pending' | 'paid-unverified'
+export type TicketOrderStatus = 'pending' | 'paid-unverified' | 'issued'
+
+/** Izdana ulaznica s backenda (E2) — QR token stiže jednokratno i čuva se ovdje. */
+export type IssuedTicket = {
+  serial: string
+  holderName?: string
+  state: 'issued' | 'checked_in' | 'void'
+  /** Opaque QR token (backend čuva samo hash); undefined dok nije isporučen. */
+  qrToken?: string
+}
 
 export type TicketOrder = {
   /** = referenca (stabilan id). */
@@ -29,6 +38,14 @@ export type TicketOrder = {
   txHash?: string
   status: TicketOrderStatus
   createdAtMs: number
+  /** Backend narudžba (E2): UUID = idempotency ključ i bearer capability. */
+  backendOrderId?: string
+  /** Zadnje poznato backend stanje narudžbe (pending|paid|expired|…). */
+  backendState?: string
+  /** Tx hash koji je backend verificirao (nakon uspješnog events-confirm). */
+  confirmedTxHash?: string
+  /** Izdane ulaznice s backenda; postavlja status na 'issued'. */
+  tickets?: IssuedTicket[]
 }
 
 const storage = createMMKV({ id: 'events' })
@@ -87,8 +104,44 @@ export const markTicketOrderPaid = (orderId: string, txHash?: string): void => {
   )
 }
 
+/**
+ * Merge backend sync rezultata u lokalnu narudžbu. QR tokeni se isporučuju
+ * JEDNOKRATNO (backend potom čuva samo hash), pa se već spremljeni token po
+ * serialu nikad ne pregazi praznim.
+ */
+export const applyBackendSync = (
+  orderId: string,
+  patch: { backendState?: string; confirmedTxHash?: string; tickets?: IssuedTicket[] },
+): void => {
+  persist(
+    getSnapshot().map((order) => {
+      if (order.id !== orderId) {
+        return order
+      }
+      const previousBySerial = new Map((order.tickets ?? []).map((ticket) => [ticket.serial, ticket]))
+      const tickets =
+        patch.tickets === undefined
+          ? order.tickets
+          : patch.tickets.map((ticket) => ({
+              ...ticket,
+              qrToken: ticket.qrToken ?? previousBySerial.get(ticket.serial)?.qrToken,
+            }))
+      return {
+        ...order,
+        backendState: patch.backendState ?? order.backendState,
+        confirmedTxHash: patch.confirmedTxHash ?? order.confirmedTxHash,
+        tickets,
+        status: tickets !== undefined && tickets.length > 0 ? ('issued' as const) : order.status,
+      }
+    }),
+  )
+}
+
 /** Sve narudžbe ulaznica na uređaju, najnovija prva. */
 export const useTicketOrders = (): TicketOrder[] => useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+
+/** Snapshot bez subscriptiona (za sync logiku izvan Reacta). */
+export const getTicketOrders = (): TicketOrder[] => getSnapshot()
 
 /** Samo za testove — čisti namespace. */
 export const clearTicketOrdersForTesting = (): void => {

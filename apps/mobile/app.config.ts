@@ -90,6 +90,7 @@ const config: ExpoConfig = {
       backend: brand.backend,
       features: brand.features,
       identity: brand.identity,
+      events: brand.events,
     },
   },
   orientation: 'portrait',

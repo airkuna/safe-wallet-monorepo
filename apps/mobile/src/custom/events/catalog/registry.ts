@@ -70,9 +70,41 @@ export const EVENTS: EventConfig[] = [MONEY_MOTION_2027, BLOCKSPLIT_2027]
 
 export const EVENT_SLUGS = EVENTS.map((event) => event.slug)
 
+// ── dinamički katalog: config fallback + backend source (E2) ────────────────
+// Snapshot počinje kao config lista; uspješan fetch backend kataloga
+// (backendSource.ts) je zamjenjuje merge-om. Backend nedostupan → snapshot
+// ostaje config (točno E1 ponašanje).
+let catalogSnapshot: EventConfig[] = EVENTS
+
+const catalogListeners = new Set<() => void>()
+
+export const subscribeEventCatalog = (listener: () => void): (() => void) => {
+  catalogListeners.add(listener)
+  return () => catalogListeners.delete(listener)
+}
+
+/** Trenutni katalog (backend merge kad postoji, inače config). */
+export const getEventCatalog = (): EventConfig[] => catalogSnapshot
+
+/**
+ * Merge backend evenata u katalog: backend pobjeđuje po slugu, config eventi
+ * koje backend (još) ne poznaje ostaju vidljivi.
+ */
+export const setBackendEvents = (backendEvents: EventConfig[]): void => {
+  const backendSlugs = new Set(backendEvents.map((event) => event.slug))
+  catalogSnapshot = [...backendEvents, ...EVENTS.filter((event) => !backendSlugs.has(event.slug))]
+  catalogListeners.forEach((listener) => listener())
+}
+
+/** Samo za testove — vraća katalog na config fallback. */
+export const resetEventCatalogForTesting = (): void => {
+  catalogSnapshot = EVENTS
+  catalogListeners.forEach((listener) => listener())
+}
+
 /** Event po slugu; nepoznat slug → prvi u registru (nikad ne ruši UI). */
 export const getEvent = (slug: string | undefined): EventConfig =>
-  EVENTS.find((event) => event.slug === slug) ?? EVENTS[0]
+  catalogSnapshot.find((event) => event.slug === slug) ?? catalogSnapshot[0]
 
 export const getTier = (event: EventConfig, tierId: string | undefined): TicketTierConfig | undefined =>
   event.tiers.find((tier) => tier.id === tierId)

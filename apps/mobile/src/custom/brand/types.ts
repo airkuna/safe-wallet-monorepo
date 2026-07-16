@@ -18,6 +18,11 @@ export interface RuntimeBrand {
     resolverChainId?: string
     reservedNames?: string[]
   }
+  /** Events (Događaji) backend; absent → catalog stays config-only (E1). */
+  events?: {
+    /** Supabase edge functions base, e.g. `https://api.domovina.ai/functions/v1`. */
+    apiBaseUrl: string
+  }
   backend?: {
     /** Gateway for production builds only; dev builds stay on staging. */
     cgwBaseUrl?: string
