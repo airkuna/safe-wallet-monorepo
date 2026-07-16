@@ -1,7 +1,8 @@
 /**
  * Tipovi REST ugovora s domovina-api events funkcijama (events-feed,
- * events-order, events-confirm, events-tickets). Server-side ugovor:
- * domovina-api/supabase/functions/events-* + docs/events-ticketing-curl-scenario.md.
+ * events-order, events-confirm, events-tickets, events-checkin). Server-side
+ * ugovor: domovina-api/supabase/functions/events-* +
+ * docs/events-ticketing-curl-scenario.md.
  */
 
 export type FeedTier = {
@@ -107,3 +108,28 @@ export type BackendOrder = {
   tx_hash?: string | null
   tickets: BackendTicket[]
 }
+
+/** Poslovni ishod skena (redeem_ticket RPC kroz events-checkin). */
+export type CheckinStatus = 'checked_in' | 'already_checked_in' | 'void' | 'not_found'
+
+export type CheckinResponse = {
+  status: CheckinStatus
+  serial?: string
+  holder_name?: string | null
+  tier_title?: string | null
+  event_title?: string | null
+  checked_in_at?: string | null
+  /** Tko je skenirao PRVI ulaz (samo kod already_checked_in). */
+  checked_in_by_email?: string | null
+  /** Ukupan broj ulazaka na eventu nakon ovog skena (brojač na pultu). */
+  checked_in_count?: number
+}
+
+/**
+ * Trostruki ishod check-ina: poslovni odgovor (uklj. already_checked_in) /
+ * autoritativno odbijenje poziva (401/403/format) / backend nedostupan.
+ */
+export type CheckinResult =
+  | { kind: 'ok'; response: CheckinResponse }
+  | { kind: 'rejected'; code: string }
+  | { kind: 'unreachable' }

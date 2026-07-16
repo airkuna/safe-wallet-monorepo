@@ -85,4 +85,95 @@ dodavanje skener-osoblja (E4), NFT ulaznice (Tier 2+ receipts plana).
 
 ## Zapisnik izvršenja
 
-(popunjava agent koji izvrši fazu)
+> Izvršeno: 2026-07-17 (Claude Code sesija). Verify (mobile) zelen (414 suita /
+> 3329 testova); backend SQL verificiran end-to-end na lokalnom Postgresu 17.
+
+### Isporučeno — domovina-api (grana `main`, commit `099d194`)
+
+- Migracija `20260717120000_events_checkin.sql` (idempotentna, 2× run čist):
+  - `redeem_ticket(qr_token)` — security definer; sha256 hash lookup, org-admin
+    autorizacija (`has_role_on_account(campaign.account_id,'admin')`),
+    `issued→checked_in` u JEDNOJ update naredbi uz `for update` row lock;
+    idempotentno — drugi sken vraća PRVI rezultat (`already_checked_in` +
+    `checked_in_at` + e-mail skenera + brojač). Poslovni ishodi (not_found /
+    void / already_checked_in) su status jsonb, NE exception — audit eventi
+    (`ticket.checked_in`, `ticket.checkin_duplicate`) prežive. Exceptioni samo
+    za neispravan poziv (`not_authenticated`/`not_authorized`/`invalid_token`).
+  - `void_ticket(ticket_id)` — org admin; samo `issued→void` (iskorištena se ne
+    poništava — vraća `already_checked_in`); audit `ticket.voided`.
+- Edge funkcija `events-checkin`: interni `getUser` (obrazac handoff-consume) +
+  RPC kroz USER klijent (anon key + Authorization header ⇒ `auth.uid()` =
+  skener); 401/403/400 mapiranje; tolerira i payload s `dgdj1:` prefiksom.
+  `config.toml`: `verify_jwt = false` (getUser interno).
+- Curl scenarij §7 (check-in) + prošireni deploy koraci.
+
+### Isporučeno — monorepo (grana `custom`)
+
+- `events/logic/qrPayload.ts` — format `dgdj1:<64-hex>`; build/parse + testovi,
+  uklj. dokaz da `resolveScannedAddress(dgdj1…) === null` (payment choke-point
+  netaknut — NULA upstream izmjena Send flowa; formati su međusobno gluhi).
+- `events/screens/UlaznicaQr.tsx` + ruta `app/events/ticket.tsx` — QR po komadu
+  (holder ime, tier, serial), crno-na-bijelom neovisno o teme (brightness na
+  ulazu); "nije isporučen" stanje; napomena za iskorištenu/poništenu.
+  MojeUlaznice: tap na izdanu ulaznicu s tokenom otvara QR.
+- `events/screens/SkenerUlaza.tsx` + ruta `app/events/scanner.tsx` — reuse host
+  `QrCamera`/`useCameraPermissionFlow`/`ScanErrorOverlay`, vlastiti parser
+  (payment/adresni QR = glasno "Nije QR ulaznice", checkin API se NE zove);
+  veliki ✅/⛔ + ime + tier + brojač ulazaka; `already_checked_in` pokazuje
+  vrijeme i skenera prvog ulaska.
+- `events/state/useEntryLog.ts` — MMKV log skenova (samo fingerprint tokena,
+  prvih 16 hex — bearer token se ne akumulira na uređaju); lokalni
+  anti-double-entry pre-check bez mreže (isti uređaj) + brojač + audit.
+- `events/state/useScannerAuth.ts` — pristupni token skenera (GoTrue JWT org
+  admina; paste u ekran, MMKV). Transport, NE autorizacija.
+- `api/client.ts` `checkinTicket` + `CheckinResult` tipovi (4xx kod =
+  autoritativno; 5xx/mreža = `unreachable`).
+- Testovi: qrPayload (5), useEntryLog (6), useScannerAuth (3), client checkin
+  (5), SkenerUlaza (8), UlaznicaQr (5) — pack ukupno 110 testova / 15 suita.
+
+### Ključne odluke
+
+1. **Online-only check-in (MVP)** — opaque token traži mrežu; potpisani
+   Ed25519 voucher + odgođeni redeem je dokumentirani upgrade path (receipts
+   plan Tier 1; javni ključ u brand config, `useEntryLog` već ima sync-ready
+   strukturu). Pad mreže: jasan ⛔ "sken nije potvrđen", zapis `error` u log,
+   ulaz se NE priznaje ni ne broji. Lokalni pre-check duplikata radi i bez
+   mreže, ali samo za skenove OVOG uređaja (backend hvata cross-device).
+2. **Skener auth = paste GoTrue JWT** ("pristupni token"): wallet je
+   self-custody bez GoTrue sesije, a `redeem_ticket` traži `auth.uid()` s
+   admin rolom. MVP: organizator dobije JWT (pinka SPA login / operater) i
+   zalijepi ga u skener; istek (1 h) ⇒ 401 s porukom "zatraži novi". Pravi
+   organizator login/refresh + self-service skener osoblje = E4.
+3. **Ulaz u skener = long-press na "Tvoj događaj ovdje"** karticu huba:
+   organizator-nost se klijentski NE MOŽE dokazati, pa bi vidljivi gumb ili
+   "skriveni flag" bili lažna sigurnost — autorizacija je uvijek server-side
+   (svaki sken → RPC role check), diskretni ulaz samo smanjuje šum za kupce.
+4. **Brojač ulazaka**: server `checked_in_count` je autoritativan (odgovor
+   svakog skena); lokalni MMKV count je fallback prikaz na kameri.
+5. **Fingerprint umjesto tokena u logu** (prvih 16 hex): organizatorov uređaj
+   ne smije čuvati upotrebljive bearer tokene ulaznica.
+
+### Verifikacija
+
+- Backend: svih 35 migracija čisto na lokalnom Postgresu 17 (Supabase stub);
+  E3 migracija idempotentna (2×). Matrica: prvi sken ✅ (ime+tier+brojač) →
+  drugi sken ⛔ `already_checked_in` (vrijeme + e-mail skenera, brojač ne
+  raste) → ne-admin `not_authorized` → bez JWT-a `not_authenticated` → krivi
+  format `invalid_token` → nepoznat token `not_found` → void flow (voided /
+  redeem→void / already_void / used→already_checked_in) → audit eventi
+  persistirani. Dokumentirano u curl scenariju §7.
+- Monorepo: `node scripts/verify.mjs --changed --workspace=mobile` exit 0
+  (type-check, lint, prettier, 414 suita / 3329 testova). Expo typed routes
+  regenerirani kratkim `npx expo start --offline` (E1 gotcha).
+
+### Odstupanja / otvoreno (ručni koraci)
+
+- **Produkcijski deploy NIJE izvršen** (nema SSH): `./scripts/db-migrate.sh`
+  (1 nova migracija) + `./scripts/deploy-functions.sh --only=events-checkin`
+  (+ restart) — koraci na dnu curl scenarija.
+- **Kamera nije testirana na fizičkom uređaju** u ovoj sesiji (workflow: build
+  samo na eksplicitan zahtjev); QrCamera je postojeća, dokazana komponenta.
+- **Kriterij "<2 s na stvarnoj mreži"** nije mjeren (nema prod deploya) —
+  izmjeriti uz pilot; RPC je jedan indexirani lookup + update.
+- Ručni preduvjeti iz tablice (org admin memberi za uređaje na ulazu, pilot
+  procedura na pultu) i dalje otvoreni — E4/pilot runbook.

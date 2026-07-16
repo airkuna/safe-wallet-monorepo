@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { server } from '@/src/tests/server'
-import { confirmTicketOrder, fetchBackendOrders, fetchEventsFeed, submitTicketOrder } from './client'
+import { checkinTicket, confirmTicketOrder, fetchBackendOrders, fetchEventsFeed, submitTicketOrder } from './client'
 import type { SubmitOrderRequest } from './types'
 
 const BASE = 'https://events.test/functions/v1'
@@ -143,6 +143,79 @@ describe('events api client', () => {
     it('returns null on failure', async () => {
       server.use(http.post(`${BASE}/events-tickets`, () => HttpResponse.json({ error: 'x' }, { status: 500 })))
       expect(await fetchBackendOrders(['o1'])).toBeNull()
+    })
+  })
+
+  describe('checkinTicket', () => {
+    const TOKEN = 'ab'.repeat(32)
+
+    it('sends the bearer token and returns the check-in response', async () => {
+      let receivedAuth: string | null = null
+      server.use(
+        http.post(`${BASE}/events-checkin`, ({ request }) => {
+          receivedAuth = request.headers.get('authorization')
+          return HttpResponse.json({
+            status: 'checked_in',
+            serial: 'MON-000001',
+            holder_name: 'Ana Anić',
+            tier_title: 'Regular',
+            checked_in_count: 1,
+          })
+        }),
+      )
+      const result = await checkinTicket(TOKEN, 'jwt-org-admina')
+      expect(receivedAuth).toBe('Bearer jwt-org-admina')
+      expect(result.kind).toBe('ok')
+      if (result.kind === 'ok') {
+        expect(result.response.status).toBe('checked_in')
+        expect(result.response.holder_name).toBe('Ana Anić')
+        expect(result.response.checked_in_count).toBe(1)
+      }
+    })
+
+    it('returns the already_checked_in business outcome as ok (anti-double-entry data)', async () => {
+      server.use(
+        http.post(`${BASE}/events-checkin`, () =>
+          HttpResponse.json({
+            status: 'already_checked_in',
+            serial: 'MON-000001',
+            checked_in_at: '2027-03-10T09:00:00Z',
+            checked_in_by_email: 'admin@momo.test',
+            checked_in_count: 42,
+          }),
+        ),
+      )
+      const result = await checkinTicket(TOKEN, 'jwt')
+      expect(result.kind).toBe('ok')
+      if (result.kind === 'ok') {
+        expect(result.response.status).toBe('already_checked_in')
+        expect(result.response.checked_in_by_email).toBe('admin@momo.test')
+      }
+    })
+
+    it('maps 401/403 machine codes to an authoritative rejection', async () => {
+      server.use(
+        http.post(`${BASE}/events-checkin`, () => HttpResponse.json({ error: 'not_authenticated' }, { status: 401 })),
+      )
+      expect(await checkinTicket(TOKEN, 'stari-jwt')).toEqual({ kind: 'rejected', code: 'not_authenticated' })
+
+      server.use(
+        http.post(`${BASE}/events-checkin`, () => HttpResponse.json({ error: 'not_authorized' }, { status: 403 })),
+      )
+      expect(await checkinTicket(TOKEN, 'jwt-ne-admina')).toEqual({ kind: 'rejected', code: 'not_authorized' })
+    })
+
+    it('maps 5xx and network failures to unreachable (online-only: scan not honoured)', async () => {
+      server.use(http.post(`${BASE}/events-checkin`, () => HttpResponse.json({ error: 'x' }, { status: 500 })))
+      expect(await checkinTicket(TOKEN, 'jwt')).toEqual({ kind: 'unreachable' })
+
+      server.use(http.post(`${BASE}/events-checkin`, () => HttpResponse.error()))
+      expect(await checkinTicket(TOKEN, 'jwt')).toEqual({ kind: 'unreachable' })
+    })
+
+    it('is unreachable when the backend is not configured', async () => {
+      mockApiBaseUrl = undefined
+      expect(await checkinTicket(TOKEN, 'jwt')).toEqual({ kind: 'unreachable' })
     })
   })
 })

@@ -68,24 +68,23 @@ export const Dogadjaji = () => {
           </XStack>
         </TouchableOpacity>
 
-        <XStack
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$4"
-          padding="$4"
-          alignItems="center"
-          gap="$3"
-          testID="ev-hub-your-event"
-        >
-          <SafeFontIcon name="plus" size={20} color="$colorSecondary" />
-          <YStack flex={1} gap="$1">
-            <Text fontSize="$4" fontWeight="600" color="$colorSecondary">
-              {evStrings.hub.yourEventHere}
-            </Text>
-            <Text fontSize="$3" color="$colorSecondary">
-              {evStrings.hub.yourEventHereDesc}
-            </Text>
-          </YStack>
-        </XStack>
+        {/* Organizatorski ulaz: long-press otvara Skener ulaza. Namjerno
+            diskretno — tko SMIJE skenirati zna server (redeem_ticket RPC,
+            org admin role); klijentski se organizator ne može dokazati pa
+            "skrivanje" gumba ne bi bilo nikakva zaštita. */}
+        <TouchableOpacity onLongPress={() => router.push('/events/scanner')} testID="ev-hub-your-event">
+          <XStack backgroundColor="$backgroundSecondary" borderRadius="$4" padding="$4" alignItems="center" gap="$3">
+            <SafeFontIcon name="plus" size={20} color="$colorSecondary" />
+            <YStack flex={1} gap="$1">
+              <Text fontSize="$4" fontWeight="600" color="$colorSecondary">
+                {evStrings.hub.yourEventHere}
+              </Text>
+              <Text fontSize="$3" color="$colorSecondary">
+                {evStrings.hub.yourEventHereDesc}
+              </Text>
+            </YStack>
+          </XStack>
+        </TouchableOpacity>
       </YStack>
     </ScrollView>
   )

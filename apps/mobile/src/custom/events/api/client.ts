@@ -2,6 +2,8 @@ import { getEventsApiBaseUrl } from './config'
 import type {
   BackendOrder,
   BackendOrderInfo,
+  CheckinResponse,
+  CheckinResult,
   ConfirmOrderResponse,
   EventsFeedResponse,
   FeedRow,
@@ -89,6 +91,36 @@ export const confirmTicketOrder = async (orderId: string, txHash: string): Promi
   } catch {
     return null
   }
+}
+
+/**
+ * Check-in na ulazu (E3): redeem QR tokena kroz events-checkin. Autorizacija
+ * je ISKLJUČIVO server-side — `authToken` je GoTrue JWT org admina (skener
+ * samo prosljeđuje header; redeem_ticket RPC provjerava admin rolu). 4xx sa
+ * strojnim kodom (not_authenticated, not_authorized, invalid_token) je
+ * autoritativno odbijanje poziva; 5xx/mreža = `unreachable` (online-only MVP:
+ * sken se NE priznaje bez backend potvrde).
+ */
+export const checkinTicket = async (qrToken: string, authToken: string): Promise<CheckinResult> => {
+  const response = await apiFetch('/events-checkin', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${authToken}` },
+    body: JSON.stringify({ qr_token: qrToken }),
+  })
+  if (response === null || response.status >= 500) {
+    return { kind: 'unreachable' }
+  }
+  let body: unknown
+  try {
+    body = await response.json()
+  } catch {
+    return { kind: 'unreachable' }
+  }
+  if (!response.ok) {
+    const code = (body as { error?: string }).error
+    return typeof code === 'string' && code.length > 0 ? { kind: 'rejected', code } : { kind: 'unreachable' }
+  }
+  return { kind: 'ok', response: body as CheckinResponse }
 }
 
 /** Narudžbe + ulaznice (QR token stiže jednokratno). `null` = nedostupan. */

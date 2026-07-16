@@ -1,7 +1,9 @@
 import React, { useCallback } from 'react'
-import { Share } from 'react-native'
+import { Share, TouchableOpacity } from 'react-native'
+import { useRouter } from 'expo-router'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useTicketSync } from '../api/useTicketSync'
 import { getEvent, getTier } from '../catalog/registry'
 import { composeTicketOrderMessage, formatEur } from '../logic/ticketOrder'
@@ -15,6 +17,7 @@ import { evStrings } from '../strings'
  * ekran radi točno kao u E1 (share sheet prema organizatoru).
  */
 export const MojeUlaznice = () => {
+  const router = useRouter()
   const orders = useTicketOrders()
   const { syncing } = useTicketSync()
 
@@ -100,17 +103,38 @@ export const MojeUlaznice = () => {
                   <Text fontSize="$3" fontWeight="600">
                     {evStrings.tickets.issuedHeader}
                   </Text>
-                  {order.tickets.map((ticket) => (
-                    <XStack key={ticket.serial} justifyContent="space-between" gap="$2">
-                      <Text fontSize="$3" color="$colorSecondary">
-                        {ticket.serial}
-                        {ticket.holderName !== undefined ? ` · ${ticket.holderName}` : ''}
-                      </Text>
-                      <Text fontSize="$3" color="$colorSecondary">
-                        {evStrings.tickets.ticketState[ticket.state]}
-                      </Text>
-                    </XStack>
-                  ))}
+                  {order.tickets.map((ticket) => {
+                    const hasQr = ticket.qrToken !== undefined
+                    const row = (
+                      <XStack justifyContent="space-between" alignItems="center" gap="$2">
+                        <Text flex={1} fontSize="$3" color="$colorSecondary">
+                          {ticket.serial}
+                          {ticket.holderName !== undefined ? ` · ${ticket.holderName}` : ''}
+                        </Text>
+                        <Text fontSize="$3" color="$colorSecondary">
+                          {evStrings.tickets.ticketState[ticket.state]}
+                        </Text>
+                        {hasQr && <SafeFontIcon name="qr-code" size={16} color="$color" />}
+                      </XStack>
+                    )
+                    return hasQr ? (
+                      <TouchableOpacity
+                        key={ticket.serial}
+                        accessibilityLabel={evStrings.tickets.showQr}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/events/ticket',
+                            params: { order: order.id, serial: ticket.serial },
+                          })
+                        }
+                        testID={`ev-ticket-qr-${ticket.serial}`}
+                      >
+                        {row}
+                      </TouchableOpacity>
+                    ) : (
+                      <YStack key={ticket.serial}>{row}</YStack>
+                    )
+                  })}
                 </YStack>
               )}
 

@@ -24,6 +24,17 @@ export type {
 export { evStrings } from './strings'
 export { useTicketOrders, addTicketOrder, markTicketOrderPaid, applyBackendSync } from './state/useTickets'
 export type { TicketOrder, TicketOrderStatus, IssuedTicket } from './state/useTickets'
+export { buildTicketQrPayload, parseTicketQrPayload, TICKET_QR_PREFIX } from './logic/qrPayload'
+export {
+  recordEntryScan,
+  findPriorOkScan,
+  getLocalEntryCount,
+  useEntryLog,
+  tokenFingerprint,
+} from './state/useEntryLog'
+export type { EntryScanRecord, EntryScanResult } from './state/useEntryLog'
+export { getScannerToken, setScannerToken, clearScannerToken, useScannerToken } from './state/useScannerAuth'
+export type { CheckinResponse, CheckinResult, CheckinStatus } from './api/types'
 export {
   ticketTotals,
   toBaseUnits,
