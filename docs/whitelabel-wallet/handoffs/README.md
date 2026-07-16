@@ -64,6 +64,21 @@ feature-pack `apps/mobile/src/custom/marketplace/` (gated `features.marketplace`
 | M3  | Račun + fiskalizacija kao servis                       | [trznica-3-fiskalizacija.md](trznica-3-fiskalizacija.md)             | M2; ručno: certifikati/mišljenja | ⬜     |
 | M4  | Merchant onboarding (katalog backend, DAC7 evidencija) | [trznica-4-merchant-onboarding.md](trznica-4-merchant-onboarding.md) | M2                               | ⬜     |
 
+## Događaji faze (P2P ticketing)
+
+Događaji su P2P event-ticketing marketplace (Entrio/Luma paritet bez posrednika; pilot: Money
+Motion / BlockSplit, request Luke Sučića 2026-07-16) — strategija, backend mapiranje na
+`pinka_finance` (domovina-api) i regulatorni okvir u [11 — Događaji](../11-dogadjaji-p2p-ticketing.md).
+E2 se izvršava u repou `/Users/ms/git/domovinatv/domovina-api`.
+
+| #   | Faza                                                           | Dokument                                                 | Ovisi o                   | Status |
+| --- | -------------------------------------------------------------- | -------------------------------------------------------- | ------------------------- | ------ |
+| E1  | Feature-pack `events` + pilot katalog (MoMo 2027, BlockSplit)  | [dogadjaji-1-event-pack.md](dogadjaji-1-event-pack.md)   | —                         | ⬜     |
+| E2  | Backend: eventi, narudžbe, onchain confirm, izdavanje ulaznica | [dogadjaji-2-backend.md](dogadjaji-2-backend.md)         | E1; ručno: server pristup | ⬜     |
+| E3  | QR ulaznice + skener ulaza + check-in                          | [dogadjaji-3-qr-checkin.md](dogadjaji-3-qr-checkin.md)   | E2                        | ⬜     |
+| E4  | Organizator self-service + discovery + pilot runbook           | [dogadjaji-4-organizator.md](dogadjaji-4-organizator.md) | E2; ručno: pilot dogovor  | ⬜     |
+| E5  | Računi/fiskalizacija za organizatore                           | — (plan nakon Tržnica M3; isti servis, druga vertikala)  | E3, E4, Tržnica M3        | ⬜     |
+
 ## Kako koristiti
 
 U praznoj Claude Code sesiji (u rootu ovog repoa, grana `custom`) zalijepi:
