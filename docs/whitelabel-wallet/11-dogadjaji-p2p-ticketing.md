@@ -232,7 +232,7 @@ flowchart LR
 
 | #   | Faza                                                            | Handoff                                                           | Ovisi o                             | Status |
 | --- | --------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------- | ------ |
-| E1  | Feature-pack `events` + pilot katalog (MoMo 2027, BlockSplit)   | [dogadjaji-1-event-pack.md](handoffs/dogadjaji-1-event-pack.md)   | —                                   | ⬜     |
+| E1  | Feature-pack `events` + pilot katalog (MoMo 2027, BlockSplit)   | [dogadjaji-1-event-pack.md](handoffs/dogadjaji-1-event-pack.md)   | —                                   | ✅     |
 | E2  | Backend: eventi, narudžbe, onchain confirm, izdavanje ulaznica  | [dogadjaji-2-backend.md](handoffs/dogadjaji-2-backend.md)         | E1 (tipovi); ručno: pristup serveru | ⬜     |
 | E3  | QR ulaznice + skener ulaza + check-in                           | [dogadjaji-3-qr-checkin.md](handoffs/dogadjaji-3-qr-checkin.md)   | E2                                  | ⬜     |
 | E4  | Organizator self-service + discovery + pilot runbook (L. Sučić) | [dogadjaji-4-organizator.md](handoffs/dogadjaji-4-organizator.md) | E2; ručno: pilot dogovor, Safe      | ⬜     |

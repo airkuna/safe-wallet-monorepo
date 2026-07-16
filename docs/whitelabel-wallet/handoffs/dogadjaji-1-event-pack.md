@@ -128,4 +128,18 @@ Status `paid-unverified` = kupac se vratio iz Send flowa (tx potpisana); prava v
 
 ## Zapisnik izvršenja
 
-(popunjava agent koji izvrši fazu)
+- 2026-07-16, izvršeno u istoj sesiji u kojoj je plan napisan (na zahtjev vlasnika), odmah
+  nakon merge-a upstream/dev.
+- Isporučeno točno po opsegu: pack `apps/mobile/src/custom/events/` (catalog/logic/state/
+  screens/strings/isEventsBrand/index + README), thin seams `(tabs)/dogadjaji.tsx`,
+  `app/events/{event,checkout,tickets}.tsx`, registracija taba u `_layout.tsx` (ikona `star`).
+- Odluka: aritmetika je vlastita kopija obrasca u `events/logic/ticketOrder.ts` (packovi ostaju
+  samodostatni — isti presedan kao marketplace↔ff), uz ticket-specifične funkcije
+  (`ticketTotals`, `holdersComplete`, `formatEventDate`).
+- Odstupanje: nema (pilot katalog bez `safeAddress`, kupnja disabled; BlockSplit 2027 unesen
+  kao najava bez tiera).
+- Gotcha za buduće faze: expo typed routes (`.expo/types/router.d.ts`, gitignored) su stale
+  nakon dodavanja novih ruta — regeneriraj kratkim `npx expo start --offline` (dovoljno je da
+  ispiše rute) prije type-checka.
+- Verify: `node scripts/verify.mjs --changed --workspace=mobile` exit 0 (406 suita / 3260
+  testova, uključujući 7 novih test datoteka packa).

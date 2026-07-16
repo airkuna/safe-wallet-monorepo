@@ -10,6 +10,7 @@ import TransactionHeader from '@/src/features/TxHistory/components/TransactionHe
 import { isAndroid } from '@/src/config/constants'
 import { isFfBrand } from '@/src/custom/ff'
 import { isMarketplaceBrand } from '@/src/custom/marketplace'
+import { isEventsBrand } from '@/src/custom/events'
 
 function TabBarBackground() {
   const { isDark } = useCurrentTheme()
@@ -96,6 +97,25 @@ export default function TabLayout() {
             )
           },
           tabBarIcon: ({ color }) => <TabBarIcon name={'tag'} color={color} />,
+        }}
+      />
+
+      {/* Događaji feature-pack tab — mounted only for brands with `features.events` (see src/custom/events). */}
+      <Tabs.Screen
+        name="dogadjaji"
+        options={{
+          href: isEventsBrand() ? undefined : null,
+          title: 'Događaji',
+          headerShown: false,
+          tabBarButtonTestID: 'dogadjaji-tab',
+          tabBarButton: ({ children, ref, ...rest }) => {
+            return (
+              <Pressable {...rest} style={styles.tabButton}>
+                {children}
+              </Pressable>
+            )
+          },
+          tabBarIcon: ({ color }) => <TabBarIcon name={'star'} color={color} />,
         }}
       />
 
