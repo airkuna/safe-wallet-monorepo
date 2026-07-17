@@ -160,7 +160,9 @@ const config: ExpoConfig = {
   },
   web: {
     bundler: 'metro',
-    output: 'static',
+    // 'single' (SPA): static SSR render in Node hits native-module bridges
+    // (__fbBatchedBridgeConfig) — web is a dev/preview target, not a release.
+    output: 'single',
     favicon: brand.assets.favicon,
   },
   plugins: [

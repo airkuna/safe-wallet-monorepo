@@ -22,7 +22,8 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
   // follow the OS. Fixed by .yarn/patches/react-native-npm-0.83.4-* which
   // resolves the actual OS scheme instead of storing 'unspecified' as-is.
   useEffect(() => {
-    Appearance.setColorScheme(themePreference === 'auto' ? 'unspecified' : themePreference)
+    // react-native-web nema setColorScheme (web preview) — native no-op guard.
+    Appearance.setColorScheme?.(themePreference === 'auto' ? 'unspecified' : themePreference)
   }, [themePreference])
 
   const themeProvider = isStorybookEnv ? (
