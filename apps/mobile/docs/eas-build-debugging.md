@@ -86,27 +86,71 @@ androidAppBuildCredentialsList { androidKeystore { sha256CertificateFingerprint 
 
 ## Lokalni build bez queuea (`eas build --local`)
 
-Kad je free-tier queue blokada, Android build se vrti lokalno **istim profilima, istim
-arhiverom i istim remote keystoreom** (APK potpisan identično cloud buildu → app links i
-update preko instalirane aplikacije rade). Toolchain je na ovom stroju kompletna
-(Android SDK+NDK u `~/Library/Android/sdk`, JDK 21, gradle).
+> ✅ Provjereno E2E 2026-07-23: APK potpisan istim EAS keystoreom (SHA-256 otisak
+> identičan živom assetlinks.json), ~16 min s toplim cacheom. Recept dolje je rezultat
+> 11 pokušaja — svaki korak postoji s razlogom.
+
+Lokalni build koristi **iste profile, isti arhiver i isti remote keystore** kao cloud
+(APK potpisan identično → app links i update preko instalirane aplikacije rade).
+
+**Jednokratni setup** (oba vanjska diska su ExFAT — bez symlinkova, pa yarn/gradle na
+njima NE rade; rješenje je APFS sparse image na vanjskom disku):
 
 ```bash
-cd apps/mobile
-BRAND_ID=airkuna \
-EAS_LOCAL_BUILD_WORKINGDIR=/Volumes/DOMOVINA2TB/airkuna_build_files/eas-local \
-GRADLE_USER_HOME=/Volumes/DOMOVINA2TB/airkuna_build_files/gradle-home \
-npx eas-cli build --profile preview-airkuna --platform android --local \
-  --output /Volumes/DOMOVINA2TB/airkuna_build_files/airkuna-preview.apk
+hdiutil create -type SPARSEBUNDLE -fs APFS -size 80g -volname EASBUILD \
+  /Volumes/DOMOVINA2TB/airkuna_build_files/easbuild.sparsebundle
+hdiutil attach /Volumes/DOMOVINA2TB/airkuna_build_files/easbuild.sparsebundle
+mkdir -p /Volumes/EASBUILD/{eas-local,gradle-home,tmp}
+
+# JDK 17 (RN toolchain ga traži; instaliran je samo 21 → gradle bi zvao foojay
+# resolver koji je nekompatibilan s Gradleom 9: "JvmVendorSpec ... IBM_SEMERU")
+curl -sL -o /Volumes/EASBUILD/jdk17.tar.gz \
+  "https://api.adoptium.net/v3/binary/latest/17/ga/mac/aarch64/jdk/hotspot/normal/eclipse"
+mkdir -p /Volumes/EASBUILD/jdk17 && tar xzf /Volumes/EASBUILD/jdk17.tar.gz \
+  -C /Volumes/EASBUILD/jdk17 --strip-components=1 && rm /Volumes/EASBUILD/jdk17.tar.gz
+
+cat > /Volumes/EASBUILD/gradle-home/gradle.properties <<'EOF'
+org.gradle.java.installations.paths=/Volumes/EASBUILD/jdk17/Contents/Home
+org.gradle.java.installations.auto-download=false
+org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=2g -Djava.io.tmpdir=/Volumes/EASBUILD/tmp
+datadogSourcemapsDryRun=true
+EOF
 ```
 
-Gotche:
+**Build** (workingdir MORA biti prazan — EAS ga ne čisti nakon neuspjeha):
 
-- **Disk**: radni dir + gradle cache traže 10–15 GB → obavezno na vanjski disk (glavni
-  ima ~6 GB slobodno). Ako vanjski disk ne podnosi symlinkove (exFAT), radni dir vrati
-  na glavni disk, a samo `GRADLE_USER_HOME` i `--output` drži vani.
-- **Secret file env varovi** (GOOGLE_SERVICES_JSON/PLIST s EAS-a) nisu dostupni lokalno —
-  ne smeta, brand Firebase configi ionako postoje lokalno u `apps/mobile` (gitignorani).
+```bash
+rm -rf /Volumes/EASBUILD/eas-local && mkdir -p /Volumes/EASBUILD/eas-local
+cd apps/mobile
+export ANDROID_HOME="$HOME/Library/Android/sdk" TMPDIR=/Volumes/EASBUILD/tmp
+BRAND_ID=airkuna \
+GOOGLE_SERVICES_JSON=$PWD/google-services-airkuna.json \
+DATADOG_SOURCEMAPS_DRY_RUN=true DATADOG_API_KEY=dummy-local-dry-run \
+EAS_LOCAL_BUILD_WORKINGDIR=/Volumes/EASBUILD/eas-local \
+GRADLE_USER_HOME=/Volumes/EASBUILD/gradle-home \
+npx eas-cli build --profile preview-airkuna --platform android --local \
+  --output /Volumes/DOMOVINA2TB/airkuna_build_files/airkuna-preview-local.apk
+```
+
+Zašto svaki dio (svaki je bio zaseban pad):
+
+- **`GOOGLE_SERVICES_JSON` apsolutnom putanjom**: arhiver izbacuje gitignorane fajlove
+  pa brand Firebase config ne postoji u radnoj kopiji; EAS secret file env varovi
+  lokalno nisu dostupni. Apsolutna putanja do fajla u pravom repou rješava oboje.
+- **JDK 17 + `installations.paths`**: bez lokalnog JDK 17 gradle pokreće toolchain
+  auto-download kroz stari foojay-resolver → `NoSuchFieldError: IBM_SEMERU` (Gradle 9).
+- **`-Xmx6g -XX:MaxMetaspaceSize=2g`**: default (512m metaspace) pukne na ovom monorepou
+  ("Could not stop all services. > Metaspace").
+- **`java.io.tmpdir` + `TMPDIR` na image**: AGP prefab staging i eas-cli tar.gz arhiv
+  inače idu u `/var/folders` na glavnom (punom) disku → "No space left on device".
+- **Datadog dry-run + dummy ključ**: `uploadReleaseSourcemaps` je `finalizedBy` na
+  bundlanju i ne može se preskočiti; dry-run (env ili gradle property) dodaje
+  `--dry-run`, ali `datadog-ci` svejedno traži da `DATADOG_API_KEY` postoji — dummy
+  vrijednost je sigurna jer se s `--dry-run` ništa ne šalje.
+- **Gradle daemon pamti env** iz prvog pokretanja — nakon promjene env varova
+  `pkill -f GradleDaemon` (ili koristi gradle.properties, koji se čita svaki build).
 - `preview-airkuna` je čist kandidat (nema `autoIncrement`); za `production-airkuna`
-  (remote version source + autoIncrement) verzioniranje u lokalnom buildu ima ograničenja —
-  produkciju i dalje raditi u cloudu.
+  (remote version source + autoIncrement) verzioniranje u lokalnom buildu ima
+  ograničenja — produkciju i dalje raditi u cloudu.
+- Provjera potpisa: `apksigner verify --print-certs <apk>` → SHA-256 mora odgovarati
+  otisku u `https://domovina.ai/.well-known/assetlinks.json`.
