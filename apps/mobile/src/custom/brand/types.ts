@@ -23,6 +23,11 @@ export interface RuntimeBrand {
     /** Supabase edge functions base, e.g. `https://api.domovina.ai/functions/v1`. */
     apiBaseUrl: string
   }
+  /** Donations (airKUNA) backend; absent → donations UI never mounts. */
+  donations?: {
+    /** Supabase edge functions base, e.g. `https://api.domovina.ai/functions/v1`. */
+    apiBaseUrl: string
+  }
   backend?: {
     /** Gateway for production builds only; dev builds stay on staging. */
     cgwBaseUrl?: string

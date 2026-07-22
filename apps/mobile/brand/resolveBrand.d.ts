@@ -52,6 +52,8 @@ export interface ResolvedBrand {
   identity?: BrandManifest['identity']
   /** Events (Događaji) backend config, forwarded to the runtime via `extra.brand`. */
   events?: BrandManifest['events']
+  /** Donations (airKUNA) backend config, forwarded to the runtime via `extra.brand`. */
+  donations?: BrandManifest['donations']
 }
 
 export declare function loadBrandManifest(): BrandManifest

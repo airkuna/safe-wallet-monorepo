@@ -66,6 +66,14 @@ const brandManifestSchema = z.object({
       apiBaseUrl: z.string().url(),
     })
     .optional(),
+  // Donacije (airKUNA A1/A2): backend za donations pack — Supabase edge
+  // functions base (npr. `https://api.domovina.ai/functions/v1`). Absent →
+  // donations UI se nikad ne mounta.
+  donations: z
+    .object({
+      apiBaseUrl: z.string().url(),
+    })
+    .optional(),
   updates: z
     .object({
       codeSigningCertificatePath: z.string().min(1),

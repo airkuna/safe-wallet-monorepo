@@ -167,6 +167,52 @@ describe('resolveBrand', () => {
     }
   })
 
+  it('passes the donations config through for the runtime layer', () => {
+    const donations = { apiBaseUrl: 'https://api.domovina.ai/functions/v1' }
+
+    const brand = resolveBrand({ isDev: false }, { ...safe, donations })
+
+    expect(brand.donations).toEqual(donations)
+  })
+
+  it('leaves donations undefined when the manifest has none', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+
+    expect(brand.donations).toBeUndefined()
+  })
+
+  it('loads a valid airkuna manifest with donations from disk', () => {
+    const originalBrandId = process.env.BRAND_ID
+    process.env.BRAND_ID = 'airkuna'
+
+    try {
+      const manifest = loadBrandManifest()
+
+      expect(manifest.id).toBe('airkuna')
+      expect(manifest.backend?.defaultChainId).toBe('100')
+      expect(manifest.features?.donations).toBe(true)
+      expect(manifest.donations?.apiBaseUrl).toBe('https://api.domovina.ai/functions/v1')
+      expect(manifest.theme?.light?.['primary.main']).toBe('#002F6C')
+      expect(manifest.theme?.dark?.['primary.main']).toBe('#E3AF35')
+    } finally {
+      if (originalBrandId === undefined) {
+        delete process.env.BRAND_ID
+      } else {
+        process.env.BRAND_ID = originalBrandId
+      }
+    }
+  })
+
+  it('rejects a manifest with a malformed donations apiBaseUrl', () => {
+    process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, donations: { apiBaseUrl: 'not-a-url' } })
+
+    try {
+      expect(() => loadBrandManifest()).toThrow()
+    } finally {
+      delete process.env.BRAND_CONFIG_JSON
+    }
+  })
+
   it('rejects a manifest with a malformed EAS project id', () => {
     process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, easProjectId: 'not-a-uuid' })
 

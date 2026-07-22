@@ -73,6 +73,14 @@ export interface BrandManifest {
     apiBaseUrl: string
   }
   /**
+   * Donations (airKUNA) backend for the `donations` feature pack — the
+   * Supabase edge functions base URL (e.g. `https://api.domovina.ai/functions/v1`).
+   * Absent → the donations UI never mounts.
+   */
+  donations?: {
+    apiBaseUrl: string
+  }
+  /**
    * Opting in enables OTA (EAS Update) for this brand. The certificate path is
    * relative to `brand/` (e.g. `certs/acme/certificate.pem`); the matching
    * private key stays outside the repo (see `keys/` in .gitignore).

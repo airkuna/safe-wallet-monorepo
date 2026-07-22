@@ -129,4 +129,29 @@ poljem `donations`** (schema + runtime tip) koje će A2 konzumirati. Stock brand
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+> Izvršeno: 2026-07-22 (dev1). Sve iz opsega isporučeno; odstupanja i nalazi dolje.
+
+**Isporučeno po planu:**
+
+- `donations` schema polje u svih 5 datoteka šavova (strukturna kopija `events`, samo `apiBaseUrl`, bez `confirmUrl`).
+- Tracked manifest `airkuna.json` + gitignore iznimke; tema navy/zlato za oba moda; `defaultChainId: "100"` (Gnosis); `features.donations: true`.
+- Testovi: 4 nova casea u `resolveBrand.test.ts` (airkuna s diska, `donations` forward, forward `undefined` bez polja, odbijanje ne-URL `apiBaseUrl`) — 18/18 prolazi.
+- `node scripts/verify.mjs --changed --workspace=mobile` čist (full verify: 417/417 suiteova, prettier/lint/type-check OK).
+
+**Odstupanja od handoff tablice:**
+
+1. **Dodatni šav: `app.config.ts`** (1 linija) — `extra.brand` se gradi polje-po-polje, pa `resolveBrand` forward nije dovoljan; bez `donations: brand.donations` u `app.config.ts` polje ne stiže u runtime. Tablica šavova ga nije navela.
+2. **Gitignore assets iznimka**: `/brand/assets/` morao postati `/brand/assets/*` — git ne može re-include unutar isključenog direktorija; `!/brand/assets/airkuna/` inače ne radi. Ostali brandovi nemaju trackane assete, promjena je no-op za njih.
+3. **`BRAND_ID=safe` bajt-identičnost**: pretty-print `expo config --type public` dobiva novu liniju `donations: undefined` (isti presedan kao `events` u E1). Serijalizirani config (`--json`) je **bajt-identičan** prije/poslije (provjereno stash-diffom) — `undefined` ključevi se ne serijaliziraju u binary.
+
+**Placeholderi → stvarne vrijednosti:** ručni preduvjeti iz [15] §8 pokazali su se većinski riješeni (potvrđeno 2026-07-22, memorija `italk-apple-team`):
+
+- `easProjectId: a3bfe1f6-16bd-4b0c-a171-86410842cbaf` (EAS `@airkuna/airkuna`) — stvaran, nije placeholder.
+- `appleTeamId: 6SCK58757K` (ITalk) — potvrđen default.
+- `owner: airkuna` (Expo org postoji), bundle/package `com.airkuna.wallet` — poklapa se s Firebase appovima.
+- Firebase projekti postoje (`airkuna-wallet-development/-production`); `google-services-airkuna[-dev].json` zatečeni u `apps/mobile/` (gitignored) — bili su neformatirani i rušili prettier check pa su formatirani in-place. iOS plistovi (`GoogleService-Info-Airkuna*.plist`) nisu zatečeni.
+- **Ostaje otvoreno za A4**: AASA/universal link na domovina.ai, pinka backend allowlist, iOS Firebase plistovi.
+
+**Asseti: DA** — `rsvg-convert` iz `airkuna-web/com/coin.svg` (512×512, novčić r=150) → `brand/assets/airkuna/`: `icon.png` (1024, opaque navy podloga, novčić kropan na ~83%), `splash.png` (1024, prozirna, isti PNG za light/dark; podloge `#FFFFFF` / `#00224E`), adaptive foreground (novčić 600 px stane u 660 px safe zonu), background (puni navy), monochrome (= foreground; Android koristi samo alfa masku → silueta novčića), `favicon.png` (48). Vizualno provjereno: ikona ispravna (navy + zlatni prsten + bijela kuna).
+
+**Kontrast (WCAG omjeri, izračunato):** light navy-na-bijelo 12.9:1, dark zlato-na-`#121312` 9.3:1, splash-dark bijela-kuna-na-`#00224E` 15.7:1 — sve AAA. `static.textBrand` `#C8912A` na bijelom = 2.8:1 — ispod AA za mali tekst, ali token se koristi kao brand akcent (isti kompromis kao stock `#12FF80` koji ima 1.5:1); nijanse nisu korigirane da se ne odstupi od brand SSOT-a.

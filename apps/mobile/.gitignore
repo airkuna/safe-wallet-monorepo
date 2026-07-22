@@ -30,9 +30,11 @@ GoogleService-Info-*.plist
 /brand/manifests/*.json
 !/brand/manifests/safe.json
 !/brand/manifests/example.community.json
+!/brand/manifests/airkuna.json
 
 # Per-brand visual assets (icon/splash/adaptive icons) arrive with the manifest
-/brand/assets/
+/brand/assets/*
+!/brand/assets/airkuna/
 
 # expo-updates code-signing PRIVATE keys — must never be committed.
 # (The public certificate under brand/certs/ is safe to track.)

@@ -111,6 +111,7 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
     features: manifest.features,
     identity: manifest.identity,
     events: manifest.events,
+    donations: manifest.donations,
   }
 }
 

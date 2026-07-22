@@ -91,6 +91,7 @@ const config: ExpoConfig = {
       features: brand.features,
       identity: brand.identity,
       events: brand.events,
+      donations: brand.donations,
     },
   },
   orientation: 'portrait',

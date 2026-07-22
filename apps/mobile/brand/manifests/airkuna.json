@@ -1,0 +1,52 @@
+{
+  "id": "airkuna",
+  "name": "airKUNA",
+  "devNamePrefix": "Dev-",
+  "slug": "airkuna",
+  "owner": "airkuna",
+  "easProjectId": "a3bfe1f6-16bd-4b0c-a171-86410842cbaf",
+  "scheme": ["airkuna", "wc"],
+  "ios": {
+    "bundleIdentifier": "com.airkuna.wallet",
+    "appleTeamId": "6SCK58757K"
+  },
+  "android": {
+    "package": "com.airkuna.wallet"
+  },
+  "backend": {
+    "defaultChainId": "100"
+  },
+  "features": {
+    "donations": true
+  },
+  "donations": {
+    "apiBaseUrl": "https://api.domovina.ai/functions/v1"
+  },
+  "theme": {
+    "light": {
+      "primary.main": "#002F6C",
+      "secondary.main": "#002F6C",
+      "secondary.dark": "#00224E",
+      "static.textBrand": "#C8912A"
+    },
+    "dark": {
+      "primary.main": "#E3AF35",
+      "static.textBrand": "#E3AF35"
+    }
+  },
+  "assets": {
+    "icon": "assets/airkuna/icon.png",
+    "splash": {
+      "image": "assets/airkuna/splash.png",
+      "backgroundColor": "#FFFFFF",
+      "imageDark": "assets/airkuna/splash.png",
+      "backgroundColorDark": "#00224E"
+    },
+    "androidAdaptiveIcon": {
+      "foregroundImage": "assets/airkuna/android-adaptive-icon-foreground.png",
+      "backgroundImage": "assets/airkuna/android-adaptive-icon-background.png",
+      "monochromeImage": "assets/airkuna/android-adaptive-icon-monochrome.png"
+    },
+    "favicon": "assets/airkuna/favicon.png"
+  }
+}
