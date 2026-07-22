@@ -119,6 +119,96 @@ import { useBrand, getBrand } from '@/src/custom/brand'
 const { name, theme, backend } = useBrand() // or getBrand() outside React
 ```
 
+## Brand doctor
+
+Validates that a brand package is complete enough to build — manifest passes
+the zod schema, referenced assets exist, Firebase files are present and their
+application ids match the manifest, OTA certificate resolves, and the
+`eas.json` brand profiles are wired:
+
+```bash
+yarn workspace @safe-global/mobile brand:doctor            # default: safe
+yarn workspace @safe-global/mobile brand:doctor airkuna
+node brand/doctor.js airkuna --remote-firebase             # CI: Firebase via EAS file env vars
+```
+
+Exit code 0 = buildable (warnings allowed), 1 = something is missing; the
+report says exactly what. Firebase file naming convention per brand:
+`google-services-<id>[-dev].json` and `GoogleService-Info-<id>[-Dev].plist`
+(the `safe` brand keeps the stock unsuffixed names). The `GOOGLE_SERVICES_*`
+env vars override those paths, mirroring `app.config.ts`.
+
+## From manifest to store (release pipeline)
+
+One brand = one binary = one store listing. The deterministic path:
+
+```mermaid
+flowchart LR
+  M["brand/manifests/&lt;id&gt;.json<br/>+ brand/assets/&lt;id&gt;/"] --> D["brand:doctor &lt;id&gt;"]
+  D --> P["eas build --profile<br/>&lt;variant&gt;-&lt;id&gt;"]
+  P --> B[".aab / .ipa s brand<br/>imenom, ikonom, bojama"]
+  B --> S["Store listing<br/>(docs/whitelabel-wallet/16)"]
+```
+
+1. **Doctor first**: `yarn workspace @safe-global/mobile brand:doctor <id>`.
+2. **EAS profiles**: each brand gets two thin profiles in `eas.json` extending
+   the stock ones, carrying only `env.BRAND_ID`:
+
+   ```json
+   "preview-airkuna": { "extends": "preview", "env": { "BRAND_ID": "airkuna" } },
+   "production-airkuna": { "extends": "production", "env": { "BRAND_ID": "airkuna" } }
+   ```
+
+   The profile env is applied both when the CLI evaluates `app.config.ts`
+   locally (correct owner/projectId) and inside the remote build.
+
+3. **Firebase files on EAS**: gitignored files never reach the build archive,
+   so each brand's EAS project carries them as **file-type env vars** named
+   exactly like the local overrides (`GOOGLE_SERVICES_JSON`,
+   `GOOGLE_SERVICES_PLIST`, plus `_DEV` variants for the development profile),
+   created once per environment:
+
+   ```bash
+   BRAND_ID=airkuna npx eas-cli env:create --environment preview \
+     --name GOOGLE_SERVICES_JSON --type file --value ./google-services-airkuna.json \
+     --visibility secret --scope project --non-interactive
+   ```
+
+4. **Build** (cloud; local builds need ~10 GB disk):
+
+   ```bash
+   cd apps/mobile
+   eas build --profile preview-airkuna --platform android --non-interactive --no-wait
+   eas build --profile production-airkuna --platform all --non-interactive --no-wait
+   ```
+
+   Or via GitHub Actions: `mobile-brand-release.yml` (manual
+   `workflow_dispatch`; runs doctor + EAS build, secrets stay in GH/EAS).
+
+5. **SaaS pipeline path**: instead of a manifest file, inject
+   `BRAND_CONFIG_JSON` (inline manifest) into the build env — no repo edits at
+   all. The dashboard will generate the `eas.json` profile pair per brand the
+   same way.
+
+6. **Store submission**: per-brand checklist (listing assets, privacy policy
+   URL, Apple/Google accounts, APNs/FCM, GPL-3.0 source offer) lives in
+   [docs/whitelabel-wallet/16-release-checklist.md](../../../docs/whitelabel-wallet/16-release-checklist.md).
+
+## Smoke checklist (branded build)
+
+The Maestro e2e harness (`e2e/`) is tied to the stock Safe appId and the e2e
+mock environment, so branded smoke is a short manual pass on the installed
+build:
+
+- [ ] App installs and launches; launcher shows the brand **name** and **icon**
+- [ ] Splash screen uses the brand image/background (light and dark)
+- [ ] Onboarding/home surfaces use brand colors (`theme` palette override)
+- [ ] "Create account" flow opens and preselects `backend.defaultChainId`
+- [ ] Receive QR renders for the active account (and share link works)
+- [ ] Brand feature packs mount per `features` flags (e.g. donations tab), and
+      are absent on the stock `safe` build
+- [ ] Deep link `<scheme>://` opens the app
+
 ## SaaS pipeline (target)
 
 ```mermaid

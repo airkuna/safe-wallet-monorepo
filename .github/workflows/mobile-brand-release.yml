@@ -1,0 +1,66 @@
+# White-label brand release: manual trigger only, separate from the stock Safe
+# release workflows. Runs `brand doctor` and hands the build to EAS cloud.
+# Secrets stay in GitHub (EXPO_TOKEN) and EAS env vars — never in the repo.
+name: Mobile brand release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      brand_id:
+        description: 'Brand id (brand/manifests/<id>.json; must have <variant>-<id> profiles in eas.json)'
+        required: true
+        default: 'airkuna'
+      variant:
+        description: 'Build profile variant'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+      platform:
+        description: 'Platform'
+        required: true
+        default: 'android'
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+
+permissions: {}
+
+jobs:
+  doctor-and-build:
+    name: Doctor + EAS build (${{ inputs.brand_id }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
+
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+
+      - name: Build expo plugins
+        run: yarn workspace @safe-global/notification-service-ios build
+
+      # Firebase files are not in the repo — CI expects them as EAS file-type
+      # env vars in the brand's EAS project, hence --remote-firebase.
+      - name: Brand doctor
+        working-directory: apps/mobile
+        run: node brand/doctor.js ${{ inputs.brand_id }} --remote-firebase
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # 9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build on EAS
+        working-directory: apps/mobile
+        env:
+          BRAND_ID: ${{ inputs.brand_id }}
+        run: eas build --profile ${{ inputs.variant }}-${{ inputs.brand_id }} --platform ${{ inputs.platform }} --non-interactive --no-wait

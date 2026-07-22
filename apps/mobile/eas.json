@@ -62,6 +62,18 @@
         "APP_VARIANT": "production"
       }
     },
+    "preview-airkuna": {
+      "extends": "preview",
+      "env": {
+        "BRAND_ID": "airkuna"
+      }
+    },
+    "production-airkuna": {
+      "extends": "production",
+      "env": {
+        "BRAND_ID": "airkuna"
+      }
+    },
     "build-and-maestro-test": {
       "extends": "base",
       "withoutCredentials": true,

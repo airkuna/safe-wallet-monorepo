@@ -33,6 +33,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Secrets that must never reach the EAS build archive (service accounts,
+# OTA private keys). Firebase configs travel as EAS file-type env vars instead.
+/keys/
+
 # Native
 *.orig.*
 *.
