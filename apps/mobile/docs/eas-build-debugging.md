@@ -154,3 +154,6 @@ Zašto svaki dio (svaki je bio zaseban pad):
   ograničenja — produkciju i dalje raditi u cloudu.
 - Provjera potpisa: `apksigner verify --print-certs <apk>` → SHA-256 mora odgovarati
   otisku u `https://domovina.ai/.well-known/assetlinks.json`.
+- **Exit kod zna biti 1 i kad build USPIJE**: nakon "Build successful" i zapisanog APK-a
+  cleanup radne kopije padne na `ENOTEMPTY … build/.git`. Uspjeh se provjerava po
+  "Build successful" u logu / postojanju APK-a, ne po exit kodu.
