@@ -137,7 +137,7 @@ Napomena: airkuna-web je light-only, ali mobile app ima dark mod — manifest da
 | Firebase projekti (iOS+Android, push)                | gitignored fileovi (v. `brand/README.md`)           | ✅ projekt `airkuna-production` (vlasnikov), 4 appa; configi `*-airkuna*` + SA ključ `keys/airkuna/` lokalno u `apps/mobile/` |
 | Scheme `airkuna://`                                  | manifest `scheme` (nije blokada — samo odluka)      | ✅ u manifestu (`airkuna`, `wc`)                                                                                              |
 | AASA / universal link na domovina.ai                 | domovina.ai hosting + entitlements (→ A4/post-MVP)  | ⬜                                                                                                                            |
-| pinka backend allowlist (ako CORS/origin gating)     | domovina-api                                        | ⬜ provjeriti (A2 prvi poziv)                                                                                                 |
+| pinka backend allowlist (ako CORS/origin gating)     | domovina-api                                        | ✅ nema gatinga — A2 verificirao živi RPC + edge fns s javnim anon keyem (2026-07-22)                                         |
 
 **Rizici:**
 
