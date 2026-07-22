@@ -8,7 +8,8 @@
   "scheme": ["airkuna", "wc"],
   "ios": {
     "bundleIdentifier": "com.airkuna.wallet",
-    "appleTeamId": "6SCK58757K"
+    "appleTeamId": "6SCK58757K",
+    "associatedDomains": ["applinks:domovina.ai"]
   },
   "android": {
     "package": "com.airkuna.wallet"

@@ -16,6 +16,8 @@ export interface ResolvedBrand {
     appleTeamId: string
     appGroupIdentifier: string
     apsEnvMode: 'development' | 'production'
+    /** Universal-link entitlements, passed through from the manifest. */
+    associatedDomains?: [string, ...string[]]
   }
   android: {
     package: string

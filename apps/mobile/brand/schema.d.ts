@@ -23,6 +23,8 @@ export interface BrandManifest {
     /** Production base bundle identifier; the dev variant appends `.dev`. */
     bundleIdentifier: string
     appleTeamId: string
+    /** Universal-link entitlements (e.g. `applinks:domovina.ai`). Absent → no entitlement. */
+    associatedDomains?: [string, ...string[]]
   }
   android: {
     /** Production base application id; the dev variant appends `.dev`. */

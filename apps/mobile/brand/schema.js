@@ -22,6 +22,9 @@ const brandManifestSchema = z.object({
   ios: z.object({
     bundleIdentifier: z.string().min(1),
     appleTeamId: z.string().min(1),
+    // Universal-link entitlements (e.g. `applinks:domovina.ai`). Absent → no
+    // Associated Domains entitlement is added to the build.
+    associatedDomains: z.array(z.string().min(1)).nonempty().optional(),
   }),
   android: z.object({
     package: z.string().min(1),

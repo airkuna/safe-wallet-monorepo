@@ -93,6 +93,7 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
       appleTeamId: manifest.ios.appleTeamId,
       appGroupIdentifier: `group.${bundleIdentifier}`,
       apsEnvMode: isDev ? 'development' : 'production',
+      associatedDomains: manifest.ios.associatedDomains,
     },
     android: {
       package: withVariant(manifest.android.package, isDev),

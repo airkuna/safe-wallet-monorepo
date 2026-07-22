@@ -38,6 +38,7 @@ Zapisnik kao blokirano i vrati vlasniku točan popis akcija.
 - **OTA odluka**: self-hosted expo-updates kao domovina (`updates` blok + cert u `brand/certs/airkuna/`) ili bez OTA za MVP — preporuka: **bez OTA za MVP** (manje ručnih preduvjeta; reverzibilno), zapiši odluku.
 - Smoke provjera brandiranog builda (faza-5 checklist: boje/ime/ikona, create account, receive QR, **plus airkuna-specifično**: Doniraj tab vidljiv, slug → kampanja dohvat radi na uređaju).
 - TestFlight + Play interni track upload.
+- **Android App Links za `/c/*`** (preporuka iz associatedDomains taska, 2026-07-22): iOS strana je gotova (AASA na domovina.ai živ + `ios.associatedDomains` u manifestu); za Android treba (1) `assetlinks.json` na `domovina.ai/.well-known/` sa SHA-256 otiskom **stvarnog potpisnog certa** (EAS keystore postoji od prvog builda — `eas credentials`), (2) novo manifest polje `android.appLinks: [{host, pathPrefix}]` → expo `android.intentFilters` s `autoVerify` (čista derivacija iz `associatedDomains` nije moguća jer Android traži eksplicitni path scope).
 
 **Out (svjesno):**
 

@@ -167,6 +167,21 @@ describe('resolveBrand', () => {
     }
   })
 
+  it('passes iOS associated domains through for the universal-link entitlement', () => {
+    const brand = resolveBrand(
+      { isDev: false },
+      { ...safe, ios: { ...safe.ios, associatedDomains: ['applinks:domovina.ai'] } },
+    )
+
+    expect(brand.ios.associatedDomains).toEqual(['applinks:domovina.ai'])
+  })
+
+  it('leaves iOS associated domains undefined when the manifest has none', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+
+    expect(brand.ios.associatedDomains).toBeUndefined()
+  })
+
   it('passes the donations config through for the runtime layer', () => {
     const donations = { apiBaseUrl: 'https://api.domovina.ai/functions/v1' }
 
@@ -192,6 +207,7 @@ describe('resolveBrand', () => {
       expect(manifest.backend?.defaultChainId).toBe('100')
       expect(manifest.features?.donations).toBe(true)
       expect(manifest.donations?.apiBaseUrl).toBe('https://api.domovina.ai/functions/v1')
+      expect(manifest.ios.associatedDomains).toEqual(['applinks:domovina.ai'])
       expect(manifest.theme?.light?.['primary.main']).toBe('#002F6C')
       expect(manifest.theme?.dark?.['primary.main']).toBe('#E3AF35')
     } finally {
@@ -205,6 +221,16 @@ describe('resolveBrand', () => {
 
   it('rejects a manifest with a malformed donations apiBaseUrl', () => {
     process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, donations: { apiBaseUrl: 'not-a-url' } })
+
+    try {
+      expect(() => loadBrandManifest()).toThrow()
+    } finally {
+      delete process.env.BRAND_CONFIG_JSON
+    }
+  })
+
+  it('rejects a manifest with an empty associatedDomains array', () => {
+    process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, ios: { ...safe.ios, associatedDomains: [] } })
 
     try {
       expect(() => loadBrandManifest()).toThrow()

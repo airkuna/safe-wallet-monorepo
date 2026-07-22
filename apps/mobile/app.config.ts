@@ -136,6 +136,9 @@ const config: ExpoConfig = {
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
     bundleIdentifier: brand.ios.bundleIdentifier,
+    // Conditional spread: brands without the field (stock safe) keep a
+    // byte-identical config output.
+    ...(brand.ios.associatedDomains ? { associatedDomains: brand.ios.associatedDomains } : {}),
     entitlements: {
       'aps-environment': brand.ios.apsEnvMode,
       'com.apple.security.application-groups': [brand.ios.appGroupIdentifier],
