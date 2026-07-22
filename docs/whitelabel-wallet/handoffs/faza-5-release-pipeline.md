@@ -61,6 +61,7 @@ Označi fazu 5 ✅ u `handoffs/README.md` (MVP komplet!), popuni Zapisnik, commi
 **Stvarni EAS build (cloud, Android preview):**
 
 - ✅ Pokrenut: **build ID `2c43e4a3-7968-4d43-99f1-dd3622574172`** — <https://expo.dev/accounts/airkuna/projects/airkuna/builds/2c43e4a3-7968-4d43-99f1-dd3622574172> (`--no-wait`; ishod prati orkestrator). Android keystore automatski kreiran na EAS-u; `versionCode` inicijaliziran na 1.
+- ⚠️ **Ishod (orkestrator, 2026-07-22):** build `2c43e4a3` **errored u Prebuild fazi** — EAS arhiver ne poštuje gitignore `!`-re-include ispod isključenog direktorija pa `brand/assets/airkuna/` nije ušao u arhiv (Prebuild ENOENT na adaptive icon). Dijagnoza kroz `eas build:inspect --stage archive`; fix u `apps/mobile/.gitignore` (eksplicitni ignore privatnih brandova umjesto blanket + iznimka), commit `a5665cb7a`. Ponovljeni build: **`838170f4-7849-4535-8fb5-3602603e357f`** (s vrha grane — uključuje i SEND_FLOW override + universal linkove).
 - iOS nije pokretan (credentials/ASC setup je dio A4).
 
 **Acceptance status:**
