@@ -32,9 +32,12 @@ GoogleService-Info-*.plist
 !/brand/manifests/example.community.json
 !/brand/manifests/airkuna.json
 
-# Per-brand visual assets (icon/splash/adaptive icons) arrive with the manifest
-/brand/assets/*
-!/brand/assets/airkuna/
+# Per-brand visual assets (icon/splash/adaptive icons) arrive with the manifest.
+# Tracked brandovi (airkuna) se NE ignoriraju; privatni brandovi dobivaju
+# eksplicitnu liniju ispod. NIKAD ne koristiti blanket /brand/assets/* + !-iznimku:
+# EAS arhiver (npm ignore lib) ne poštuje re-include ispod isključenog direktorija
+# pa build tiho ostane bez asseta (Prebuild ENOENT — build 2c43e4a3).
+# /brand/assets/<privatni-brand>/ linije dodavati po potrebi:
 
 # expo-updates code-signing PRIVATE keys — must never be committed.
 # (The public certificate under brand/certs/ is safe to track.)
