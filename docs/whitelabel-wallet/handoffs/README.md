@@ -79,6 +79,20 @@ E2 se izvršava u repou `/Users/ms/git/domovinatv/domovina-api`.
 | E4  | Organizator self-service + discovery + pilot runbook           | [dogadjaji-4-organizator.md](dogadjaji-4-organizator.md) | E2; ručno: pilot dogovor  | ✅     |
 | E5  | Računi/fiskalizacija za organizatore                           | — (plan nakon Tržnica M3; isti servis, druga vertikala)  | E3, E4, Tržnica M3        | ⬜     |
 
+## airKUNA faze
+
+airKUNA je generički HR self-custody wallet s donacijama na domovina.ai kampanje kao ključnom
+funkcijom — strategija, donacijski interfejs (pinka), zero-fee pristup i ručni preduvjeti u
+[15 — airKUNA wallet](../15-airkuna-wallet.md). A4 može paralelno s A2/A3 čim su ručni
+preduvjeti ([15] §8) riješeni.
+
+| #   | Faza                                              | Dokument                                       | Ovisi o                                | Status |
+| --- | ------------------------------------------------- | ---------------------------------------------- | -------------------------------------- | ------ |
+| A1  | Brand manifest `airkuna` + `donations` schema     | [airkuna-1-brand.md](airkuna-1-brand.md)       | —                                      | ⬜     |
+| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](airkuna-2-donacije.md) | A1                                     | ⬜     |
+| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](airkuna-3-zerofee.md)   | A2                                     | ⬜     |
+| A4  | Store release za `airkuna`                        | [airkuna-4-release.md](airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti ([15] §8) | ⬜     |
+
 ## Kako koristiti
 
 U praznoj Claude Code sesiji (u rootu ovog repoa, grana `custom`) zalijepi:

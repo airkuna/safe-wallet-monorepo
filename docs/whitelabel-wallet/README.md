@@ -7,23 +7,24 @@ Ova knowledge baza dokumentira **zašto** i **kako** gradimo whitelabel wallet p
 
 ## Sadržaj
 
-| Dok                                                                                          | Tema                                                                                                                          |
-| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [01 — Vizija i strategija](01-vizija-i-strategija.md)                                        | Cilj (N community walleta), dva track-a (Safe fork vs domovina wallet), build-vs-fork odluka                                  |
-| [02 — Brand config sustav](02-brand-config-sustav.md)                                        | Manifest-driven brand config koji smo izgradili (faza 1, commit `f7cb87d44`); native vs runtime slojevi; SaaS pipeline        |
-| [03 — Feature audit (Revolut-like)](03-feature-audit-revolut.md)                             | Koliko je "Revolut-like" wallet već gotov (~80%), matrica sposobnosti, ključni gap = identitet primatelja                     |
-| [04 — Prior art landscape](04-prior-art-landscape.md)                                        | Tko još forka Safe, neobank self-custody wallete, P2P-send obrasci, reusable OSS                                              |
-| [05 — Counterfactual onboarding](05-counterfactual-onboarding.md)                            | Arhitektura "Create account" flowa (faza 2): CREATE2 predikcija, undeployedSafes lifecycle, naučene lekcije                   |
-| [06 — Receive + payment linkovi](06-receive-payment-linkovi.md)                              | Arhitektura EIP-681 receive/pay flowa (faza 3): QR + deep link, konzumacija kroz Send risk-validaciju                         |
-| [07 — Hardening: aktivacija + brand sigurnost](07-hardening-aktivacija-i-brand-sigurnost.md) | Hardening prolaz (10 review nalaza): aktivacija counterfactual Safea (relay/EOA), gateway split, SSL pinning, WC metadata     |
-| [08 — KUNAPay consumer brand](08-kunapay-consumer-brand.md)                                  | Generički consumer brand (KEKS/Aircash UX) na istoj tračnici; fiat on/off-ramp, claim linkovi                                 |
-| [09 — Tržnica marketplace](09-trznica-marketplace.md)                                        | Ugrađeni marketplace za HR MSP-ove (pilot: Crošulja); regulatorni okvir (Fiskalizacija 2.0, DAC7, ne-CASP)                    |
-| [10 — Onboarding trgovca](10-onboarding-trgovca.md)                                          | Operativni runbook za trgovca (in-app Safe, multi-tenant tablica)                                                             |
-| [11 — Događaji: P2P ticketing](11-dogadjaji-p2p-ticketing.md)                                | Event-ticketing marketplace bez posrednika (Entrio/Luma paritet); pilot MoMo/BlockSplit; backend na `pinka_finance`           |
-| [12 — Onboarding organizatora](12-onboarding-organizatora.md)                                | Operativni runbook za organizatora eventa (self-service E4: Safe u appu, event + tieri, publish, skener, off-ramp opcije)     |
-| [13 — Lekcije: Događaji sesija](13-lekcije-sesije-dogadjaji.md)                              | Procesne + tehničke lekcije (handoff-driven autonomni razvoj, SQL/tooling gotchae, web preview) iz sesije 2026-07-16/17       |
-| [14 — Dnevnik upstream sinkronizacije](14-upstream-sync-dnevnik.md)                          | Append-only dnevnik `git pull` s upstreama: što je community doradio, merge bilješke, snapshot Safe{Mobile} strategije        |
-| [handoffs/](handoffs/README.md)                                                              | **Izvršni planovi po fazama** — samodostatni handoff promptovi za praznu Claude Code sesiju (MVP, KUNAPay, Tržnica, Događaji) |
+| Dok                                                                                          | Tema                                                                                                                                   |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [01 — Vizija i strategija](01-vizija-i-strategija.md)                                        | Cilj (N community walleta), dva track-a (Safe fork vs domovina wallet), build-vs-fork odluka                                           |
+| [02 — Brand config sustav](02-brand-config-sustav.md)                                        | Manifest-driven brand config koji smo izgradili (faza 1, commit `f7cb87d44`); native vs runtime slojevi; SaaS pipeline                 |
+| [03 — Feature audit (Revolut-like)](03-feature-audit-revolut.md)                             | Koliko je "Revolut-like" wallet već gotov (~80%), matrica sposobnosti, ključni gap = identitet primatelja                              |
+| [04 — Prior art landscape](04-prior-art-landscape.md)                                        | Tko još forka Safe, neobank self-custody wallete, P2P-send obrasci, reusable OSS                                                       |
+| [05 — Counterfactual onboarding](05-counterfactual-onboarding.md)                            | Arhitektura "Create account" flowa (faza 2): CREATE2 predikcija, undeployedSafes lifecycle, naučene lekcije                            |
+| [06 — Receive + payment linkovi](06-receive-payment-linkovi.md)                              | Arhitektura EIP-681 receive/pay flowa (faza 3): QR + deep link, konzumacija kroz Send risk-validaciju                                  |
+| [07 — Hardening: aktivacija + brand sigurnost](07-hardening-aktivacija-i-brand-sigurnost.md) | Hardening prolaz (10 review nalaza): aktivacija counterfactual Safea (relay/EOA), gateway split, SSL pinning, WC metadata              |
+| [08 — KUNAPay consumer brand](08-kunapay-consumer-brand.md)                                  | Generički consumer brand (KEKS/Aircash UX) na istoj tračnici; fiat on/off-ramp, claim linkovi                                          |
+| [09 — Tržnica marketplace](09-trznica-marketplace.md)                                        | Ugrađeni marketplace za HR MSP-ove (pilot: Crošulja); regulatorni okvir (Fiskalizacija 2.0, DAC7, ne-CASP)                             |
+| [10 — Onboarding trgovca](10-onboarding-trgovca.md)                                          | Operativni runbook za trgovca (in-app Safe, multi-tenant tablica)                                                                      |
+| [11 — Događaji: P2P ticketing](11-dogadjaji-p2p-ticketing.md)                                | Event-ticketing marketplace bez posrednika (Entrio/Luma paritet); pilot MoMo/BlockSplit; backend na `pinka_finance`                    |
+| [12 — Onboarding organizatora](12-onboarding-organizatora.md)                                | Operativni runbook za organizatora eventa (self-service E4: Safe u appu, event + tieri, publish, skener, off-ramp opcije)              |
+| [13 — Lekcije: Događaji sesija](13-lekcije-sesije-dogadjaji.md)                              | Procesne + tehničke lekcije (handoff-driven autonomni razvoj, SQL/tooling gotchae, web preview) iz sesije 2026-07-16/17                |
+| [14 — Dnevnik upstream sinkronizacije](14-upstream-sync-dnevnik.md)                          | Append-only dnevnik `git pull` s upstreama: što je community doradio, merge bilješke, snapshot Safe{Mobile} strategije                 |
+| [15 — airKUNA wallet](15-airkuna-wallet.md)                                                  | Generički HR self-custody wallet s donacijama (domovina.ai kampanje); zero-fee strategija, brand smjernice, faze A1–A4                 |
+| [handoffs/](handoffs/README.md)                                                              | **Izvršni planovi po fazama** — samodostatni handoff promptovi za praznu Claude Code sesiju (MVP, KUNAPay, Tržnica, Događaji, airKUNA) |
 
 ## Kontekst u jednoj slici
 
