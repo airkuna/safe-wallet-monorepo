@@ -19,14 +19,13 @@ flowchart LR
   F0["Faza 0 ✅<br/>Native identitet<br/>(f7cb87d44)"] --> F1["Faza 1 ✅<br/>Runtime branding<br/>(theme + backend + assets)"]
   F1 --> F2["Faza 2 ✅<br/>Onboarding:<br/>kreiranje novog Safea"]
   F1 --> F3["Faza 3 ✅<br/>Receive + payment linkovi"]
-  F2 --> F4["Faza 4<br/>Identity layer<br/>(username → adresa)"]
+  F2 --> F4["Faza 4 ✅<br/>Identity layer<br/>(username → adresa)"]
   F3 --> F4
-  F4 --> F5["Faza 5<br/>Release pipeline<br/>(EAS per brand)"]
+  F4 --> F5["Faza 5 ✅<br/>Release pipeline<br/>(EAS per brand)"]
 
   classDef done fill:#eafbea,stroke:#2f855a,color:#14331f
   classDef todo fill:#e8f0ff,stroke:#2e5791,color:#0b2447
-  class F0,F1,F2,F3 done
-  class F4,F5 todo
+  class F0,F1,F2,F3,F4,F5 done
 ```
 
 | Faza | Dokument                                                               | Cilj                                                                        | Status |
@@ -36,7 +35,7 @@ flowchart LR
 | 2    | [faza-2-onboarding-novi-safe.md](faza-2-onboarding-novi-safe.md)       | Kreiranje **novog** Safea u appu (danas: samo import)                       | ✅     |
 | 3    | [faza-3-receive-payment-linkovi.md](faza-3-receive-payment-linkovi.md) | EIP-681 QR s iznosom + share link + deep-link u Send                        | ✅     |
 | 4    | [faza-4-identity-layer.md](faza-4-identity-layer.md)                   | Send po usernameu (ENS offchain subnames), hex adrese skrivene              | ✅     |
-| 5    | [faza-5-release-pipeline.md](faza-5-release-pipeline.md)               | EAS build per brand manifest + smoke test + store priprema                  | ⬜     |
+| 5    | [faza-5-release-pipeline.md](faza-5-release-pipeline.md)               | EAS build per brand manifest + smoke test + store priprema                  | ✅     |
 
 ## KUNAPay faze
 

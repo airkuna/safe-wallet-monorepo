@@ -47,4 +47,34 @@ Označi fazu 5 ✅ u `handoffs/README.md` (MVP komplet!), popuni Zapisnik, commi
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+> Izvršeno: 2026-07-22 (dev2) · test brand: `airkuna` · commit/push radi orkestrator
+
+**Isporučeno:**
+
+1. **`brand doctor`** — `apps/mobile/brand/doctor.js` (+ `doctor.d.ts`, `doctor.test.ts`, 17 testova) i yarn script `brand:doctor`. Validira: zod schemu, assete, Firebase datoteke + podudaranje application id-jeva (JSON `package_name`, plist `BUNDLE_ID`, prod i dev varijante), OTA certifikat, identity (https + resolvabilna domena), `eas.json` brand profile. `--remote-firebase` flag za CI (Firebase dolazi kao EAS file env var). Naming konvencija: `google-services-<id>[-dev].json`, `GoogleService-Info-<id>[-Dev].plist`; `safe` zadržava stock imena.
+2. **EAS profili per brand** — `preview-airkuna` / `production-airkuna` u `eas.json` (extends stock profila, nose samo `env.BRAND_ID`); postojeći Safe profili netaknuti. Firebase configi idu kao **file-type EAS env vars** u brandovom EAS projektu (kreirani za airkuna preview: `GOOGLE_SERVICES_JSON`, `GOOGLE_SERVICES_PLIST`, visibility secret). `BRAND_CONFIG_JSON` put dokumentiran u `brand/README.md` §5.
+3. **CI** — `.github/workflows/mobile-brand-release.yml` (workflow_dispatch: brand_id/variant/platform → doctor `--remote-firebase` + `eas build --no-wait`); zasebna datoteka, Safe workflowi nedirnuti.
+4. **Smoke** — Maestro harness postoji (`apps/mobile/e2e/`) ali je vezan na Safe appId + e2e mock env; parametrizacija per brand nije stala u fazu → **ručni smoke checklist** u `brand/README.md` (dozvoljena opcija po zadatku 4).
+5. **Store priprema** — `docs/whitelabel-wallet/16-release-checklist.md` (broj **16, ne 05** — 05 je već zauzet counterfactual onboardingom). GPL-3.0: mobile **nema** in-app licences ekran; Safe se oslanja na javni repo → za fork minimum = source link u store listing opisu (checklist §5).
+6. **Dokumentacija** — `brand/README.md` (doctor, "From manifest to store", smoke checklist), `02-brand-config-sustav.md` (§ "Što je stvarnost od faze 5").
+
+**Stvarni EAS build (cloud, Android preview):**
+
+- ✅ Pokrenut: **build ID `2c43e4a3-7968-4d43-99f1-dd3622574172`** — <https://expo.dev/accounts/airkuna/projects/airkuna/builds/2c43e4a3-7968-4d43-99f1-dd3622574172> (`--no-wait`; ishod prati orkestrator). Android keystore automatski kreiran na EAS-u; `versionCode` inicijaliziran na 1.
+- iOS nije pokretan (credentials/ASC setup je dio A4).
+
+**Acceptance status:**
+
+- [x] `brand:doctor` za `airkuna` → PASS (0 warnings); za `safe` → točan FAIL izvještaj (vidi napomenu ispod)
+- [x] EAS build za test brand pokrenut (Android preview, cloud) — instalacija/vizualna potvrda = orkestrator/korisnik po smoke checklistu
+- [x] Default `safe` build neizmijenjen: `resolveBrand`/`app.config.ts` nisu dirani; eas.json samo **dodaje** profile; verify čist
+- [x] Smoke checklist napisan (ručni)
+- [x] Nula secrets u repou (doctor samo referencira lokalne putanje; `.easignore` sad isključuje `/keys/`)
+
+**Odstupanja i nalazi:**
+
+- `05-release-checklist.md` → **`16-release-checklist.md`** (kolizija broja).
+- Doctor za `safe` na ovom stroju ispravno FAIL-a: lokalni `google-services.json`/plistovi su **domovina** configi (dev setup ovog stroja), ne Safeovi — environmentalno, ne regresija.
+- Nalaz: stock fallback `./assets/images/favicon.png` **ne postoji** (upstream ga obrisao u `04ef9a4d4`, `resolveBrand.js` ga još referencira) — favicon je samo web-preview target pa je u doctoru warning, ne error.
+- Sigurnosni popravak usput: `apps/mobile/.easignore` nije isključivao `/keys/` (service account + OTA privatni ključevi bi ušli u EAS build arhivu) — dodano isključenje.
+- `eas env:create` je deprecated u eas-cli 21 (radi; nasljednik `eas env:set`) — README koristi postojeću formu.

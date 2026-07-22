@@ -68,6 +68,17 @@ flowchart LR
 
 Dashboard i app validiraju **istim** zod schemom. Sljedeći korak: promovirati `schema.js` u `packages/brand-config` (dijele web + mobile + dashboard).
 
+### Što je stvarnost od faze 5 (2026-07-22)
+
+Ručno-pokretljiv deterministički pipeline **manifest in → potpisani build out** postoji:
+
+- **`brand doctor`** (`apps/mobile/brand/doctor.js`, `yarn workspace @safe-global/mobile brand:doctor <id>`) — validira kompletnost brand paketa: schema, asseti, Firebase datoteke + podudaranje application id-jeva, OTA certifikat, `eas.json` profili. CI mod `--remote-firebase`.
+- **EAS profili per brand** — `preview-<id>` / `production-<id>` u `eas.json`, nose samo `env.BRAND_ID`; Firebase configi putuju kao **file-type EAS env vars** u brandovom EAS projektu (gitignored datoteke ne ulaze u build arhivu).
+- **CI** — `.github/workflows/mobile-brand-release.yml` (ručni `workflow_dispatch`: brand_id + variant + platform → doctor + EAS cloud build).
+- **Store checklist** — [16 — Release checklist](16-release-checklist.md).
+
+**Ostaje vizija (post-MVP):** dashboard koji generira manifest + profile, automatski `eas submit`, `packages/brand-config` dijeljena schema, OTA rebrand.
+
 ## Faza 2 — theme injection (isporučeno)
 
 Implementirano ovako (vidi [handoffs/faza-1-runtime-branding.md](handoffs/faza-1-runtime-branding.md), "Zapisnik izvršenja"):
