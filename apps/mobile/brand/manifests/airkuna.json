@@ -17,7 +17,8 @@
     "defaultChainId": "100"
   },
   "features": {
-    "donations": true
+    "donations": true,
+    "forceSendFlow": true
   },
   "donations": {
     "apiBaseUrl": "https://api.domovina.ai/functions/v1"

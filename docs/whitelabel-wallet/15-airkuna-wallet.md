@@ -128,16 +128,16 @@ Napomena: airkuna-web je light-only, ali mobile app ima dark mod — manifest da
 
 **Ručni preduvjeti** (bez njih se u manifestu koriste placeholderi; A4 je njima blokiran):
 
-| Preduvjet                                            | Gdje se upisuje                                     | Status                                                                                                                        |
-| ---------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| EAS projekt za airkuna (`easProjectId`)              | manifest `easProjectId`                             | ✅ 2026-07-22 `@airkuna/airkuna` = `a3bfe1f6-16bd-4b0c-a171-86410842cbaf` (u manifestu)                                       |
-| EAS owner račun (prijedlog: `airkuna`, kao ff)       | manifest `owner`                                    | ✅ org `airkuna` postoji; `stepanic` dodan kao member                                                                         |
-| Apple Team (ITalk `6SCK58757K` ili vlastiti — TBD)   | manifest `ios.appleTeamId`                          | ✅ odluka vlasnika: ITalk `6SCK58757K` (u manifestu)                                                                          |
-| Bundle id / package (prijedlog `com.airkuna.wallet`) | manifest `ios.bundleIdentifier` / `android.package` | ✅ `com.airkuna.wallet` (+ `.dev` varijanta)                                                                                  |
-| Firebase projekti (iOS+Android, push)                | gitignored fileovi (v. `brand/README.md`)           | ✅ projekt `airkuna-production` (vlasnikov), 4 appa; configi `*-airkuna*` + SA ključ `keys/airkuna/` lokalno u `apps/mobile/` |
-| Scheme `airkuna://`                                  | manifest `scheme` (nije blokada — samo odluka)      | ✅ u manifestu (`airkuna`, `wc`)                                                                                              |
-| AASA / universal link na domovina.ai                 | domovina.ai hosting + entitlements (→ A4/post-MVP)  | ⬜                                                                                                                            |
-| pinka backend allowlist (ako CORS/origin gating)     | domovina-api                                        | ✅ nema gatinga — A2 verificirao živi RPC + edge fns s javnim anon keyem (2026-07-22)                                         |
+| Preduvjet                                            | Gdje se upisuje                                     | Status                                                                                                                                                      |
+| ---------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EAS projekt za airkuna (`easProjectId`)              | manifest `easProjectId`                             | ✅ 2026-07-22 `@airkuna/airkuna` = `a3bfe1f6-16bd-4b0c-a171-86410842cbaf` (u manifestu)                                                                     |
+| EAS owner račun (prijedlog: `airkuna`, kao ff)       | manifest `owner`                                    | ✅ org `airkuna` postoji; `stepanic` dodan kao member                                                                                                       |
+| Apple Team (ITalk `6SCK58757K` ili vlastiti — TBD)   | manifest `ios.appleTeamId`                          | ✅ odluka vlasnika: ITalk `6SCK58757K` (u manifestu)                                                                                                        |
+| Bundle id / package (prijedlog `com.airkuna.wallet`) | manifest `ios.bundleIdentifier` / `android.package` | ✅ `com.airkuna.wallet` (+ `.dev` varijanta)                                                                                                                |
+| Firebase projekti (iOS+Android, push)                | gitignored fileovi (v. `brand/README.md`)           | ✅ projekt `airkuna-production` (vlasnikov), 4 appa; configi `*-airkuna*` + SA ključ `keys/airkuna/` lokalno u `apps/mobile/`                               |
+| Scheme `airkuna://`                                  | manifest `scheme` (nije blokada — samo odluka)      | ✅ u manifestu (`airkuna`, `wc`)                                                                                                                            |
+| AASA / universal link na domovina.ai                 | domovina.ai hosting + entitlements (→ A4/post-MVP)  | 🔶 iOS AASA živ 2026-07-22 (`/c/*` → com.airkuna.wallet, domovina.ai v2.0.105); ostaje app entitlement (schema) + Android assetlinks (čeka signing cert A4) |
+| pinka backend allowlist (ako CORS/origin gating)     | domovina-api                                        | ✅ nema gatinga — A2 verificirao živi RPC + edge fns s javnim anon keyem (2026-07-22)                                                                       |
 
 **Rizici:**
 
@@ -148,6 +148,19 @@ Napomena: airkuna-web je light-only, ali mobile app ima dark mod — manifest da
 3. **Upstream `CreateSafe` kolizija** — naš overlay je ispred upstreama; kad upstream shipa svoje
    kreiranje Safea, odluka migracije (v. [14](14-upstream-sync-dnevnik.md), Implikacije §2).
 4. **Aircash pitch imenska kolizija** (v. §4) — poslovna odluka vlasnika, ne tehnička blokada.
+5. **CGW `SEND_FLOW` izostaje na Gnosisu (prod)** — ✅ RIJEŠENO 2026-07-22 brand overrideom.
+   Nalaz istrage: prod CGW `safe-client.safe.global` za chain 100 nema `SEND_FLOW` u features
+   arrayu (staging uopće nema chain 100), a jedini gate u mobile kodu je
+   `useHasFeature(FEATURES.SEND_FLOW)` u `AssetsHeader.container.tsx` (`showSendButton`) —
+   same `(send)` rute nisu gateane. Backend je **potpuno funkcionalan** bez flaga: živi CGW
+   `POST …/transactions/{safe}/preview` i `GET …/safes/{safe}/nonces` na chainu 100 vraćaju
+   valjane odgovore, a web app uopće ne gatea slanje po `SEND_FLOW` (nula referenci u
+   `apps/web`) — flag je čisto client-side rollout switch za Safe{Mobile}. Razmotrene opcije:
+   (a) zahtjev Safeu da uključi flag za Gnosis (izvan naše kontrole, spor), (b) vlastiti CGW
+   preko `backend.cgwBaseUrl` (preskup za jedan flag), (c) **odabrano** — brand-gated override:
+   manifest `features.forceSendFlow: true` (airkuna) + allowlist seam
+   `src/custom/features/forcedFeatures.ts` u `useHasFeature` (i `.e2e` varijanti); samo
+   `SEND_FLOW` se može forsirati, safe/domovina bez flaga = identično upstream ponašanje.
 
 ## 9. Faze i handoff promptovi
 
