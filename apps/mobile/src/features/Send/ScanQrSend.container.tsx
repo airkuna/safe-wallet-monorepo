@@ -1,7 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { Text } from 'tamagui'
 import { Code } from 'react-native-vision-camera'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
+import { resolveDonationScan } from '@/src/custom/donations'
 import {
   QrCamera,
   ScanErrorOverlay,
@@ -43,6 +44,7 @@ export function ScanQrSendContainer() {
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { sendScannedToRecipient } = useScannedAddressToSend()
+  const router = useRouter()
 
   // Read the latest error inside the focus effect without listing it in deps (which would re-run the
   // effect and fight the live state).
@@ -71,6 +73,17 @@ export function ScanQrSendContainer() {
       }
 
       const code = codes[0].value || ''
+
+      // Donacijski šav (samo brandovi s `features.donations`, inače uvijek null):
+      // QR s domovina.ai donacijskim linkom vodi na Doniraj s prefillanim slugom.
+      const donationSlug = resolveDonationScan(code)
+      if (donationSlug !== null) {
+        hasScanned.current = true
+        setIsCameraActive(false)
+        router.replace({ pathname: '/(tabs)/doniraj', params: { slug: donationSlug } })
+        return
+      }
+
       const resolved = resolveScannedAddress(code)
 
       if (!resolved) {
@@ -85,7 +98,7 @@ export function ScanQrSendContainer() {
       setIsCameraActive(false)
       sendScannedToRecipient(resolved)
     },
-    [isCameraActive, sendScannedToRecipient],
+    [isCameraActive, sendScannedToRecipient, router],
   )
 
   const handleActivateCamera = useCallback(() => {

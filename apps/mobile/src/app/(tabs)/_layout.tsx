@@ -11,6 +11,7 @@ import { isAndroid } from '@/src/config/constants'
 import { isFfBrand } from '@/src/custom/ff'
 import { isMarketplaceBrand } from '@/src/custom/marketplace'
 import { isEventsBrand } from '@/src/custom/events'
+import { isDonationsBrand } from '@/src/custom/donations'
 
 function TabBarBackground() {
   const { isDark } = useCurrentTheme()
@@ -108,6 +109,25 @@ export default function TabLayout() {
           title: 'Događaji',
           headerShown: false,
           tabBarButtonTestID: 'dogadjaji-tab',
+          tabBarButton: ({ children, ref, ...rest }) => {
+            return (
+              <Pressable {...rest} style={styles.tabButton}>
+                {children}
+              </Pressable>
+            )
+          },
+          tabBarIcon: ({ color }) => <TabBarIcon name={'star'} color={color} />,
+        }}
+      />
+
+      {/* Donations feature-pack tab — mounted only for brands with `features.donations` (see src/custom/donations). */}
+      <Tabs.Screen
+        name="doniraj"
+        options={{
+          href: isDonationsBrand() ? undefined : null,
+          title: 'Doniraj',
+          headerShown: false,
+          tabBarButtonTestID: 'doniraj-tab',
           tabBarButton: ({ children, ref, ...rest }) => {
             return (
               <Pressable {...rest} style={styles.tabButton}>

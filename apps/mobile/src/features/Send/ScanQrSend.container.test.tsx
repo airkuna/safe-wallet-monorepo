@@ -22,8 +22,15 @@ jest.mock('expo-router', () => {
       focusCb = cb
       React.useEffect(cb, [])
     },
+    useRouter: () => ({ replace: mockRouterReplace }),
   }
 })
+
+// Donacijski šav: za ne-donations brandove helper vraća null (default u testovima).
+const mockDonationScan = jest.fn<string | null, [string]>(() => null)
+jest.mock('@/src/custom/donations', () => ({
+  resolveDonationScan: (raw: string) => mockDonationScan(raw),
+}))
 
 jest.mock('@/src/components/Camera', () => {
   const React = require('react')
@@ -62,6 +69,7 @@ jest.mock('@/src/components/Camera', () => {
 
 const mockResolve = jest.fn()
 const mockSendScanned = jest.fn()
+const mockRouterReplace = jest.fn()
 jest.mock('./hooks/useScannedAddressToSend', () => ({
   useScannedAddressToSend: () => ({ sendScannedToRecipient: mockSendScanned }),
 }))
@@ -136,5 +144,30 @@ describe('ScanQrSendContainer', () => {
     act(() => qrProps?.onScan([{ value: 'ethereum:0xabc@1?value=1000' }]))
 
     expect(mockSendScanned).toHaveBeenCalledWith({ address: '0xabc', paymentRequest })
+  })
+
+  it('routes a donation QR to the Doniraj screen with the slug prefilled (donations brand)', () => {
+    mockDonationScan.mockReturnValue('moj-kanal')
+    render(<ScanQrSendContainer />)
+
+    act(() => qrProps?.onScan([{ value: 'https://domovina.ai/c/moj-kanal/doniraj' }]))
+
+    expect(mockRouterReplace).toHaveBeenCalledWith({
+      pathname: '/(tabs)/doniraj',
+      params: { slug: 'moj-kanal' },
+    })
+    expect(mockResolve).not.toHaveBeenCalled()
+    expect(mockSendScanned).not.toHaveBeenCalled()
+  })
+
+  it('keeps the invalid-address behaviour for a donation URL on non-donations brands', () => {
+    mockDonationScan.mockReturnValue(null)
+    mockResolve.mockReturnValue(null)
+    const { getByText } = render(<ScanQrSendContainer />)
+
+    act(() => qrProps?.onScan([{ value: 'https://domovina.ai/c/moj-kanal/doniraj' }]))
+
+    expect(mockRouterReplace).not.toHaveBeenCalled()
+    expect(getByText('Not a valid address')).toBeTruthy()
   })
 })

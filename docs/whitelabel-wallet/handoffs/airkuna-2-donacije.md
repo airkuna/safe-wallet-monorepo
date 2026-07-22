@@ -99,4 +99,18 @@ Napomena: postojeća FF ruta `src/app/ff/doniraj.tsx` je **drugi namespace** (`/
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+> Izvršeno: 2026-07-22 (dev1). `node scripts/verify.mjs --changed --workspace=mobile` čist (exit 0; 431 suiteova / 3441 testova, type-check + lint + prettier). Diff ne dira `packages/utils` (EIP-681 alati samo se konzumiraju).
+
+**Isporučeno po planu:** cijeli pack `src/custom/donations/` (gate, api config/types/pinkaClient, logic donationAmount/donationLink, state useDonations, api useDonationSync, screens/Doniraj, strings, index) + kolocirani testovi za svaku datoteku; tab šav u `(tabs)/_layout.tsx` (`href: isDonationsBrand() ? undefined : null`); route wrapper `(tabs)/doniraj.tsx`; donacijski case u `PayRequestRedirect.test.tsx` (implementacija netaknuta).
+
+**Odstupanja i nalazi:**
+
+1. **RPC-evi traže Supabase anon key** — handoff to ne spominje. `active_campaign_for_subject` i `contribution_status` su PostgREST RPC-evi (`/rest/v1/rpc/...`, header `Content-Profile: pinka_finance`) i vraćaju 401 bez `apikey`. Ključ je **javan po dizajnu** (role `anon`, isporučuje se u domovina.ai web bundleu) — ugrađen kao konstanta packa `DONATIONS_ANON_KEY` u `api/config.ts`; REST baza se izvodi iz `donations.apiBaseUrl` (`/functions/v1` → `/rest/v1`, `getDonationsRestBaseUrl`). A1 schema NIJE dirana.
+2. **CORS/allowlist nalaz (prvi poziv, [15] §8):** živi `api.domovina.ai` RPC-evi rade s anon keyem bez origin gatinga (curl provjera 2026-07-22: oba RPC-a vraćaju `[]` za nepostojeće idjeve, nema 403) — ručni preduvjet nije blokada.
+3. **Mapiranje sluga:** web ruta `/c/<slug>/doniraj` prevodi slug u interni channel id (`-` → `_`) i zove RPC sa `subject_type='podcast_channel'` (app_router.dart); `slugToSubjectRefs` šalje oba kandidata (`moj_kanal`, `moj-kanal`).
+4. **Skenerski šav:** umjesto `scannedAddress.ts` (SSOT za adrese; URL nije adresa, promjena tipa bi se prelila na sve pozivatelje) šav je u `ScanQrSend.container.tsx` `onScan` — `resolveDonationScan()` iz packa (vraća `null` za ne-donations brandove) → `router.replace('/(tabs)/doniraj?slug=…')`. Nešto više od 1 linije (~8), ali potpuno gated packom.
+5. **Tab ikona:** `heart` ne postoji u `IconName` setu — uzet `star` (poznato renderira; airkuna ne mounta Događaje pa nema vizualne kolizije).
+6. **Confirm bez txHash-a u MVP flowu:** Send flow ne vraća tx hash na Doniraj ekran (isti gap kao events pack) — zapis se kreira prije navigacije, `recordDonationPayment(donationId, txHash)` je izvezen za buduće ožičenje (A3/eject); knjiženje ionako pokriva cron `pinka-onchain-ingest`.
+7. **FF ruta `/ff/doniraj`:** provjereno — drugi namespace (`/ff/doniraj` vs tab `/doniraj`), nema kolizije u expo-router stablu ni u typed routes.
+8. **Typed routes:** regenerirano kratkim `expo start` (verify type-check ih ne regenerira sam).
+9. **Web preview smoke (djelomičan):** `WEB_PREVIEW=1 BRAND_ID=airkuna` boot potvrđen u browseru (naslov Dev-airKUNA, zlatna tema, bez crasha s `features.donations`); Doniraj tab nije vizualno provjeren jer je onboarding u web previewu krhak (bijeli ekran nakon navigacije kroz get-started — poznata web-preview limitacija). Flow slug→kampanja→iznos→Send prefill pokriven je smoke testovima ekrana; backend ugovor verificiran MSW testovima + curl-om na živi backend. Provjera na uređaju ostaje za A4/release QA.

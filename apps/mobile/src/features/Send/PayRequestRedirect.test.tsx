@@ -47,6 +47,30 @@ describe('PayRequestRedirect', () => {
     expect(mockShow).not.toHaveBeenCalled()
   })
 
+  it('routes a donation payment link (EURe token transfer on Gnosis) with token and amount prefill', () => {
+    // Donacijski EIP-681 s domovina.ai stranice (airkuna A2): EURe@100,
+    // wei = centi × 1e16 (25,00 EUR = 2500 centi).
+    const EURE = '0x420CA0f9B9b604cE0fd9C18EF134C705e5Fa3430'
+    const CAMPAIGN_SAFE = '0x2222222222222222222222222222222222222222'
+    mockParams.mockReturnValue({
+      uri: `ethereum:${EURE}@100/transfer?address=${CAMPAIGN_SAFE}&uint256=25000000000000000000`,
+    })
+
+    renderWithSafe(activeSafe)
+
+    expect(mockReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/(send)/recipient',
+        params: expect.objectContaining({
+          scannedAddress: CAMPAIGN_SAFE,
+          prefillTokenAddress: EURE,
+          prefillValueRaw: '25000000000000000000',
+        }),
+      }),
+    )
+    expect(mockShow).not.toHaveBeenCalled()
+  })
+
   it('shows an error and goes home for an invalid link', () => {
     mockParams.mockReturnValue({ uri: 'ethereum:not-an-address' })
 
