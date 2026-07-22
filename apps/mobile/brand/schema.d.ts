@@ -1,5 +1,11 @@
 import type { ZodType } from 'zod'
 
+/** One Android App Link entry (e.g. `{ host: 'domovina.ai', pathPrefix: '/c' }`). */
+export interface BrandAppLink {
+  host: string
+  pathPrefix: string
+}
+
 /**
  * The validated shape of a brand manifest. Identity fields are baked into the
  * binary at build time; `backend`/`theme` are consumed by later phases.
@@ -29,6 +35,8 @@ export interface BrandManifest {
   android: {
     /** Production base application id; the dev variant appends `.dev`. */
     package: string
+    /** Android App Links (autoVerify intent filters). Absent → no intent filters. */
+    appLinks?: [BrandAppLink, ...BrandAppLink[]]
   }
   /** Optional per-brand backend. */
   backend?: {

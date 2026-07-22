@@ -147,6 +147,20 @@ const config: ExpoConfig = {
   },
   android: {
     package: brand.android.package,
+    // Conditional spread: brands without the field (stock safe) keep a
+    // byte-identical config output.
+    ...(brand.android.appLinks
+      ? {
+          intentFilters: [
+            {
+              action: 'VIEW',
+              autoVerify: true,
+              data: brand.android.appLinks.map(({ host, pathPrefix }) => ({ scheme: 'https', host, pathPrefix })),
+              category: ['BROWSABLE', 'DEFAULT'],
+            },
+          ],
+        }
+      : {}),
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
     adaptiveIcon: {
       foregroundImage: brand.assets.androidAdaptiveIcon.foregroundImage,

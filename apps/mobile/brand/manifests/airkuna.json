@@ -12,7 +12,8 @@
     "associatedDomains": ["applinks:domovina.ai"]
   },
   "android": {
-    "package": "com.airkuna.wallet"
+    "package": "com.airkuna.wallet",
+    "appLinks": [{ "host": "domovina.ai", "pathPrefix": "/c" }]
   },
   "backend": {
     "defaultChainId": "100"

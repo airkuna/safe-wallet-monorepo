@@ -1,4 +1,4 @@
-import type { BrandManifest } from './schema'
+import type { BrandAppLink, BrandManifest } from './schema'
 
 /**
  * Fully-computed identity for a single variant (dev or prod), ready to be
@@ -21,6 +21,8 @@ export interface ResolvedBrand {
   }
   android: {
     package: string
+    /** Android App Links (autoVerify intent filters), passed through from the manifest. */
+    appLinks?: [BrandAppLink, ...BrandAppLink[]]
   }
   /** App-root-relative asset paths, defaulted to the stock Safe assets. */
   assets: {

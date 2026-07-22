@@ -28,6 +28,18 @@ const brandManifestSchema = z.object({
   }),
   android: z.object({
     package: z.string().min(1),
+    // Android App Links (autoVerify intent filters), e.g.
+    // `[{ "host": "domovina.ai", "pathPrefix": "/c" }]`. Absent → no
+    // intent filters are added to the build.
+    appLinks: z
+      .array(
+        z.object({
+          host: z.string().min(1),
+          pathPrefix: z.string().min(1),
+        }),
+      )
+      .nonempty()
+      .optional(),
   }),
   backend: z
     .object({

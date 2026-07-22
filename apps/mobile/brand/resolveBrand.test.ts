@@ -1,3 +1,5 @@
+import { existsSync } from 'fs'
+import { resolve } from 'path'
 import { resolveBrand, loadBrandManifest } from './resolveBrand'
 import type { BrandManifest } from './schema'
 
@@ -58,8 +60,26 @@ describe('resolveBrand', () => {
         backgroundImage: './assets/images/android-adaptive-icon-background.png',
         monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
       },
-      favicon: './assets/images/favicon.png',
+      favicon: './assets/images/icon.png',
     })
+  })
+
+  it('defaults to stock Safe asset files that actually exist on disk', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+    const appDir = resolve(__dirname, '..')
+    const paths = [
+      brand.assets.icon,
+      brand.assets.splash.image,
+      brand.assets.splash.imageDark,
+      brand.assets.androidAdaptiveIcon.foregroundImage,
+      brand.assets.androidAdaptiveIcon.backgroundImage,
+      brand.assets.androidAdaptiveIcon.monochromeImage,
+      brand.assets.favicon,
+    ]
+
+    for (const assetPath of paths) {
+      expect({ assetPath, exists: existsSync(resolve(appDir, assetPath)) }).toEqual({ assetPath, exists: true })
+    }
   })
 
   it('resolves manifest asset paths relative to brand/ and keeps colors as-is', () => {
@@ -84,7 +104,7 @@ describe('resolveBrand', () => {
     expect(brand.assets.androidAdaptiveIcon.backgroundImage).toBe(
       './assets/images/android-adaptive-icon-background.png',
     )
-    expect(brand.assets.favicon).toBe('./assets/images/favicon.png')
+    expect(brand.assets.favicon).toBe('./assets/images/icon.png')
   })
 
   it('passes theme and backend through for the runtime layer', () => {
@@ -182,6 +202,44 @@ describe('resolveBrand', () => {
     expect(brand.ios.associatedDomains).toBeUndefined()
   })
 
+  it('passes Android app links through for the intent-filter derivation', () => {
+    const brand = resolveBrand(
+      { isDev: false },
+      { ...safe, android: { ...safe.android, appLinks: [{ host: 'domovina.ai', pathPrefix: '/c' }] } },
+    )
+
+    expect(brand.android.appLinks).toEqual([{ host: 'domovina.ai', pathPrefix: '/c' }])
+  })
+
+  it('leaves Android app links undefined when the manifest has none', () => {
+    const brand = resolveBrand({ isDev: false }, safe)
+
+    expect(brand.android.appLinks).toBeUndefined()
+  })
+
+  it('rejects a manifest with an empty appLinks array', () => {
+    process.env.BRAND_CONFIG_JSON = JSON.stringify({ ...safe, android: { ...safe.android, appLinks: [] } })
+
+    try {
+      expect(() => loadBrandManifest()).toThrow()
+    } finally {
+      delete process.env.BRAND_CONFIG_JSON
+    }
+  })
+
+  it('rejects an app link entry without a pathPrefix', () => {
+    process.env.BRAND_CONFIG_JSON = JSON.stringify({
+      ...safe,
+      android: { ...safe.android, appLinks: [{ host: 'domovina.ai' }] },
+    })
+
+    try {
+      expect(() => loadBrandManifest()).toThrow()
+    } finally {
+      delete process.env.BRAND_CONFIG_JSON
+    }
+  })
+
   it('passes the donations config through for the runtime layer', () => {
     const donations = { apiBaseUrl: 'https://api.domovina.ai/functions/v1' }
 
@@ -208,6 +266,7 @@ describe('resolveBrand', () => {
       expect(manifest.features?.donations).toBe(true)
       expect(manifest.donations?.apiBaseUrl).toBe('https://api.domovina.ai/functions/v1')
       expect(manifest.ios.associatedDomains).toEqual(['applinks:domovina.ai'])
+      expect(manifest.android.appLinks).toEqual([{ host: 'domovina.ai', pathPrefix: '/c' }])
       expect(manifest.theme?.light?.['primary.main']).toBe('#002F6C')
       expect(manifest.theme?.dark?.['primary.main']).toBe('#E3AF35')
     } finally {

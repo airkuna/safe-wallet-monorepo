@@ -29,7 +29,9 @@ const SAFE_DEFAULT_ASSETS = {
     backgroundImage: './assets/images/android-adaptive-icon-background.png',
     monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
   },
-  favicon: './assets/images/favicon.png',
+  // Upstream deleted `favicon.png` (04ef9a4d4); the app icon doubles as the
+  // web-preview favicon.
+  favicon: './assets/images/icon.png',
 }
 
 const withVariant = (base, isDev) => (isDev ? `${base}${DEV_SUFFIX}` : base)
@@ -97,6 +99,7 @@ const resolveBrand = ({ isDev }, manifest = loadBrandManifest()) => {
     },
     android: {
       package: withVariant(manifest.android.package, isDev),
+      appLinks: manifest.android.appLinks,
     },
     assets: resolveAssets(manifest.assets),
     // OTA (EAS Update) is opt-in per brand; absent → expo-updates stays disabled.
