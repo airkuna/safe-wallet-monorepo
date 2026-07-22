@@ -86,4 +86,56 @@ Točan skup ovisi o nalazu koraka 1; očekivani minimum (thin seams, upstream da
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+> Izvršeno 2026-07-22 (dev2). A2 (donations pack) se radio paralelno — po uputi orkestratora
+> `src/custom/donations/` NIJE referenciran; zero-fee komponente su u zasebnom
+> `src/custom/zerofee/` s vlastitim gateom `isZeroFeeBrand()` (= `getBrand().features?.donations === true`).
+
+### Korak 1 — istraga RELAYING/SEND (2026-07-22)
+
+Gateway: **`https://safe-client.safe.global`** (prod default; airkuna manifest **nema**
+`backend.cgwBaseUrl`, pa vrijedi Safe default). `GET /v1/chains/100` → `features`:
+
+- **`RELAYING` ✅ i `RELAYING_MOBILE` ✅ prisutni za Gnosis (100)** → **opcija A radi**, koraci 2–4 izvršeni.
+- Kvota: `GET /v1/chains/100/relay/{safeAddress}` → `{"remaining":5,"limit":5}` — 5 relaya/dan po Safeu (konzumira se kroz postojeći `useRelayGetRelaysRemainingV1Query`).
+- `SEND_TRANSFERS`: **ne postoji** — ni u CGW features ni igdje u monorepu; naziv iz [14] Implikacije §3 je zastario. Stvarni mobile gate za Send je **`SEND_FLOW`** (`AssetsHeader.container.tsx`), koji na **prod** CGW-u **nije uključen ni za chain 100 ni za chain 1** — na staging CGW-u (`safe-client.staging.5afe.dev`) jest (chain 1, 11155111). ⚠️ Implikacija: Send gumb na prod gatewayu za Gnosis danas ostaje skriven — **A4/release briga** (CGW konfiguracija ili per-brand gateway), izvan A3 opsega.
+- Staging caveat: `GET /v1/chains/100` na stagingu → **404** (Gnosis ne postoji na staging config servisu) — dev buildovi airkune (staging default) nemaju Gnosis uopće.
+
+### Nalaz o defaultu (korak 2 — bez izmjene koda)
+
+Pretpostavka doca ("default je vjerojatno PK") **ne vrijedi**: upstream `executionMethodSlice`
+ima `initialState = WITH_RELAY` (upstream PR #6493, commit `2d1debb96`) i slice je u
+`persistBlacklist` → svaka sesija starta s relayem kao requested metodom, a
+`getExecutionMethod` ga rezolvira u relay kad je `isRelayAvailable`. **Default-na-relay dakle
+već postoji upstream** — nikakav seam nije bio potreban; ponašanje je lockirano guard testom
+`src/custom/zerofee/zeroFeeDefault.test.ts` (pukne ako upstream promijeni default).
+
+### Odluka (a)/(b) iz tablice šavova
+
+**(b) globalno** — ali kao _postojeće upstream ponašanje_, ne naša izmjena: default na relay
+vrijedi za sve brandove jer ga upstream već tako shipa; `safe` brand regresija = nula po
+definiciji (nije diran nijedan default). Brand-gated je **samo copy**: HR "Bez naknade"
+stringovi pale se isključivo preko `features.donations` (airkuna), svi ostali brandovi
+zadržavaju upstream engleske stringove bajt-za-bajt (testirano u oba stanja).
+
+### Isporučeno
+
+- **Novi pack `apps/mobile/src/custom/zerofee/`**: `isZeroFeeBrand.ts`, `relayCopy.ts`
+  (`getRelayCopy(): RelayCopy | null`), `strings.ts` (HR, sentence case, bez emojija, bez "0%"
+  tvrdnje u fallbacku), `index.ts` + testovi (`isZeroFeeBrand`, `relayCopy`, `zeroFeeDefault`).
+- **Thin seams (copy-only, semantika netaknuta):**
+  - `HowToExecuteSheet/components/RelayAvailable/RelayAvailable.tsx` — naslov "Bez naknade" + "Mrežnu naknadu plaćamo umjesto tebe" + "još N danas";
+  - `HowToExecuteSheet/components/RelayUnavailable/RelayUnavailable.tsx` — pošten fallback: kvota iskorištena, mrežnu naknadu plaća korisnikov potpisni ključ;
+  - `ExecuteTx/components/RelayFee/RelayFee.tsx` — review footer label "Free" → "Bez naknade" (+ širina labela auto kad je copy aktivan).
+- Kolocirani testovi za sve tri komponente (oba brand stanja).
+- NE dirano: `useRequiresRelay`, `getExecutionMethod`, `relayExecutor`, `executionMethodSlice`, GTF Safe-pays put.
+
+### Status opcije B
+
+**Nije implementirana i nije potrebna** — opcija A (CGW relay) radi na prod gatewayu za Gnosis.
+B (`pay.domovina.ai /api/relay`) ostaje dokumentirani fallback za slučaj da Safe ugasi
+`RELAYING` za 100; tada je preduvjet potvrda vlasnika (allowlist/Turnstile), v. Preduvjeti.
+
+### Verifikacija
+
+`node scripts/verify.mjs --changed --workspace=mobile` čist (type-check, lint, prettier,
+testovi); 6 novih test suiteova / 16 testova zeleno. Commit/push radi orkestrator.

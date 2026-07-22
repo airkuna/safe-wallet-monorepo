@@ -4,6 +4,7 @@ import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeSkeleton } from '@/src/components/SafeSkeleton'
+import { getRelayCopy } from '@/src/custom/zerofee'
 
 interface RelayAvailableProps {
   isLoadingRelays: boolean
@@ -12,20 +13,26 @@ interface RelayAvailableProps {
 }
 
 export const RelayAvailable = ({ isLoadingRelays, relaysRemaining, executionMethod }: RelayAvailableProps) => {
+  const copy = getRelayCopy()
+
   return (
     <View width="100%" flexDirection="row" justifyContent="space-between" alignItems="center">
       <View flex={1}>
         <Text fontWeight="600" fontSize="$5">
-          Sponsored by Safe
+          {copy?.title ?? 'Sponsored by Safe'}
         </Text>
         <View flexDirection="row" alignItems="center" gap="$2" marginTop="$1">
           <Text color="$colorSecondary" fontSize="$4">
-            We pay transactions fees for you
+            {copy?.subtitle ?? 'We pay transactions fees for you'}
           </Text>
           {isLoadingRelays ? (
             <SafeSkeleton height={16} width={80} />
           ) : (
-            relaysRemaining && <Text fontSize="$4">{relaysRemaining.remaining} left / day</Text>
+            relaysRemaining && (
+              <Text fontSize="$4">
+                {copy ? copy.remainingToday(relaysRemaining.remaining) : `${relaysRemaining.remaining} left / day`}
+              </Text>
+            )
           )}
         </View>
       </View>
