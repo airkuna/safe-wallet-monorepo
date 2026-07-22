@@ -10,7 +10,7 @@ import { useAppUpdateCheck } from '@/src/features/AppUpdate/hooks/useAppUpdateCh
 import { ForceUpdateScreen } from '@/src/features/AppUpdate/components/ForceUpdateScreen'
 import { SoftUpdatePrompt } from '@/src/features/AppUpdate/components/SoftUpdatePrompt'
 import { remoteConfigService } from '@/src/services/remoteConfig/remoteConfigService'
-import { useScreenPreview } from '@/src/custom/preview/screenPreview'
+import { useScreenPreview, maybeRedirectPreviewRoot } from '@/src/custom/preview/screenPreview'
 let navigated = false
 
 function useInitialNavigationScreen() {
@@ -44,6 +44,9 @@ function useInitialNavigationScreen() {
     // We will navigate only on startup. Any other navigation should not happen here
     // In screen preview mode (dev web preview) the URL route must survive the boot
     if (navigated || screenPreview) {
+      if (screenPreview) {
+        maybeRedirectPreviewRoot(segments, router)
+      }
       return
     }
 

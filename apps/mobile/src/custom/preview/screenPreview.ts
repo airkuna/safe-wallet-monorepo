@@ -52,9 +52,23 @@ export const seedScreenPreviewState = (dispatch: Dispatch): void => {
 }
 
 let seeded = false
+let rootRedirected = false
 
 export const resetScreenPreviewSeedForTests = (): void => {
   seeded = false
+  rootRedirected = false
+}
+
+/**
+ * In preview mode the root index has no content (its boot redirect is skipped),
+ * so land the bare "/" URL on (tabs) — once per boot; deep URLs stay untouched.
+ */
+export const maybeRedirectPreviewRoot = (segments: string[], router: { replace: (href: '/(tabs)') => void }): void => {
+  if (rootRedirected || segments.some(Boolean)) {
+    return
+  }
+  rootRedirected = true
+  router.replace('/(tabs)')
 }
 
 /**

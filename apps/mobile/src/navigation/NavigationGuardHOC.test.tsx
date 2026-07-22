@@ -42,7 +42,9 @@ describe('NavigationGuardHOC screen preview gating', () => {
     const { getByText, store } = renderGuard()
 
     expect(getByText('child')).toBeTruthy()
-    expect(mockReplace).not.toHaveBeenCalled()
+    // Bare root URL lands on (tabs) — the only redirect preview mode performs
+    expect(mockReplace).toHaveBeenCalledTimes(1)
+    expect(mockReplace).toHaveBeenCalledWith('/(tabs)')
     expect(mockNavigate).not.toHaveBeenCalled()
 
     const state = store.getState()

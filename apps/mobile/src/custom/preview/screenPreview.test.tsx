@@ -1,6 +1,12 @@
 import { renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
-import { isScreenPreviewEnabled, useScreenPreview, resetScreenPreviewSeedForTests, PREVIEW_SAFE } from './screenPreview'
+import {
+  isScreenPreviewEnabled,
+  useScreenPreview,
+  resetScreenPreviewSeedForTests,
+  maybeRedirectPreviewRoot,
+  PREVIEW_SAFE,
+} from './screenPreview'
 
 const globalWithDev = globalThis as { __DEV__?: boolean }
 
@@ -21,6 +27,23 @@ describe('screenPreview', () => {
       process.env.EXPO_PUBLIC_SCREEN_PREVIEW = originalFlag
     }
     globalWithDev.__DEV__ = originalDev
+  })
+
+  describe('maybeRedirectPreviewRoot', () => {
+    it('redirects the bare root to (tabs) once', () => {
+      const replace = jest.fn()
+      maybeRedirectPreviewRoot([], { replace })
+      expect(replace).toHaveBeenCalledWith('/(tabs)')
+
+      maybeRedirectPreviewRoot([], { replace })
+      expect(replace).toHaveBeenCalledTimes(1)
+    })
+
+    it('leaves deep URLs untouched', () => {
+      const replace = jest.fn()
+      maybeRedirectPreviewRoot(['(tabs)', 'doniraj'], { replace })
+      expect(replace).not.toHaveBeenCalled()
+    })
   })
 
   describe('isScreenPreviewEnabled', () => {
