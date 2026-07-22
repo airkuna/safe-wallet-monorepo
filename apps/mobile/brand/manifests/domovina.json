@@ -11,7 +11,8 @@
   },
   "scheme": ["domovina", "wc"],
   "features": {
-    "marketplace": true
+    "marketplace": true,
+    "events": true
   },
   "ios": {
     "bundleIdentifier": "ai.domovina.wallet",
@@ -19,5 +20,8 @@
   },
   "android": {
     "package": "ai.domovina.wallet"
+  },
+  "events": {
+    "apiBaseUrl": "https://api.domovina.ai/functions/v1"
   }
 }
