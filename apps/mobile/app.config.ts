@@ -76,7 +76,7 @@ const config: ExpoConfig = {
   name: name,
   slug: brand.slug,
   owner: brand.owner,
-  version: '1.0.14',
+  version: '1.0.15',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
