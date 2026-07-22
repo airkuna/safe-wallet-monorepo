@@ -71,13 +71,16 @@ export default function TabLayout() {
           title: 'Klub',
           headerShown: false,
           tabBarButtonTestID: 'klub-tab',
-          tabBarButton: ({ children, ref, ...rest }) => {
-            return (
-              <Pressable {...rest} style={styles.tabButton}>
-                {children}
-              </Pressable>
-            )
-          },
+          // expo-router throws if `href` and `tabBarButton` are both set — hidden tabs (href: null) must not pass the custom button
+          tabBarButton: !isFfBrand()
+            ? undefined
+            : ({ children, ref, ...rest }) => {
+                return (
+                  <Pressable {...rest} style={styles.tabButton}>
+                    {children}
+                  </Pressable>
+                )
+              },
           tabBarIcon: ({ color }) => <TabBarIcon name={'shield'} color={color} />,
         }}
       />
@@ -90,13 +93,15 @@ export default function TabLayout() {
           title: 'Tržnica',
           headerShown: false,
           tabBarButtonTestID: 'trznica-tab',
-          tabBarButton: ({ children, ref, ...rest }) => {
-            return (
-              <Pressable {...rest} style={styles.tabButton}>
-                {children}
-              </Pressable>
-            )
-          },
+          tabBarButton: !isMarketplaceBrand()
+            ? undefined
+            : ({ children, ref, ...rest }) => {
+                return (
+                  <Pressable {...rest} style={styles.tabButton}>
+                    {children}
+                  </Pressable>
+                )
+              },
           tabBarIcon: ({ color }) => <TabBarIcon name={'tag'} color={color} />,
         }}
       />
@@ -109,13 +114,15 @@ export default function TabLayout() {
           title: 'Događaji',
           headerShown: false,
           tabBarButtonTestID: 'dogadjaji-tab',
-          tabBarButton: ({ children, ref, ...rest }) => {
-            return (
-              <Pressable {...rest} style={styles.tabButton}>
-                {children}
-              </Pressable>
-            )
-          },
+          tabBarButton: !isEventsBrand()
+            ? undefined
+            : ({ children, ref, ...rest }) => {
+                return (
+                  <Pressable {...rest} style={styles.tabButton}>
+                    {children}
+                  </Pressable>
+                )
+              },
           tabBarIcon: ({ color }) => <TabBarIcon name={'star'} color={color} />,
         }}
       />
@@ -128,13 +135,15 @@ export default function TabLayout() {
           title: 'Doniraj',
           headerShown: false,
           tabBarButtonTestID: 'doniraj-tab',
-          tabBarButton: ({ children, ref, ...rest }) => {
-            return (
-              <Pressable {...rest} style={styles.tabButton}>
-                {children}
-              </Pressable>
-            )
-          },
+          tabBarButton: !isDonationsBrand()
+            ? undefined
+            : ({ children, ref, ...rest }) => {
+                return (
+                  <Pressable {...rest} style={styles.tabButton}>
+                    {children}
+                  </Pressable>
+                )
+              },
           tabBarIcon: ({ color }) => <TabBarIcon name={'star'} color={color} />,
         }}
       />

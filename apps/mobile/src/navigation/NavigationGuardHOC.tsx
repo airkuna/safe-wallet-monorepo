@@ -10,6 +10,7 @@ import { useAppUpdateCheck } from '@/src/features/AppUpdate/hooks/useAppUpdateCh
 import { ForceUpdateScreen } from '@/src/features/AppUpdate/components/ForceUpdateScreen'
 import { SoftUpdatePrompt } from '@/src/features/AppUpdate/components/SoftUpdatePrompt'
 import { remoteConfigService } from '@/src/services/remoteConfig/remoteConfigService'
+import { useScreenPreview } from '@/src/custom/preview/screenPreview'
 let navigated = false
 
 function useInitialNavigationScreen() {
@@ -20,13 +21,14 @@ function useInitialNavigationScreen() {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const segments = useSegments()
+  const screenPreview = useScreenPreview()
 
   /*
    * If the user has not enabled notifications and has not been prompted to enable them,
    * show him the opt-in screen, but only if he is in a navigator that has (tabs) as the first screen
    * */
   const [hasShownNotifications, setHasShownNotifications] = useState(false)
-  const shouldShowOptIn = !isAppNotificationEnabled && !promptAttempts && segments[0] === '(tabs)'
+  const shouldShowOptIn = !screenPreview && !isAppNotificationEnabled && !promptAttempts && segments[0] === '(tabs)'
 
   useEffect(() => {
     if (shouldShowOptIn && !hasShownNotifications) {
@@ -40,7 +42,8 @@ function useInitialNavigationScreen() {
 
   useEffect(() => {
     // We will navigate only on startup. Any other navigation should not happen here
-    if (navigated) {
+    // In screen preview mode (dev web preview) the URL route must survive the boot
+    if (navigated || screenPreview) {
       return
     }
 

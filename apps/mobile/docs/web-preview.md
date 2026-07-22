@@ -13,7 +13,37 @@ WEB_PREVIEW=1 npx expo start --web --port 8085
 
 `BRAND_ID` dolazi iz `.env.local`; feature flagovi (npr. `features.events`) se pale u
 `brand/manifests/<brand>.json` (gitignored). Do tabova treba proći onboarding — dovoljan je
-read-only import bilo koje Safe adrese.
+read-only import bilo koje Safe adrese (ili koristi screen preview mode dolje).
+
+## Screen preview mode — ekran po ekran bez onboardinga
+
+Za brzu UI inspekciju pojedinačnih ekrana direktno URL-om, bez prolaska onboardinga:
+
+```bash
+cd apps/mobile
+WEB_PREVIEW=1 EXPO_PUBLIC_SCREEN_PREVIEW=1 npx expo start --web --port 8085
+```
+
+Što flag radi (samo `__DEV__` + `EXPO_PUBLIC_SCREEN_PREVIEW=1`; native/prod netaknut):
+
+- **Initial redirect se preskače** — `NavigationGuardHOC` inače na bootu radi
+  `router.replace('/onboarding')` ili `(tabs)`, pa URL ruta ne preživi. S flagom ostaje
+  URL koju si otvorio (expo-router na webu mapira URL → ekran).
+- **State se seeda** (modul `src/custom/preview/screenPreview.ts`): `onboardingVersionSeen`,
+  `promptAttempts` (da notifications opt-in ne iskače) i read-only aktivni Safe
+  `0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6` na Sepoliji (isti kao e2e fixtura) —
+  staging CGW za njega vraća prave podatke.
+
+Kako otvoriti ekran:
+
+- Popis svih ruta: <http://localhost:8085/_sitemap> (expo-router dev sitemap)
+- Direktno URL-om, npr. <http://localhost:8085/doniraj> (tab, grupa `(tabs)` nije u URL-u),
+  <http://localhost:8085/address-book>, <http://localhost:8085/app-settings>…
+- Root `/` ostaje na splash spinneru (dummy `app/index.tsx`; redirect je namjerno preskočen) —
+  uvijek otvaraj konkretnu rutu.
+
+Napomena: state je seedan i persistiran u browser storage; za čist boot bez flaga
+obriši site data (localStorage/MMKV web).
 
 ## Zašto je ovo trebalo
 
