@@ -85,12 +85,12 @@ funkcijom — strategija, donacijski interfejs (pinka), zero-fee pristup i ručn
 [15 — airKUNA wallet](../15-airkuna-wallet.md). A4 može paralelno s A2/A3 čim su ručni
 preduvjeti ([15] §8) riješeni.
 
-| #   | Faza                                              | Dokument                                       | Ovisi o                                | Status |
-| --- | ------------------------------------------------- | ---------------------------------------------- | -------------------------------------- | ------ |
-| A1  | Brand manifest `airkuna` + `donations` schema     | [airkuna-1-brand.md](airkuna-1-brand.md)       | —                                      | ✅     |
-| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](airkuna-2-donacije.md) | A1                                     | ✅     |
-| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](airkuna-3-zerofee.md)   | A2                                     | ✅     |
-| A4  | Store release za `airkuna`                        | [airkuna-4-release.md](airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti ([15] §8) | ⬜     |
+| #   | Faza                                              | Dokument                                       | Ovisi o                                | Status                                                                            |
+| --- | ------------------------------------------------- | ---------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------- |
+| A1  | Brand manifest `airkuna` + `donations` schema     | [airkuna-1-brand.md](airkuna-1-brand.md)       | —                                      | ✅                                                                                |
+| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](airkuna-2-donacije.md) | A1                                     | ✅                                                                                |
+| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](airkuna-3-zerofee.md)   | A2                                     | ✅                                                                                |
+| A4  | Store release za `airkuna`                        | [airkuna-4-release.md](airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti ([15] §8) | 🔄 automatizirani dio ✅ 2026-07-22; ručni koraci vlasnika (ASC/Play) u Zapisniku |
 
 ## Kako koristiti
 

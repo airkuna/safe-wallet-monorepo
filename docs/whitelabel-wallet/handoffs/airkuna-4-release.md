@@ -14,14 +14,14 @@ doctor, EAS profili, smoke) još nije izvršena, izvrši nju prvo ili je uključ
 
 Prije ijednog koraka provjeri tablicu iz [15](../15-airkuna-wallet.md) §8 i ažuriraj status ovdje:
 
-| Preduvjet                                                                | Bez njega                                                                               | Status |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ------ |
-| EAS projekt (`easProjectId`) + owner račun `airkuna`                     | build se ne može ni pokrenuti                                                           | ⬜     |
-| Apple Team odluka (ITalk `6SCK58757K` ili vlastiti)                      | iOS signing nemoguć                                                                     | ⬜     |
-| Bundle id / package registrirani (`com.airkuna.wallet` + `.dev` variant) | store upload nemoguć                                                                    | ⬜     |
-| Firebase projekti iOS+Android (dev+prod, push)                           | build pada na google-services fileovima                                                 | ⬜     |
-| Store računi (App Store Connect / Play Console)                          | distribucija nemoguća                                                                   | ⬜     |
-| Ikona/splash asseti (A1 korak 4)                                         | build prolazi sa stock Safe assetima — prihvatljivo za interni track, NE za javni store | ⬜     |
+| Preduvjet                                                                | Bez njega                                                                               | Status                                                                                      |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| EAS projekt (`easProjectId`) + owner račun `airkuna`                     | build se ne može ni pokrenuti                                                           | ✅ `@airkuna/airkuna` = `a3bfe1f6-…` (u manifestu)                                          |
+| Apple Team odluka (ITalk `6SCK58757K` ili vlastiti)                      | iOS signing nemoguć                                                                     | ✅ ITalk `6SCK58757K` (u manifestu)                                                         |
+| Bundle id / package registrirani (`com.airkuna.wallet` + `.dev` variant) | store upload nemoguć                                                                    | 🔶 idevi odlučeni i u manifestu; Apple registracija = ručni korak vlasnika (Zapisnik)       |
+| Firebase projekti iOS+Android (dev+prod, push)                           | build pada na google-services fileovima                                                 | ✅ `airkuna-production`, 4 appa; configi lokalno + EAS file env vars (preview i production) |
+| Store računi (App Store Connect / Play Console)                          | distribucija nemoguća                                                                   | ⬜ ručni korak vlasnika (Zapisnik)                                                          |
+| Ikona/splash asseti (A1 korak 4)                                         | build prolazi sa stock Safe assetima — prihvatljivo za interni track, NE za javni store | ✅ brand/assets/airkuna/ kompletan, doctor zelen                                            |
 
 Ako je išta ⬜, radi što se može (dev/preview profil, Android prije iOS-a), ostalo zapiši u
 Zapisnik kao blokirano i vrati vlasniku točan popis akcija.
@@ -76,4 +76,43 @@ Zapisnik kao blokirano i vrati vlasniku točan popis akcija.
 
 ## Zapisnik izvršenja
 
-_(prazno — popunjava agent koji izvrši fazu)_
+> 2026-07-22 · sesija dev2 · automatizirani dio faze; ručni koraci vlasnika pobrojani dolje.
+
+### OTA odluka: **BEZ OTA za MVP** ✅
+
+Airkuna manifest **nema** `updates` blok i ne dodaje se. Razlozi:
+
+1. Manje ručnih preduvjeta — self-hosted expo-updates (domovina obrazac) traži update server, code-signing cert u `brand/certs/airkuna/` + privatni ključ, i operativu oko manifest potpisivanja; ništa od toga nije potrebno za TestFlight/interni track MVP.
+2. Interni track distribucija ionako ide kroz store kanale — novi build je jednako brz kao OTA za ovu fazu.
+3. **Reverzibilno**: uključenje kasnije = `updates` blok u manifestu + cert + rebuild (postojeći `ota.domovina.ai` server se može višebrandirati); nula promjena app koda.
+
+### Odrađeno (automatizirano)
+
+- **Preduvjeti**: tablica gore ažurirana — svi build-blokirajući preduvjeti ✅ (EAS projekt, Apple team, Firebase, asseti); ostaju store-računi kao ručni koraci.
+- **Brand doctor**: `yarn brand:doctor airkuna` → **PASS (0 warnings)** (manifest, asseti, 4 Firebase filea s ispravnim application idevima, EAS profili).
+- **EAS build profili**: `preview-airkuna` / `production-airkuna` postoje u `eas.json` od faze 5 — provjereni, bez izmjena.
+- **EAS file env vars (production)**: kreirani na `@airkuna/airkuna` — `GOOGLE_SERVICES_JSON` (`google-services-airkuna.json`) i `GOOGLE_SERVICES_PLIST` (`GoogleService-Info-airkuna.plist`), secret/project scope; preview ih je već imao. Production remote build sada ima Firebase inpute.
+- **`eas.json` submit profil** `production-airkuna` (Android): `applicationId com.airkuna.wallet`, `track internal`, `releaseStatus draft`, `serviceAccountKeyPath ./keys/airkuna/play-service-account.json` (fajl još ne postoji — v. Play koraci). iOS submit namjerno izostavljen dok ne postoji `ascAppId` (v. iOS koraci).
+- **Smoke checklist**: airkuna-specifične stavke (Doniraj tab, slug dohvat, forceSendFlow, zero-fee copy, `/c/*` link) dodane u [16 — Release checklist](../16-release-checklist.md) §6.1.
+- **Android preview build** `2c43e4a3` u EAS redu — prati ga orkestrator (izvan opsega ove sesije); production-android build namjerno NIJE pokrenut.
+- **Nije dirano** (ograde sesije): `brand/schema.*`, `resolveBrand.*`, `app.config.ts`, `airkuna.json`, `src/` — na njima radi druga sesija (uklj. novo `android.appLinks` polje u manifestu).
+
+### Ručni koraci za vlasnika — iOS (redoslijedom)
+
+1. **ASC API key** (za credentials + submit bez Apple ID logina): App Store Connect → Users and Access → Integrations → App Store Connect API → Team Keys → generiraj key s rolom **App Manager** (ITalk team `6SCK58757K`); preuzmi `.p8` (jednokratno!). Zatim: `cd apps/mobile && BRAND_ID=airkuna npx eas-cli credentials --platform ios` → odaberi production → "App Store Connect: Manage your API Key" → upload `.p8` + Key ID + Issuer ID.
+2. **Bundle id registracija**: u istom `eas credentials` flowu EAS nudi auto-registraciju bundle ideva na Apple Developer portalu — potvrdi za `com.airkuna.wallet` **i** `com.airkuna.wallet.dev`. Capabilities koje build očekuje: Push Notifications, Associated Domains (AASA već živ), App Groups. (Alternativa: ručno na developer.apple.com → Identifiers.) Distribution cert + provisioning profile EAS kreira sam pri prvom buildu (prvi put interaktivno, bez `--non-interactive`).
+3. **ASC app record**: App Store Connect → My Apps → **New App** → platforma iOS, bundle `com.airkuna.wallet`, ime "airKUNA", SKU po želji. Zapiši **Apple ID (ascAppId)** appa → upiši u `eas.json` `submit.production-airkuna.ios.ascAppId`.
+4. **Build + TestFlight**: `cd apps/mobile && eas build --profile production-airkuna --platform ios` (prvi put interaktivno zbog credentials), pa `eas submit --profile production-airkuna --platform ios`. U TestFlightu dodaj interne testere (do 100, bez reviewa).
+
+### Ručni koraci za vlasnika — Google Play (redoslijedom)
+
+1. **App record**: Play Console (developer račun vlasnika) → **Create app** → ime "airKUNA", app (ne igra), Finance, besplatno. Package `com.airkuna.wallet` se veže tek prvim uploadom.
+2. **Prvi AAB ručno**: Play zahtijeva da prvi artefakt novog appa ide kroz Console UI — preuzmi `production-airkuna` Android artefakt s EAS-a (kad se pokrene i završi) i uploadaj na **Internal testing** track. Time se package id fiksira.
+3. **Service account za `eas submit`** (NIJE isti kao `keys/airkuna/firebase-adminsdk.json` — taj je za push!): Google Cloud Console (bilo koji projekt, može `airkuna-production`) → IAM → Service Accounts → novi SA → JSON ključ → spremi kao `apps/mobile/keys/airkuna/play-service-account.json` (dir je gitignored + easignored). U Play Console → Users and permissions → **Invite new user** s emailom SA-a → prava: Release to testing tracks (min.) za airKUNA app.
+4. **Nadalje**: `eas submit --profile production-airkuna --platform android` šalje na interni track (`draft` status — objava klikom u Consoleu).
+
+### Blokirano / ostaje
+
+- **Android App Links**: manifest polje `android.appLinks` postoji (druga sesija); ostaje `assetlinks.json` na `domovina.ai/.well-known/` sa **SHA-256 otiskom EAS keystorea** — otisak dostupan tek nakon prvog Android builda (`eas credentials --platform android`); hosting = orkestrator/vlasnik.
+- **Smoke na uređaju** (§6.1 checklist) — nakon što preview build `2c43e4a3` završi i instalira se.
+- **Javni store listing** (screenshotovi, privacy policy URL na airkuna domeni, GPL-3.0 source link) — doc 16 §4–5, svjesno izvan A4 opsega.

@@ -167,9 +167,9 @@ Napomena: airkuna-web je light-only, ali mobile app ima dark mod — manifest da
 Redoslijed: A1 (brand + schema) je preduvjet svemu; A2 (donacije) je jezgra; A3 (zero-fee UX)
 polira Send; A4 (release) može paralelno s A2/A3 čim su ručni preduvjeti riješeni.
 
-| #   | Faza                                              | Handoff                                                 | Ovisi o                           | Status                   |
-| --- | ------------------------------------------------- | ------------------------------------------------------- | --------------------------------- | ------------------------ |
-| A1  | Brand manifest + `donations` schema polje         | [airkuna-1-brand.md](handoffs/airkuna-1-brand.md)       | —                                 | ✅ 2026-07-22            |
-| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](handoffs/airkuna-2-donacije.md) | A1                                | 🔄 u tijeku              |
-| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](handoffs/airkuna-3-zerofee.md)   | A2                                | ✅ 2026-07-22            |
-| A4  | Release pipeline za `airkuna`                     | [airkuna-4-release.md](handoffs/airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti (§8) | ⬜ (preduvjeti §8 ✅/⬜) |
+| #   | Faza                                              | Handoff                                                 | Ovisi o                           | Status                                                                          |
+| --- | ------------------------------------------------- | ------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------- |
+| A1  | Brand manifest + `donations` schema polje         | [airkuna-1-brand.md](handoffs/airkuna-1-brand.md)       | —                                 | ✅ 2026-07-22                                                                   |
+| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](handoffs/airkuna-2-donacije.md) | A1                                | 🔄 u tijeku                                                                     |
+| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](handoffs/airkuna-3-zerofee.md)   | A2                                | ✅ 2026-07-22                                                                   |
+| A4  | Release pipeline za `airkuna`                     | [airkuna-4-release.md](handoffs/airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti (§8) | 🔄 automatizirani dio ✅ 2026-07-22 (Zapisnik); ručno: ASC/Play koraci vlasnika |

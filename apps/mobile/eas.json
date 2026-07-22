@@ -109,6 +109,14 @@
       "android": {
         "releaseStatus": "draft"
       }
+    },
+    "production-airkuna": {
+      "android": {
+        "applicationId": "com.airkuna.wallet",
+        "track": "internal",
+        "releaseStatus": "draft",
+        "serviceAccountKeyPath": "./keys/airkuna/play-service-account.json"
+      }
     }
   }
 }

@@ -52,6 +52,19 @@ Monorepo je GPL-3.0: **binarna distribucija mora nuditi izvorni kod**.
 - [ ] TestFlight / Play internal track runda prije produkcije
 - [ ] Post-release: verzija tagirana, manifest + asseti arhivirani (SaaS DB jednog dana)
 
+### 6.1 Smoke dodaci po brandu
+
+Generički smoke je u [brand/README.md](../../apps/mobile/brand/README.md#smoke-checklist-branded-build); svaki brand s feature packovima dodaje svoje stavke ovdje.
+
+**airkuna:**
+
+- [ ] **Doniraj tab** vidljiv u tab baru (`features.donations`); na stock `safe` buildu ga NEMA
+- [ ] Otvaranje kampanje po **slugu** dohvaća podatke s `api.domovina.ai` na uređaju (živi backend, ne mock)
+- [ ] Donacijski flow: odabir kampanje → iznos → review ekran se otvara (bez slanja)
+- [ ] **Send gumb vidljiv na Gnosisu** (`features.forceSendFlow` override — prod CGW nema `SEND_FLOW` za chain 100)
+- [ ] "Bez naknade" copy u Send flowu (A3 zero-fee UX)
+- [ ] Universal link `https://domovina.ai/c/<slug>` otvara app (iOS: AASA; Android: tek nakon `assetlinks.json` s otiskom EAS keystorea)
+
 ## Sučelje koje SaaS dashboard jednog dana zove
 
 Manifest in → binary out: `BRAND_CONFIG_JSON` (inline manifest) + EAS file env
