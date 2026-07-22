@@ -128,16 +128,16 @@ Napomena: airkuna-web je light-only, ali mobile app ima dark mod — manifest da
 
 **Ručni preduvjeti** (bez njih se u manifestu koriste placeholderi; A4 je njima blokiran):
 
-| Preduvjet                                            | Gdje se upisuje                                     | Status         |
-| ---------------------------------------------------- | --------------------------------------------------- | -------------- |
-| EAS projekt za airkuna (`easProjectId`)              | manifest `easProjectId`                             | ⬜ placeholder |
-| EAS owner račun (prijedlog: `airkuna`, kao ff)       | manifest `owner`                                    | ⬜ potvrditi   |
-| Apple Team (ITalk `6SCK58757K` ili vlastiti — TBD)   | manifest `ios.appleTeamId`                          | ⬜ odluka      |
-| Bundle id / package (prijedlog `com.airkuna.wallet`) | manifest `ios.bundleIdentifier` / `android.package` | ⬜ potvrditi   |
-| Firebase projekti (iOS+Android, push)                | gitignored fileovi (v. `brand/README.md`)           | ⬜             |
-| Scheme `airkuna://`                                  | manifest `scheme` (nije blokada — samo odluka)      | ⬜ prijedlog   |
-| AASA / universal link na domovina.ai                 | domovina.ai hosting + entitlements (→ A4/post-MVP)  | ⬜             |
-| pinka backend allowlist (ako CORS/origin gating)     | domovina-api                                        | ⬜ provjeriti  |
+| Preduvjet                                            | Gdje se upisuje                                     | Status                                                                                                                        |
+| ---------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| EAS projekt za airkuna (`easProjectId`)              | manifest `easProjectId`                             | ✅ 2026-07-22 `@airkuna/airkuna` = `a3bfe1f6-16bd-4b0c-a171-86410842cbaf` (u manifestu)                                       |
+| EAS owner račun (prijedlog: `airkuna`, kao ff)       | manifest `owner`                                    | ✅ org `airkuna` postoji; `stepanic` dodan kao member                                                                         |
+| Apple Team (ITalk `6SCK58757K` ili vlastiti — TBD)   | manifest `ios.appleTeamId`                          | ✅ odluka vlasnika: ITalk `6SCK58757K` (u manifestu)                                                                          |
+| Bundle id / package (prijedlog `com.airkuna.wallet`) | manifest `ios.bundleIdentifier` / `android.package` | ✅ `com.airkuna.wallet` (+ `.dev` varijanta)                                                                                  |
+| Firebase projekti (iOS+Android, push)                | gitignored fileovi (v. `brand/README.md`)           | ✅ projekt `airkuna-production` (vlasnikov), 4 appa; configi `*-airkuna*` + SA ključ `keys/airkuna/` lokalno u `apps/mobile/` |
+| Scheme `airkuna://`                                  | manifest `scheme` (nije blokada — samo odluka)      | ✅ u manifestu (`airkuna`, `wc`)                                                                                              |
+| AASA / universal link na domovina.ai                 | domovina.ai hosting + entitlements (→ A4/post-MVP)  | ⬜                                                                                                                            |
+| pinka backend allowlist (ako CORS/origin gating)     | domovina-api                                        | ⬜ provjeriti (A2 prvi poziv)                                                                                                 |
 
 **Rizici:**
 
@@ -154,9 +154,9 @@ Napomena: airkuna-web je light-only, ali mobile app ima dark mod — manifest da
 Redoslijed: A1 (brand + schema) je preduvjet svemu; A2 (donacije) je jezgra; A3 (zero-fee UX)
 polira Send; A4 (release) može paralelno s A2/A3 čim su ručni preduvjeti riješeni.
 
-| #   | Faza                                              | Handoff                                                 | Ovisi o                           |
-| --- | ------------------------------------------------- | ------------------------------------------------------- | --------------------------------- |
-| A1  | Brand manifest + `donations` schema polje         | [airkuna-1-brand.md](handoffs/airkuna-1-brand.md)       | —                                 |
-| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](handoffs/airkuna-2-donacije.md) | A1                                |
-| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](handoffs/airkuna-3-zerofee.md)   | A2                                |
-| A4  | Release pipeline za `airkuna`                     | [airkuna-4-release.md](handoffs/airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti (§8) |
+| #   | Faza                                              | Handoff                                                 | Ovisi o                           | Status                   |
+| --- | ------------------------------------------------- | ------------------------------------------------------- | --------------------------------- | ------------------------ |
+| A1  | Brand manifest + `donations` schema polje         | [airkuna-1-brand.md](handoffs/airkuna-1-brand.md)       | —                                 | ✅ 2026-07-22            |
+| A2  | Donations feature-pack (`src/custom/donations/`)  | [airkuna-2-donacije.md](handoffs/airkuna-2-donacije.md) | A1                                | 🔄 u tijeku              |
+| A3  | Zero-fee slanje ("Bez naknade" UX + relay odluka) | [airkuna-3-zerofee.md](handoffs/airkuna-3-zerofee.md)   | A2                                | ✅ 2026-07-22            |
+| A4  | Release pipeline za `airkuna`                     | [airkuna-4-release.md](handoffs/airkuna-4-release.md)   | A1, faza 5, ručni preduvjeti (§8) | ⬜ (preduvjeti §8 ✅/⬜) |
