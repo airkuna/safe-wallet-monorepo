@@ -50,6 +50,8 @@ for (const gatewayUrl of [brand.backend?.cgwBaseUrl, brand.backend?.cgwStagingBa
 
 const name = brand.appName
 
+const datadogUploadArtifacts = !!process.env.EAS_BUILD && process.env.DATADOG_SOURCEMAPS_DRY_RUN !== 'true'
+
 // OTA (EAS Update) — only for brands that opt in via the manifest. `fingerprint` keeps
 // updates from reaching binaries whose native layer differs; code signing is mandatory
 // (wallet — the app must reject any update not signed with our private key).
@@ -187,11 +189,14 @@ const config: ExpoConfig = {
     [
       'expo-datadog',
       {
+        // Dry-run builds (dummy DATADOG_API_KEY) must not add upload phases: the iOS
+        // dsyms/sourcemaps phases have no dry-run flag and datadog-ci validates the
+        // key against the API, failing the Xcode build.
         errorTracking: {
-          iosDsyms: !!process.env.EAS_BUILD,
-          iosSourcemaps: !!process.env.EAS_BUILD,
-          androidSourcemaps: !!process.env.EAS_BUILD,
-          androidProguardMappingFiles: !!process.env.EAS_BUILD,
+          iosDsyms: datadogUploadArtifacts,
+          iosSourcemaps: datadogUploadArtifacts,
+          androidSourcemaps: datadogUploadArtifacts,
+          androidProguardMappingFiles: datadogUploadArtifacts,
         },
       },
     ],
