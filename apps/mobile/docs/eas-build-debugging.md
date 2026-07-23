@@ -160,4 +160,101 @@ Zašto svaki dio (svaki je bio zaseban pad):
   otisku u `https://domovina.ai/.well-known/assetlinks.json`.
 - **Exit kod zna biti 1 i kad build USPIJE**: nakon "Build successful" i zapisanog APK-a
   cleanup radne kopije padne na `ENOTEMPTY … build/.git`. Uspjeh se provjerava po
-  "Build successful" u logu / postojanju APK-a, ne po exit kodu.
+  "Build successful" u logu / postojanju APK-a, ne po exit kodu. (Vrijedi i za iOS.)
+
+## Cloud pipeline potvrđen (2026-07-23)
+
+Cloud Android `preview-airkuna` build `9b13d407` **finished** nakon env fixa
+(`DATADOG_SOURCEMAPS_DRY_RUN` + dummy `DATADOG_API_KEY` u EAS `preview` environmentu)
+— cloud queue je od sada samo čekanje, build proces je dokazano ispravan.
+
+## Lokalni iOS build (`eas build --local --platform ios`)
+
+> ✅ Provjereno E2E 2026-07-23 (`preview-ios-simulator`, credential-free): `airKUNA.app`
+> u tar.gz artefaktu. Tri pada dok se nije složilo — svaki je lekcija dolje.
+
+**Preduvjeti povrh Android setupa** (Xcode + CocoaPods već postoje):
+
+```bash
+gem install fastlane --no-document   # eas local iOS build ga zahtijeva
+# gem bin dir NIJE na defaultnom PATH-u — homebrew ruby:
+export PATH="/opt/homebrew/lib/ruby/gems/3.4.0/bin:/opt/homebrew/opt/ruby/bin:$PATH"
+```
+
+**Build (simulator, bez credentials-a):**
+
+```bash
+rm -rf /Volumes/EASBUILD/eas-local-ios && mkdir -p /Volumes/EASBUILD/eas-local-ios
+cd apps/mobile
+export TMPDIR=/Volumes/EASBUILD/tmp
+BRAND_ID=airkuna \
+GOOGLE_SERVICES_PLIST=$PWD/GoogleService-Info-airkuna.plist \
+DATADOG_SOURCEMAPS_DRY_RUN=true DATADOG_API_KEY=dummy-local-dry-run \
+EAS_LOCAL_BUILD_WORKINGDIR=/Volumes/EASBUILD/eas-local-ios \
+npx eas-cli build --profile preview-ios-simulator --platform ios --local \
+  --non-interactive --output /Volumes/DOMOVINA2TB/airkuna_build_files/airkuna-preview-sim.tar.gz
+```
+
+Lekcije (svaka je bila zaseban pad):
+
+- **Stale `ios/`/`android/` prebuild direktoriji ruše config rezoluciju.** Lokalni
+  eas-cli resolvea app config u pravom projektnom diru; ako tamo stoji `ios/` od ranijeg
+  `expo prebuild`/`expo run` za DRUGI brand (npr. `ios/DevDomovina`), introspect tiho
+  padne (exit 1 bez outputa!), a fallback pukne na `EXUpdatesRuntimeVersion` u starom
+  `Expo.plist` (domovina ima OTA → runtimeVersion; airkuna nema). Fix: makni/obriši
+  `apps/mobile/ios` i `android` prije lokalnog EAS builda — regenerabilni su, u arhiv
+  ionako ne ulaze (gitignored).
+- **Datadog na iOS-u NEMA dry-run put** (za razliku od gradle `datadogSourcemapsDryRun`):
+  `expo-datadog` plugin generira "Upload dSYMs to Datadog" fazu i wrapa RN bundle kroz
+  `datadog-ci react-native xcode`, koji ključ validira API pozivom → dummy ključ →
+  `Configuration error … not a valid API key` → xcodebuild exit 65. Fix je u
+  `app.config.ts`: gate `datadogUploadArtifacts = EAS_BUILD && DATADOG_SOURCEMAPS_DRY_RUN
+!== 'true'` na svim `errorTracking` opcijama — s dry-runom se upload faze uopće ne
+  generiraju (vrijedi za obje platforme; cloud preview env već ima taj var).
+- **Local-build-plugin prosljeđuje CIJELI parent env** (`...process.env` + `EAS_BUILD=1`)
+  u sve build korake — zato `BRAND_ID`, `GOOGLE_SERVICES_PLIST` (apsolutna putanja!) i
+  `DATADOG_*` varovi iz shella rade. `builderEnvironment.env` u job JSON-u je `{}` i to
+  je OK.
+- **Monitoring gotcha**: novi run truncatea log tek kad se npx stvarno pokrene (par
+  sekundi do minute) — `tail`/`grep` u tom prozoru čitaju STARI sadržaj i lako se krivo
+  zaključi da je novi run pao sa starom greškom. Provjeri `ps` prije dijagnoze.
+
+### iOS s remote credentials (`preview-airkuna`) — interaktivni korak za vlasnika
+
+Non-interactive pokušaj staje ovdje (očekivano, credentials još ne postoje):
+
+```
+Setting up credentials for following targets:
+- airKUNA (com.airkuna.wallet)
+- NotifeeNotificationServiceExtension (com.airkuna.wallet.NotifeeNotificationServiceExtension)
+Failed to set up credentials. You're in non-interactive mode…
+```
+
+Internal distribution = **ad-hoc provisioning** → traži Apple ID login + registriran
+UDID test iPhonea. Koraci (jednokratno, ~10 min):
+
+1. `cd apps/mobile && BRAND_ID=airkuna npx eas-cli device:create` → izaberi
+   "Website" → otvori generirani link NA iPHONEU → instaliraj profil (registrira UDID).
+2. `BRAND_ID=airkuna npx eas-cli build --profile preview-airkuna --platform ios`
+   (BEZ `--non-interactive`; cloud ili `--local`, svejedno) → login Apple ID-em
+   (team ITalk `6SCK58757K`) → potvrdi generiranje dist certa + DVA ad-hoc profila
+   (glavni target + Notifee extension). EAS sve sprema remote — svaki idući build
+   (i lokalni i cloud) radi bez pitanja.
+3. Nakon toga backup credentials-a (v. sekciju dolje).
+
+## Backup potpisnih ključeva (anti vendor lock-in)
+
+EAS drži ključeve, ali su izvlačivi — arhivirano 2026-07-23 u
+`/Volumes/DOMOVINA2TB/airkuna_build_files/credentials/` + `apps/mobile/keys/airkuna/`
+(gitignored kroz `/keys/`), u `credentials.json` formatu (odmah upotrebljiv uz
+`"credentialsSource": "local"` ili običan gradle/apksigner).
+
+- **Android keystore = identitet appa** (assetlinks!), gubitak je nepovratan — ovaj
+  backup je kritičan. Izvlačenje kroz GraphQL (session recept gore), polja na
+  `androidKeystore`: `keystore` (base64 JKS), `keystorePassword`, `keyAlias`,
+  `keyPassword`. Verificiraj otisak `keytool -list -v` protiv assetlinks.json.
+  airkuna ključ vrijedi do 2053.
+- **iOS nema pravi lock-in**: identitet je bundle ID + Apple team, certovi se
+  regeneriraju u Apple računu. Kad credentials nastanu, ista GraphQL ruta:
+  `iosAppCredentials { iosAppBuildCredentialsList { distributionCertificate {
+certificateP12 certificatePassword } provisioningProfile { provisioningProfile } } }`.
