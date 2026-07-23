@@ -146,7 +146,11 @@ Zašto svaki dio (svaki je bio zaseban pad):
 - **Datadog dry-run + dummy ključ**: `uploadReleaseSourcemaps` je `finalizedBy` na
   bundlanju i ne može se preskočiti; dry-run (env ili gradle property) dodaje
   `--dry-run`, ali `datadog-ci` svejedno traži da `DATADOG_API_KEY` postoji — dummy
-  vrijednost je sigurna jer se s `--dry-run` ništa ne šalje.
+  vrijednost je sigurna jer se s `--dry-run` ništa ne šalje. **Isto ruši i CLOUD
+  buildove** (potvrđeno na 838170f4): fix je jednokratni
+  `eas env:create --environment preview --name DATADOG_SOURCEMAPS_DRY_RUN --value true
+--visibility plaintext --scope project` + isto za `DATADOG_API_KEY` (dummy,
+  sensitive). Za `production` environment ista odluka: dummy+dry-run ili pravi DD ključ.
 - **Gradle daemon pamti env** iz prvog pokretanja — nakon promjene env varova
   `pkill -f GradleDaemon` (ili koristi gradle.properties, koji se čita svaki build).
 - `preview-airkuna` je čist kandidat (nema `autoIncrement`); za `production-airkuna`
