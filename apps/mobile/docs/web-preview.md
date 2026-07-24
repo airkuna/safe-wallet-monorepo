@@ -109,6 +109,37 @@ curl -s 'http://localhost:8085/apps/mobile/index.bundle?platform=web&dev=true&..
 awk -v l=<LINE> 'NR>=l && NR<=l+900' /tmp/wb.js | grep -am1 -oE '\},[0-9]+,\[[0-9, ]*\],"[^"]+"'
 ```
 
+## Public deploy — statički export na Cloudflare Pages
+
+Isti web-preview bundle može se izvesti statički i hostati na javnom URL-u (npr. za brzi
+stakeholder review bez instalacije APK/TestFlighta). Napravljeno prvi put 2026-07-24 za
+brand **airKUNA** → `https://airkuna-wallet.pages.dev/` (CF Pages, account airKUNA,
+projekt `airkuna-wallet`; custom domena `wallet.airkuna.com` dodaje se ručno u CF dashu).
+
+```bash
+cd apps/mobile
+# 1) statički export (SPA, output:'single' iz app.config.ts); BRAND_ID biraj po brandu
+WEB_PREVIEW=1 BRAND_ID=airkuna npx expo export -p web        # → dist/ (main bundle ~15MB)
+
+# 2) SPA fallback — bez ovoga CF Pages vraća 404 na deep linkove (/doniraj, /address-book…)
+printf '/*  /index.html  200\n' > dist/_redirects
+
+# 3) deploy (prvi put: `wrangler pages project create <ime> --production-branch main`)
+CLOUDFLARE_ACCOUNT_ID=<account-id> \
+  npx wrangler pages deploy dist --project-name airkuna-wallet --branch main
+```
+
+Napomene:
+
+- `BRAND_ID=airkuna` na command-lineu **nadjača** `.env.local` (dotenv ne override-a već
+  postojeći shell var), pa ne treba dirati `.env.local`. Provjeri da je brand pravi:
+  `<title>` u `dist/index.html` mora biti ime branda.
+- `dist/` je gitignored (build artefakt) — ne commita se; redeploy = ponovi 3 koraka.
+- Ovo je i dalje **mobile signer-first UI u browseru = dev/preview target, NE web release**
+  (vidi Ograničenja niže). Kamera/QR, push, Ledger BLE, RASP su no-op stubovi.
+- Runtime boot verificiraj u browseru nakon deploya — produkcijski (minificirani) bundle je
+  drugi put od dev servera pa se novi native stub može pojaviti tek ovdje (debug postupak niže).
+
 ## Ograničenja (svjesno)
 
 - Kamera/QR skeniranje ne radi (VisionCamera stub) — skener ulaza testiraj na uređaju.
