@@ -1,0 +1,125 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Montserrat",
+      "role": "body"
+    },
+    {
+      "family": "Lora",
+      "role": "heading"
+    },
+    {
+      "family": "Cormorant Garamond",
+      "role": "display"
+    }
+  ],
+  "colors": {
+    "primary": "#C4121A",
+    "secondary": "#820202",
+    "accent": "#C4121A",
+    "background": "#F8F3EC",
+    "textPrimary": "#272B31",
+    "link": "#071D38"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Montserrat",
+      "heading": "Lora"
+    },
+    "fontStacks": {
+      "heading": ["Cormorant Garamond", "sans-serif"],
+      "body": ["Montserrat", "sans-serif"],
+      "paragraph": ["Montserrat", "sans-serif"]
+    },
+    "fontSizes": {
+      "h1": "64px",
+      "h2": "48px",
+      "body": "12px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "3px"
+  },
+  "components": {
+    "buttonPrimary": {
+      "background": "#C4121A",
+      "textColor": "#FFFFFF",
+      "borderRadius": "4px",
+      "borderRadiusCorners": {
+        "topLeft": "4px",
+        "topRight": "4px",
+        "bottomRight": "4px",
+        "bottomLeft": "4px"
+      },
+      "shadow": "none"
+    },
+    "buttonSecondary": {
+      "background": "#071D38",
+      "textColor": "#FFFFFF",
+      "borderRadius": "4px",
+      "borderRadiusCorners": {
+        "topLeft": "4px",
+        "topRight": "4px",
+        "bottomRight": "4px",
+        "bottomLeft": "4px"
+      },
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "logo": "https://crosulja.hr/CrosuljaNew/wp-content/uploads/2026/01/crosulja-logo-500x250-1.png.webp",
+    "favicon": "https://crosulja.hr/CrosuljaNew/wp-content/uploads/2026/01/crosulja-logo-500x250-1-150x150.png",
+    "ogImage": null
+  },
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Selected #0 because it matches the favicon and is the main visible logo representing the brand 'Crošulja'.",
+    "confidence": 0.9,
+    "source": "llm"
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": 9,
+      "text": "Naruči",
+      "reasoning": "Button #5 with text 'Naruči' has a vibrant brand color (#C4121A) and action-oriented text, making it the primary CTA."
+    },
+    "secondary": {
+      "index": 3,
+      "text": "Izaberi ovaj model",
+      "reasoning": "Button #1 with text 'Izaberi ovaj model' has a different background color (#071D38) and serves as a secondary action, complementing the primary CTA."
+    },
+    "confidence": 0.95
+  },
+  "personality": {
+    "tone": "professional",
+    "energy": "medium",
+    "targetAudience": "fashion-conscious individuals"
+  },
+  "designSystem": {
+    "framework": "custom",
+    "componentLibrary": ""
+  },
+  "confidence": {
+    "buttons": 0.95,
+    "colors": 0.9,
+    "overall": 0.925
+  },
+  "__llm_metadata": {
+    "logoSelection": {
+      "llmCalled": true,
+      "llmSucceeded": true,
+      "finalSource": "llm",
+      "rawLogoSelection": {
+        "selectedLogoIndex": 0,
+        "selectedLogoReasoning": "Selected #0 because it matches the favicon and is the main visible logo representing the brand 'Crošulja'.",
+        "confidence": 0.9
+      }
+    },
+    "buttonClassification": {
+      "llmCalled": true,
+      "llmSucceeded": true
+    }
+  }
+}

@@ -27,6 +27,7 @@ Ova knowledge baza dokumentira **zašto** i **kako** gradimo whitelabel wallet p
 | [16 — Release checklist po brandu](16-release-checklist.md)                                  | Store priprema po brandu (faza 5): računi, push, listing, GPL-3.0 obveza, submission; tehnički pipeline u `apps/mobile/brand/README.md`  |
 | [17 — airKUNA roadmap 12 mj](17-airkuna-roadmap.md)                                          | Arhitektonski plan isporuke R0–R6 (Q3 2026 → Q3 2027): javni launch, identitet/linkovi, Monerium fiat, događaji, tržnica, kartica        |
 | [18 — Research: tržište i regulativa 7/2026](18-research-trziste-regulativa-2026-07.md)      | Puni nalazi s izvorima: konkurencija (Gnosis Pay/Zeal/Peanut), rampe, MiCA/CASP granice, HR donacijski zakon, PSD2, GDPR, store politike |
+| [19 — Crošulja redizajn 7/2026](19-crosulja-redizajn-2026-07.md)                             | Analiza novog dizajna crosulja.hr (staging): design tokeni, struktura, diff prema marketplace packu; preuzeti asseti u `assets/`         |
 | [handoffs/](handoffs/README.md)                                                              | **Izvršni planovi po fazama** — samodostatni handoff promptovi za praznu Claude Code sesiju (MVP, KUNAPay, Tržnica, Događaji, airKUNA)   |
 
 ## Kontekst u jednoj slici
