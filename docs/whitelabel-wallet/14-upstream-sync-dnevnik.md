@@ -73,3 +73,96 @@ privremena — paritet se aktivno zatvara.** Dokazi:
 2. `CreateSafe` (naš overlay) je kandidat za najveću buduću koliziju — kad upstream shipa
    svoje kreiranje Safea, odlučiti: migrirati na njihovo ili zadržati naše.
 3. `SEND_TRANSFERS` chain-config flag: provjeriti da je uključen za naše chainove.
+
+---
+
+## 2026-09-11 — merge `aa90a2f5f` (278 upstream commita, 22.7.–11.9.)
+
+### Merge
+
+- Konflikt samo u root `package.json` → `resolutions`: obje strane dodale nove pinove.
+  Zadržana **oba** skupa (naš `expo-updates-interface` + upstream
+  `axios`/`protobufjs`/`brace-expansion`/`postcss`).
+- `apps/mobile/app.config.ts` ovaj put **bez konflikta** — upstream nije dizao mobile
+  verziju (i dalje 1.0.15).
+- Verifikacija: `yarn install` ✅, type-check (mobile, utils, store) ✅,
+  testovi mobile/store/utils ✅ uz jedan flaky timeout
+  (`packages/utils/.../useGuardCheck.test.ts` padne pod punim paralelnim loadom,
+  prolazi izolirano — upstream test, nije posljedica merge-a).
+
+### Što je upstream doradio
+
+278 commita, od toga 61 dependabot. Težište je i dalje **web** — mobile je u ovih 7
+tjedana dobio **nula novih featurea**, samo E2E testove i shared fixeve.
+
+**1. shadcn/ui + Tailwind migracija (#8040) — najveća strukturna promjena dosad.**
+`apps/web` više **nema MUI ni Emotion**; `vars.css` je zamijenjen `shadcn.css`-om,
+a web čita theme kao CSS varijable (ne više JS MUI theme objekt). Za `packages/theme`
+posljedica je da je MUI generator efektivno mrtav za web; Tamagui put (naš) netaknut.
+Iza migracije je došlo ~25 `fix(UI)` commita — migracija je ostavila dosta repova.
+
+**2. `apps/web-tanstack` — novi workspace (#7994).** Drugi runtime istog koda:
+TanStack Router + Vite, reusa `apps/web/src` preko Vite aliasa, s `src/compat/` shimovima
+za `next/*`. Nije fork — priprema za izlazak iz Next.js-a.
+
+**3. Safe Pro monetizacija — Workspaces prelaze na plaćeni plan 6.10.2026.**
+Nova `safe-pro-announcement` feature (banneri, modal, Plans ruta) iza `SAFE_PRO` flaga,
+plus dva **nova CGW API modula** u `packages/store/src/gateway/AUTO_GENERATED/`:
+`billing.ts` (subscriptions, plans, Stripe checkout/payment links, upgrade/downgrade)
+i `entitlements.ts` (metered/binary/value entitlements, prva feature key: `safe_seats`).
+Dakle: Safe naplaćuje Workspaces po sjedalu.
+
+**4. Safenet checks — nov podsustav (19 commita).**
+`packages/utils/src/features/safenet-checks/` + `packages/store/src/safenet/`:
+čitanje lifecycle logova Safenet check-ova s Gnosis Chaina, dekodiranje eventa,
+**FROST** verifikacija atestacija protiv coordinator group keya, EIP-712 preimages,
+polling hook, prikaz u queue redu i Safe Shield sekciji. Sve iza `NEXT_PUBLIC_SAFENET_*`
+/ `EXPO_PUBLIC_SAFENET_*` varijabli (shared web+mobile konstante, default Gnosis).
+
+**5. Relaying je na webu ISKLJUČEN (#8467).** `IS_RELAYING_LIVE = false` u
+`apps/web/src/features/gtf/constants/index.ts` — "Safe pays" UI se skriva i nove potpise
+pinaju na signer-pays. Nije obrisano, flag vraća staro ponašanje. Paralelno:
+**relayer je prebačen s Gelata na Rhinestone** (#8338) — `RelayTxWatcher` i CGW relay
+schema više ne spominju Gelato, `isGtfSafePaid` prilagođen.
+
+**6. Policies (Spaces).** Nova ruta + sidebar stavka, katalog s 4 pločice:
+Spending limit, Proposer, Account recovery, "Something missing?" (feedback). Zasad
+empty-state katalog — okvir za buduće account-level politike.
+
+**7. Sigurnost / robusnost:**
+- **Address poisoning Mode B** (WA-2823): detekcija look-alike Safeova kroz sve liste računa.
+- `setGuard` target se validira protiv guard interfacea (ERC-165) prije slanja (#8364).
+- Nepodržani Zodiac mastercopyji se flagaju kao kritični, s deep-linkom na uklanjanje.
+- Safe **1.5.0** priznat kao trusted verzija + podržan u multichain kreaciji i add-network.
+- zkSync flavour-aware upgrades/dekodiranje/predviđanje adrese (#8380).
+- Step-up auth / switch authenticator: OIDC `enroll` i `elevate` parametri + lista
+  MFA autentikatora u `auth.ts`; 2FA awareness kartica u Spaces sidebaru.
+- Nova error taksonomija u `packages/utils/src/services/exceptions/`
+  (`contractErrors`, `gatewayErrors`, `normalizeError`) — GS013 i on-chain revert poruke
+  se dekodiraju i prikazuju čitljivo umjesto generičkog reverta.
+- `proposers`: imena proposera ostaju na uređaju, ne šalju se backendu.
+
+**8. Testiranje / CI:** Playwright je **wired u CI** (#8558) uz novi
+`.github/actions/playwright`; Cypress ostaje samo za održavanje. Mobile je dobio Maestro
+flowove za WalletConnect dApp management, tx-send (happy/batch/reject/readonly/CGW failure)
+i nonce/approval draft editore. Dodan CODEOWNERS, knip na razini monorepa,
+`.agents/skills/` (skills preseljeni iz `.claude/`), CLAUDE.md pointeri uz svaki AGENTS.md.
+
+**9. Releasi:** web 1.94 → **1.99.2** (1.96.x, 1.97, 1.98, 1.99.x), tx-builder 2.1.0.
+
+### Implikacije za nas
+
+1. **Mobile stagnacija ide nam u korist**: upstream 7 tjedana nije dirao mobile feature
+   set, pa naš `CreateSafe` overlay i dalje nema konkurenciju uzvodno. Rizik kolizije
+   odgođen, ne uklonjen.
+2. **Relay**: upstream je ugasio "Safe pays" na webu i promijenio relayera. Naš `zerofee`
+   pack i donations flow oslanjaju se na relay-paid transakcije — provjeriti radi li
+   Rhinestone relay na našim chainovima prije nego ga obećamo korisniku.
+   Vidi i postojeću bilješku: SEND_FLOW isključen na prod CGW Gnosis.
+3. **Safe Pro (6.10.)**: Workspaces postaju plaćeni. Nas se izravno ne tiče (ne koristimo
+   Spaces), ali potvrđuje smjer — Safe monetizira B2B sloj, a ne wallet. Dobra vijest za
+   whitelabel: wallet sloj ostaje besplatan temelj.
+4. **shadcn migracija**: ako ikad radimo web tier (`faza-9-web-tier`), plan se mijenja —
+   ciljati shadcn/Tailwind, ne MUI. Stari `vars.css` recepti u našim docovima su mrtvi.
+5. **Safenet** je zanimljiv kao sigurnosni signal, ali je vezan uz Safe infrastrukturu
+   (Gnosis coordinator) — za naše brandove zasad nije primjenjiv.
