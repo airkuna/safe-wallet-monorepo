@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { formatUnits } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -13,7 +13,10 @@ import useBalances from '@/hooks/useBalances'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { Errors, logError } from '@/services/exceptions'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
+import { isRateLimitError } from '@/utils/transaction-errors'
 import type { FeeRow } from './useFeesPreview'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 
@@ -118,9 +121,9 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     return provider.getTransactionReceipt(txHash)
   }, [isGtfEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
 
-  useEffect(() => {
-    if (receiptError) logError(Errors._612, receiptError.message)
-  }, [receiptError])
+  // A receipt fetch never reverts, so only a transient throttle is expected here.
+  const unexpectedReceiptError = receiptError && !isRateLimitError(receiptError) ? receiptError : undefined
+  useLogError(Errors._623, unexpectedReceiptError?.message, getRpcErrorContext(provider))
 
   const signerPaidData = useMemo<HistoryFeesData | null>(() => {
     if (!receipt) return null

@@ -4,14 +4,15 @@ import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/Va
 import { isByte } from '@/utils/transaction-guards'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import classNames from 'classnames'
 import { isAddress } from 'ethers'
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import Msg from '../Msg'
 import css from './styles.module.css'
-import { logError, Errors } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 
 const EIP712_DOMAIN_TYPE = 'EIP712Domain'
 
@@ -19,13 +20,8 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
   const { types, message: msg, domain } = eip712Msg
   const findType = (paramName: string) => types[displayedType].find((paramType) => paramType.name === paramName)?.type
   return (
-    <Box>
-      <Typography
-        textTransform="uppercase"
-        fontWeight={700}
-        variant="caption"
-        sx={({ palette }) => ({ color: `${palette.border.main}` })}
-      >
+    <div>
+      <Typography variant="paragraph-mini-bold" className="uppercase text-[var(--color-border-main)]">
         {displayedType}
       </Typography>
 
@@ -40,14 +36,7 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
         return (
           <TxDataRow key={`${displayedType}_param-${index}`} title={`${param[0]}(${type})`}>
             {isNested ? (
-              <Box
-                className={css.nestedMsg}
-                sx={{
-                  borderRadius: (theme) => `${theme.shape.borderRadius}px`,
-                }}
-              >
-                {paramValueAsString}
-              </Box>
+              <div className={classNames(css.nestedMsg, 'rounded')}>{paramValueAsString}</div>
             ) : isArrayValueParam ? (
               <Value method={displayedType} type={type} value={paramValueAsString} />
             ) : (
@@ -56,7 +45,7 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
           </TxDataRow>
         )
       })}
-    </Box>
+    </div>
   )
 }
 
@@ -69,33 +58,40 @@ export const DecodedMsg = ({
 }): ReactElement | null => {
   const isTextMessage = typeof message === 'string'
 
+  // Normalize the message so we know its primaryType. Hoisted above the early
+  // returns — and memoised — so a message we cannot normalize is reported once
+  // per message instead of once per render of the details panel.
+  const { normalizedMsg, normalizeFailure } = useMemo<{
+    normalizedMsg?: TypedData
+    normalizeFailure?: unknown
+  }>(() => {
+    if (!message || typeof message === 'string') return {}
+
+    try {
+      return { normalizedMsg: normalizeTypedData(message) }
+    } catch (error) {
+      return { normalizedMsg: message, normalizeFailure: error }
+    }
+  }, [message])
+
+  useLogError(Errors._809, normalizeFailure)
+
   if (!message) {
     return null
   }
   if (isTextMessage) {
     return <Msg message={message} />
   }
-
-  // Normalize message such that we know the primaryType
-  let normalizedMsg: TypedData
-  try {
-    normalizedMsg = normalizeTypedData(message)
-  } catch (error) {
-    logError(Errors._809, error)
-    normalizedMsg = message
+  if (!normalizedMsg) {
+    return null
   }
 
   return (
-    <Box
-      className={classNames(css.container, { [css.scrollable]: isInModal })}
-      sx={{
-        borderRadius: (theme) => `${theme.shape.borderRadius}px`,
-      }}
-    >
+    <div className={classNames(css.container, 'rounded', { [css.scrollable]: isInModal })}>
       <ObservabilityErrorBoundary fallback={<div>Error decoding message</div>}>
         <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={EIP712_DOMAIN_TYPE} />
         <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={normalizedMsg.primaryType} />
       </ObservabilityErrorBoundary>
-    </Box>
+    </div>
   )
 }

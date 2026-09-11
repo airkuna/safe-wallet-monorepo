@@ -1,10 +1,12 @@
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Errors, logError } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 import type { SpendingLimitState } from '../types'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import useBalances from '@/hooks/useBalances'
 import { loadSpendingLimits } from '../services/spendingLimitLoader'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -41,11 +43,7 @@ export const useLoadSpendingLimits = () => {
     true,
   )
 
-  useEffect(() => {
-    if (error) {
-      logError(Errors._609, error.message)
-    }
-  }, [error])
+  useLogError(Errors._609, error?.message, getRpcErrorContext(provider))
 
   // Dispatch to store — mirrors the old useUpdateStore pattern.
   // During loading: data=undefined, so the reducer computes loaded=false.
