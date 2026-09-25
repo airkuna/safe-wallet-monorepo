@@ -22,6 +22,12 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 
   it('Verify A valid ENS name is resolved successfully', () => {
+    cy.fixture('ens_e2etestsafe').then((results) => {
+      cy.intercept('POST', '**', (req) => {
+        const result = results[req.body?.params?.[0]?.to?.toLowerCase()]
+        if (result) req.reply({ body: { jsonrpc: '2.0', id: req.body.id, result } })
+      })
+    })
     spendinglimit.enterBeneficiaryAddress(constants.ENS_TEST_SEPOLIA)
     spendinglimit.checkBeneficiaryENS(staticSafes.SEP_STATIC_SAFE_6)
   })
@@ -55,7 +61,7 @@ describe('[SMOKE] Spending limits tests', () => {
     spendinglimit.verifyDefaultTimeIsSet()
   })
 
-  it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr', () => {
+  it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr, 1 day, 1 week, 1 month', () => {
     spendinglimit.clickOnTimePeriodDropdown()
     spendinglimit.checkTimeDropdownOptions()
   })

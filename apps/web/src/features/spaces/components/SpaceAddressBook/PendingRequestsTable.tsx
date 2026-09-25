@@ -23,6 +23,7 @@ import { Check, X } from 'lucide-react'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { cn } from '@/utils/cn'
 import AddressCell from './AddressCell'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
@@ -89,6 +90,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     setLoadingId(requestId)
     try {
       const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({
@@ -102,7 +104,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace address book',
+          message: 'Contact added to Workspace address book',
           variant: 'success',
           groupKey: 'approve-success',
         }),
@@ -160,8 +162,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
             {spaceAddresses.has(req.address.toLowerCase()) && (
               <Tooltip>
-                <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
-                <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
+                <TooltipTrigger render={<Badge variant="outline">Already in Workspace</Badge>} />
+                <TooltipContent>Approving replaces the existing Workspace entry for this address.</TooltipContent>
               </Tooltip>
             )}
           </span>
