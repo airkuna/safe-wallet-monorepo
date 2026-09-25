@@ -21,6 +21,8 @@ polja, preuzeti upstream verziju), dopisati zapis u ovaj dnevnik, pa push na `or
 > Verifikaciju pokreće **samo korisnik, ručno, kad sam odluči** — i tada po jedan
 > workspace, bez paralelnog turbo fan-outa. U zapisu dnevnika pod "Merge" napisati
 > "verifikacija nije pokretana" umjesto da se ona pretpostavi.
+>
+> Analiza uzroka i predložene mitigacije: [docs/2026-09-26-lokalni-build-ram.md](../2026-09-26-lokalni-build-ram.md).
 
 ---
 
